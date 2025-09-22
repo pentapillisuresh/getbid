@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import HomePage from './pages/HomePage';
+import HomePage from './pages/Home/HomeMain';
 import ChooseLoginType from './pages/ChooseLoginType';
 import Registration from './pages/Registration';
 import OTPVerification from './pages/OTPVerification';

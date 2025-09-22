@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { X, Upload, FileText, CheckCircle, AlertCircle, Building2, DollarSign, Calendar, User } from 'lucide-react';
 
 const SubmitBidPopup = ({ tender, onClose }) => {
@@ -10,6 +10,9 @@ const SubmitBidPopup = ({ tender, onClose }) => {
   const [boqFile, setBOQFile] = useState(null);
   const [agreedTerms, setAgreedTerms] = useState(false);
   const [agreedFinancial, setAgreedFinancial] = useState(false);
+
+  const quotationFileRef = useRef(null);
+  const boqFileRef = useRef(null);
 
   const companyDocs = [
     { id: 1, name: 'Company Registration Certificate.pdf', selected: true },
@@ -34,6 +37,64 @@ const SubmitBidPopup = ({ tender, onClose }) => {
     } else if (type === 'boq') {
       setBOQFile(file);
     }
+  };
+
+  const handleQuotationFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Check file size (10MB limit)
+      if (file.size > 10 * 1024 * 1024) {
+        alert('File size must be less than 10MB');
+        return;
+      }
+      
+      // Check file type
+      const allowedTypes = [
+        'application/pdf',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      ];
+      
+      if (!allowedTypes.includes(file.type)) {
+        alert('Please upload only PDF or Excel files');
+        return;
+      }
+      
+      handleFileUpload('quotation', file);
+    }
+  };
+
+  const handleBOQFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Check file size (10MB limit)
+      if (file.size > 10 * 1024 * 1024) {
+        alert('File size must be less than 10MB');
+        return;
+      }
+      
+      // Check file type
+      const allowedTypes = [
+        'application/pdf',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      ];
+      
+      if (!allowedTypes.includes(file.type)) {
+        alert('Please upload only PDF or Excel files');
+        return;
+      }
+      
+      handleFileUpload('boq', file);
+    }
+  };
+
+  const triggerQuotationUpload = () => {
+    quotationFileRef.current?.click();
+  };
+
+  const triggerBOQUpload = () => {
+    boqFileRef.current?.click();
   };
 
   const selectedDocCount = documents.filter(doc => doc.selected).length;
@@ -168,7 +229,10 @@ const SubmitBidPopup = ({ tender, onClose }) => {
                     Upload Quotation <span className="text-red-500">*</span>
                   </label>
                   <p className="text-xs text-gray-500 mb-3">Upload your detailed quotation file (visible to client)</p>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors cursor-pointer">
+                  <div 
+                    onClick={triggerQuotationUpload}
+                    className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors cursor-pointer"
+                  >
                     <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
                     <p className="text-sm font-medium text-gray-900">Choose Quotation File</p>
                     <p className="text-xs text-gray-500 mt-1">Supported: PDF, Excel (.xls, .xlsx) • Max 10MB</p>
@@ -179,6 +243,13 @@ const SubmitBidPopup = ({ tender, onClose }) => {
                       </div>
                     )}
                   </div>
+                  <input
+                    type="file"
+                    ref={quotationFileRef}
+                    onChange={handleQuotationFileChange}
+                    accept=".pdf,.xls,.xlsx"
+                    className="hidden"
+                  />
                 </div>
 
                 {/* BOQ Upload */}
@@ -187,7 +258,10 @@ const SubmitBidPopup = ({ tender, onClose }) => {
                     Upload Bill of Quantities (BOQ) <span className="text-red-500">*</span>
                   </label>
                   <p className="text-xs text-gray-500 mb-3">Upload your Bill of Quantities (BOQ)</p>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors cursor-pointer">
+                  <div 
+                    onClick={triggerBOQUpload}
+                    className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors cursor-pointer"
+                  >
                     <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
                     <p className="text-sm font-medium text-gray-900">Choose BOQ File</p>
                     <p className="text-xs text-gray-500 mt-1">Supported: PDF, Excel (.xls, .xlsx) • Max 10MB</p>
@@ -198,6 +272,13 @@ const SubmitBidPopup = ({ tender, onClose }) => {
                       </div>
                     )}
                   </div>
+                  <input
+                    type="file"
+                    ref={boqFileRef}
+                    onChange={handleBOQFileChange}
+                    accept=".pdf,.xls,.xlsx"
+                    className="hidden"
+                  />
                 </div>
               </div>
 
@@ -236,7 +317,8 @@ const SubmitBidPopup = ({ tender, onClose }) => {
                 <ul className="text-sm text-yellow-700 space-y-1">
                   <li className="flex items-center gap-2">
                     <span>• Quotation: Detailed pricing breakdown with line items</span>
-                    <span className="text-red-600 text-xs">❌ Required</span>
+                    {!quotationFile && <span className="text-red-600 text-xs">❌ Required</span>}
+                    {quotationFile && <span className="text-green-600 text-xs">✅ Uploaded</span>}
                   </li>
                   <li>• Format: PDF or Excel files only (.pdf, .xls, .xlsx)</li>
                   <li>• Size Limit: Maximum 10MB per file</li>

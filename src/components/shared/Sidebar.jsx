@@ -17,7 +17,7 @@ const Sidebar = ({ items, basePath }) => {
             const isActive = location.pathname === `${basePath}${item.path}`;
             return (
               <li key={index}>
-                <button
+                <button style={{fontSize:"15px"}}
                   onClick={() => handleItemClick(item.path)}
                   className={`sidebar-item w-full text-left ${isActive ? 'active' : ''}`}
                 >
