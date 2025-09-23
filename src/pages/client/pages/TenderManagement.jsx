@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  Eye, 
-  Edit, 
+import {
+  Plus,
+  Search,
+  Filter,
+  Eye,
+  Edit,
   Copy,
   Calendar,
   Users,
@@ -22,7 +22,7 @@ const TenderManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
 
-    const handleNewTender = (data) => {
+  const handleNewTender = (data) => {
     console.log("New Tender Data:", data);
     // TODO: Save to backend
   };
@@ -139,7 +139,7 @@ const TenderManagement = () => {
 
   const getStatusBadge = (status) => {
     const baseClasses = "inline-block px-3 py-1 rounded-full text-xs font-medium";
-    
+
     switch (status) {
       case 'published':
         return `${baseClasses} bg-green-100 text-green-600`;
@@ -156,7 +156,7 @@ const TenderManagement = () => {
 
   const getPriorityBadge = (priority) => {
     const baseClasses = "inline-block px-2 py-1 rounded-full text-xs font-medium";
-    
+
     switch (priority) {
       case 'high':
         return `${baseClasses} bg-red-100 text-red-600`;
@@ -172,8 +172,8 @@ const TenderManagement = () => {
   const filteredTenders = tenders.filter(tender => {
     const matchesTab = activeTab === 'all' || tender.status === activeTab;
     const matchesSearch = tender.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         tender.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         tender.category.toLowerCase().includes(searchTerm.toLowerCase());
+      tender.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      tender.category.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesTab && matchesSearch;
   });
 
@@ -242,11 +242,10 @@ const TenderManagement = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === tab.id
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === tab.id
                   ? 'border-primary-500 text-primary-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
+                }`}
             >
               {tab.label}
               <span className="ml-2 bg-gray-100 text-gray-600 py-1 px-2 rounded-full text-xs">
@@ -276,15 +275,15 @@ const TenderManagement = () => {
                       {tender.category}
                     </span>
                   </div>
-                  
+
                   <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
                     <span>ID: {tender.id}</span>
                     <span>•</span>
                     <span>{tender.department}</span>
                   </div>
-                  
+
                   <p className="text-gray-600 mb-4">{tender.description}</p>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                     <div>
                       <span className="text-sm text-gray-500">Estimated Value</span>
@@ -316,7 +315,7 @@ const TenderManagement = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="text-right">
                 <span className={getStatusBadge(tender.status)}>
                   {tender.status.charAt(0).toUpperCase() + tender.status.slice(1)}
@@ -350,7 +349,7 @@ const TenderManagement = () => {
                   Download
                 </button>
               </div>
-              
+
               <div className="flex items-center gap-2">
                 {tender.status === 'draft' && (
                   <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors">
@@ -358,7 +357,7 @@ const TenderManagement = () => {
                   </button>
                 )}
                 {tender.status === 'published' && tender.bidsReceived > 0 && (
-                  <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors">
+                  <button className="bg-primary-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors">
                     View Bids ({tender.bidsReceived})
                   </button>
                 )}
@@ -386,10 +385,10 @@ const TenderManagement = () => {
           </div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">No tenders found</h3>
           <p className="text-gray-500 mb-4">
-            {searchTerm 
-              ? 'Try adjusting your search criteria' 
-              : activeTab === 'all' 
-                ? "You haven't created any tenders yet" 
+            {searchTerm
+              ? 'Try adjusting your search criteria'
+              : activeTab === 'all'
+                ? "You haven't created any tenders yet"
                 : `No tenders found in ${tabs.find(t => t.id === activeTab)?.label.toLowerCase()} status`
             }
           </p>
@@ -399,7 +398,7 @@ const TenderManagement = () => {
         </div>
       )}
 
-            <TenderFormModal
+      <TenderFormModal
         show={showModal}
         onClose={() => setShowModal(false)}
         onSubmit={handleNewTender}

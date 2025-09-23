@@ -47,19 +47,19 @@ const SubmitBidPopup = ({ tender, onClose }) => {
         alert('File size must be less than 10MB');
         return;
       }
-      
+
       // Check file type
       const allowedTypes = [
         'application/pdf',
         'application/vnd.ms-excel',
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
       ];
-      
+
       if (!allowedTypes.includes(file.type)) {
         alert('Please upload only PDF or Excel files');
         return;
       }
-      
+
       handleFileUpload('quotation', file);
     }
   };
@@ -72,19 +72,19 @@ const SubmitBidPopup = ({ tender, onClose }) => {
         alert('File size must be less than 10MB');
         return;
       }
-      
+
       // Check file type
       const allowedTypes = [
         'application/pdf',
         'application/vnd.ms-excel',
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
       ];
-      
+
       if (!allowedTypes.includes(file.type)) {
         alert('Please upload only PDF or Excel files');
         return;
       }
-      
+
       handleFileUpload('boq', file);
     }
   };
@@ -229,7 +229,7 @@ const SubmitBidPopup = ({ tender, onClose }) => {
                     Upload Quotation <span className="text-red-500">*</span>
                   </label>
                   <p className="text-xs text-gray-500 mb-3">Upload your detailed quotation file (visible to client)</p>
-                  <div 
+                  <div
                     onClick={triggerQuotationUpload}
                     className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors cursor-pointer"
                   >
@@ -258,7 +258,7 @@ const SubmitBidPopup = ({ tender, onClose }) => {
                     Upload Bill of Quantities (BOQ) <span className="text-red-500">*</span>
                   </label>
                   <p className="text-xs text-gray-500 mb-3">Upload your Bill of Quantities (BOQ)</p>
-                  <div 
+                  <div
                     onClick={triggerBOQUpload}
                     className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors cursor-pointer"
                   >
@@ -382,11 +382,10 @@ const SubmitBidPopup = ({ tender, onClose }) => {
               </button>
               <button
                 disabled={!isFormValid}
-                className={`px-8 py-3 rounded-lg font-medium transition-all ${
-                  isFormValid
-                    ? 'bg-blue-600 hover:bg-blue-700 text-white transform hover:scale-105'
+                className={`px-8 py-3 rounded-lg font-medium transition-all ${isFormValid
+                    ? 'bg-primary-500 hover:bg-blue-700 text-white transform hover:scale-105'
                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
+                  }`}
               >
                 Submit Bid
               </button>

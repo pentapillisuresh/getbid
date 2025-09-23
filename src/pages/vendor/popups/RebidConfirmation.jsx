@@ -102,7 +102,7 @@ const RebidConfirmation = ({ tender, onClose, onConfirm }) => {
             </button>
             <button
               onClick={onConfirm}
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+              className="px-6 py-2 bg-primary-500 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
             >
               <RotateCcw className="w-4 h-4" />
               Proceed to Re-Bid

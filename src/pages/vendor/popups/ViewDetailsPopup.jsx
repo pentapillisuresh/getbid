@@ -71,7 +71,7 @@ const ViewDetailsPopup = ({ tender, onClose }) => {
                 <div className="space-y-2">
                   {eligibilityItems.map((item, index) => (
                     <div key={index} className="flex items-start gap-2">
-                      <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
+                      <div className="w-2 h-2 bg-primary-500 rounded-full mt-2 flex-shrink-0"></div>
                       <span className="text-gray-700">{item}</span>
                     </div>
                   ))}
@@ -158,7 +158,7 @@ const ViewDetailsPopup = ({ tender, onClose }) => {
           >
             Close
           </button>
-          <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors">
+          <button className="bg-primary-500 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors">
             Download All Documents
           </button>
         </div>

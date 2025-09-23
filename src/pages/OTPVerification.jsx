@@ -7,7 +7,7 @@ const OTPVerification = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { loginType, email } = location.state || { loginType: 'vendor', email: 'user@example.com' };
-  
+
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes
 
@@ -64,7 +64,7 @@ const OTPVerification = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       <div className="flex items-center justify-center py-12 px-4">
         <div className="max-w-md w-full">
           <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
@@ -126,7 +126,7 @@ const OTPVerification = () => {
           {/* Security Notice */}
           <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
             <div className="flex items-start gap-3">
-              <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center mt-0.5">
+              <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center mt-0.5">
                 <div className="w-2 h-2 bg-white rounded-full"></div>
               </div>
               <div>

@@ -3,19 +3,19 @@ import { Building2, Globe, HelpCircle } from 'lucide-react';
 
 const Header = () => {
   return (
-    <header className="bg-white shadow-sm">
+    <header className="bg-white shadow-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center gap-3">
             <div className="">
               {/* <Building2 className="w-6 h-6 text-white" /> */}
-              <img src="/images/getbidlogo.jpeg" alt="Logo" className="w-20 h-10" />
+              <img src="/images/getlogo.png" alt="Logo" className="w-20 h-10" />
             </div>
-            <div>
+            {/* <div>
               <h1 className="text-xl font-bold text-gray-900">eTender Portal</h1>
               <p className="text-sm text-gray-600">Secure Procurement Platform</p>
-            </div>
+            </div> */}
           </div>
 
           {/* Right Side */}

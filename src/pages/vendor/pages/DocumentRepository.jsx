@@ -3,13 +3,8 @@ import {
   FileText, 
   Upload, 
   Download, 
-  Trash2, 
   Search, 
-  Filter,
   FolderOpen,
-  Eye,
-  Plus,
-  Calendar,
   FileCheck,
   AlertTriangle
 } from 'lucide-react';
@@ -19,7 +14,6 @@ import ViewDocumentModal from '../popups/ViewDocumentModal';
 const DocumentRepository = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [viewMode, setViewMode] = useState('grid');
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState(null);
@@ -155,24 +149,12 @@ const DocumentRepository = () => {
     return matchesSearch && matchesCategory;
   });
 
-  const getStatusBadge = (status, expiryDate) => {
-    const baseClasses = "inline-block px-2 py-1 rounded-full text-xs font-medium";
-    
-    if (status === 'expiring' || (expiryDate && new Date(expiryDate) <= new Date(Date.now() + 30 * 24 * 60 * 60 * 1000))) {
-      return `${baseClasses} bg-yellow-100 text-yellow-600`;
-    } else if (status === 'expired') {
-      return `${baseClasses} bg-red-100 text-red-600`;
-    } else {
-      return `${baseClasses} bg-green-100 text-green-600`;
-    }
-  };
-
   const getFileIcon = (format) => {
     switch (format.toLowerCase()) {
       case 'pdf':
-        return <FileText className="w-8 h-8 text-red-500" />;
+        return <FileText className="w-8 h-8 text-primary-500" />;
       default:
-        return <FileText className="w-8 h-8 text-gray-500" />;
+        return <FileText className="w-8 h-8 text-secondary-400" />;
     }
   };
 
@@ -206,23 +188,23 @@ const DocumentRepository = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-secondary-50">
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         {/* Header */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-primary-500 rounded-lg flex items-center justify-center">
                 <FolderOpen className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Document Repository</h1>
-                <p className="text-green-600 font-medium">Manage your business documents and certifications</p>
+                <h1 className="text-2xl font-bold text-secondary-900">Document Repository</h1>
+                <p className="text-primary-600 font-medium">Manage your business documents and certifications</p>
               </div>
             </div>
             <button 
               onClick={() => setShowUploadModal(true)}
-              className="flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium"
+              className="flex items-center gap-2 bg-primary-500 text-white px-6 py-3 rounded-lg hover:bg-primary-600 transition-colors font-medium"
             >
               <Upload className="w-4 h-4" />
               Upload Document
@@ -231,12 +213,12 @@ const DocumentRepository = () => {
           
           <div className="flex items-center gap-4 text-sm">
             <div className="flex items-center gap-2">
-              <FileCheck className="w-4 h-4 text-green-600" />
-              <span className="text-gray-600">5 Verified</span>
+              <FileCheck className="w-4 h-4 text-primary-600" />
+              <span className="text-secondary-600">5 Verified</span>
             </div>
             <div className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-yellow-600" />
-              <span className="text-gray-600">1 Pending</span>
+              <span className="text-secondary-600">1 Pending</span>
             </div>
           </div>
         </div>
@@ -246,23 +228,23 @@ const DocumentRepository = () => {
           <div className="flex items-center gap-4 mb-4">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-secondary-400" />
                 <input
                   type="text"
                   placeholder="Search documents..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 />
               </div>
             </div>
-            <select className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+            <select className="px-4 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
               <option>All Categories</option>
               <option>Legal Documents</option>
               <option>Financial Documents</option>
               <option>Technical Documents</option>
             </select>
-            <select className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+            <select className="px-4 py-2 border border-secondary-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
               <option>All Status</option>
               <option>Verified</option>
               <option>Pending</option>
@@ -278,8 +260,8 @@ const DocumentRepository = () => {
                 onClick={() => setSelectedCategory(category.value)}
                 className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
                   selectedCategory === category.value
-                    ? 'bg-green-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-primary-500 text-white'
+                    : 'bg-secondary-100 text-secondary-700 hover:bg-secondary-200'
                 }`}
               >
                 {category.label} ({category.count})
@@ -302,7 +284,7 @@ const DocumentRepository = () => {
                     {getFileIcon(doc.format)}
                     <div>
                       <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${
-                        doc.status === 'active' ? 'bg-green-100 text-green-600' : 
+                        doc.status === 'active' ? 'bg-primary-50 text-primary-600' : 
                         doc.status === 'expiring' ? 'bg-yellow-100 text-yellow-600' :
                         'bg-red-100 text-red-600'
                       }`}>
@@ -311,17 +293,17 @@ const DocumentRepository = () => {
                       </span>
                     </div>
                   </div>
-                  <button className="p-1 text-gray-400 hover:text-gray-600">
+                  <button className="p-1 text-secondary-400 hover:text-secondary-600">
                     <Download className="w-4 h-4" />
                   </button>
                 </div>
                 
-                <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-green-600 transition-colors">
+                <h3 className="font-semibold text-secondary-900 mb-2 group-hover:text-primary-600 transition-colors">
                   {doc.name}
                 </h3>
-                <p className="text-sm text-gray-600 mb-3">{doc.description}</p>
+                <p className="text-sm text-secondary-600 mb-3">{doc.description}</p>
                 
-                <div className="space-y-2 text-xs text-gray-500 mb-4">
+                <div className="space-y-2 text-xs text-secondary-500 mb-4">
                   <div className="flex justify-between">
                     <span>{categories.find(c => c.value === doc.type)?.label || doc.type}</span>
                     <span className="font-medium">{doc.size}</span>
@@ -336,7 +318,7 @@ const DocumentRepository = () => {
                 
                 <div className="flex flex-wrap gap-1">
                   {doc.tags.map((tag, index) => (
-                    <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs">
+                    <span key={index} className="px-2 py-1 bg-secondary-100 text-secondary-600 rounded text-xs">
                       {tag}
                     </span>
                   ))}
@@ -349,16 +331,16 @@ const DocumentRepository = () => {
         {/* Empty State */}
         {filteredDocuments.length === 0 && (
           <div className="text-center py-12">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <FileText className="w-8 h-8 text-gray-400" />
+            <div className="w-16 h-16 bg-secondary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <FileText className="w-8 h-8 text-secondary-400" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No documents found</h3>
-            <p className="text-gray-500 mb-4">
+            <h3 className="text-lg font-medium text-secondary-900 mb-2">No documents found</h3>
+            <p className="text-secondary-500 mb-4">
               {searchTerm ? 'Try adjusting your search criteria' : 'Upload your first document to get started'}
             </p>
             <button 
               onClick={() => setShowUploadModal(true)}
-              className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+              className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-2 rounded-lg font-medium transition-colors"
             >
               Upload Document
             </button>

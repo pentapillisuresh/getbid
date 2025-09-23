@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { 
-  Search, 
-  Filter, 
-  Eye, 
-  CheckCircle, 
+import {
+  Search,
+  Filter,
+  Eye,
+  CheckCircle,
   XCircle,
   Clock,
   Star,
@@ -213,7 +213,7 @@ const VendorManagement = () => {
 
   const getStatusBadge = (status) => {
     const baseClasses = "inline-block px-3 py-1 rounded-full text-xs font-medium";
-    
+
     switch (status) {
       case 'verified':
         return `${baseClasses} bg-green-100 text-green-600`;
@@ -232,11 +232,10 @@ const VendorManagement = () => {
     return Array.from({ length: 5 }, (_, i) => (
       <Star
         key={i}
-        className={`w-4 h-4 ${
-          i < Math.floor(rating) 
-            ? 'text-yellow-400 fill-current' 
+        className={`w-4 h-4 ${i < Math.floor(rating)
+            ? 'text-yellow-400 fill-current'
             : 'text-gray-300'
-        }`}
+          }`}
       />
     ));
   };
@@ -262,8 +261,8 @@ const VendorManagement = () => {
     const matchesTab = activeTab === 'all' || vendor.status === activeTab;
     const matchesCategory = selectedCategory === 'all' || vendor.category.toLowerCase().includes(selectedCategory);
     const matchesSearch = vendor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         vendor.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         vendor.location.toLowerCase().includes(searchTerm.toLowerCase());
+      vendor.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      vendor.location.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesTab && matchesCategory && matchesSearch;
   });
 
@@ -276,7 +275,7 @@ const VendorManagement = () => {
 
   if (showDetails && selectedVendor) {
     return (
-      <VendorDetails 
+      <VendorDetails
         vendor={selectedVendor}
         onClose={handleCloseDetails}
       />
@@ -380,12 +379,12 @@ const VendorManagement = () => {
                       </span>
                     )}
                   </div>
-                  
+
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-xl font-bold text-gray-900">{vendor.name}</h3>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
                       <div>
                         <div className="space-y-2 text-sm">
@@ -394,7 +393,7 @@ const VendorManagement = () => {
                             <span className="text-gray-600">Contact Person</span>
                           </div>
                           <div className="font-medium text-gray-900">{vendor.contactPerson}</div>
-                          
+
                           <div className="flex items-center gap-2 mt-3">
                             <Building2 className="w-4 h-4 text-gray-400" />
                             <span className="text-gray-600">Category</span>
@@ -402,7 +401,7 @@ const VendorManagement = () => {
                           <div className="font-medium text-gray-900">{vendor.category}</div>
                         </div>
                       </div>
-                      
+
                       <div>
                         <div className="space-y-2 text-sm">
                           <div className="flex items-center gap-2">
@@ -410,7 +409,7 @@ const VendorManagement = () => {
                             <span className="text-gray-600">Experience</span>
                           </div>
                           <div className="font-medium text-gray-900">{vendor.experience}</div>
-                          
+
                           <div className="flex items-center gap-2 mt-3">
                             <span className="text-gray-600">ID: {vendor.id}</span>
                           </div>
@@ -486,7 +485,7 @@ const VendorManagement = () => {
 
               <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                 <div className="flex items-center gap-3">
-                  <button 
+                  <button
                     onClick={() => handleViewDetails(vendor)}
                     className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors"
                   >
@@ -494,7 +493,7 @@ const VendorManagement = () => {
                     View Details
                   </button>
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   {vendor.status === 'suspended' && (
                     <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors">
@@ -506,7 +505,7 @@ const VendorManagement = () => {
                       <button className="text-red-600 hover:text-red-700 text-sm font-medium transition-colors">
                         Suspend
                       </button>
-                      <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors">
+                      <button className="bg-primary-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors">
                         Send Message
                       </button>
                     </>
@@ -525,8 +524,8 @@ const VendorManagement = () => {
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">No vendors found</h3>
             <p className="text-gray-500">
-              {searchTerm || selectedCategory !== 'all' 
-                ? 'Try adjusting your search criteria or filters' 
+              {searchTerm || selectedCategory !== 'all'
+                ? 'Try adjusting your search criteria or filters'
                 : 'No vendors match the selected criteria'}
             </p>
           </div>

@@ -24,7 +24,8 @@ const HeroSection = () => {
       }}
     >
       {/* Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-blue-900/70 via-blue-800/70 to-black/80"></div>
+     <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/80 to-black/90"></div>
+
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 py-20 text-center">
         <div className="animate-fade-in-up">

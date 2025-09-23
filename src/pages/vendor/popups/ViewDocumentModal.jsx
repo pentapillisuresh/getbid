@@ -37,7 +37,7 @@ const ViewDocumentModal = ({ isOpen, onClose, document, onUpdate, onDelete }) =>
       type: editData.category,
       lastModified: new Date().toISOString().split('T')[0]
     };
-    
+
     onUpdate(updatedDocument);
     setIsEditing(false);
   };
@@ -234,7 +234,7 @@ const ViewDocumentModal = ({ isOpen, onClose, document, onUpdate, onDelete }) =>
               </button>
               <button
                 onClick={handleSaveChanges}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                className="px-4 py-2 bg-primary-500 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
               >
                 Save Changes
               </button>
@@ -242,7 +242,7 @@ const ViewDocumentModal = ({ isOpen, onClose, document, onUpdate, onDelete }) =>
           ) : (
             <>
               <div className="flex items-center gap-3">
-                <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
+                <button className="flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
                   <Download className="w-4 h-4" />
                   Download
                 </button>
@@ -250,7 +250,7 @@ const ViewDocumentModal = ({ isOpen, onClose, document, onUpdate, onDelete }) =>
                   <Share className="w-4 h-4" />
                   Share
                 </button>
-                <button 
+                <button
                   onClick={() => setIsEditing(true)}
                   className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors"
                 >
@@ -258,7 +258,7 @@ const ViewDocumentModal = ({ isOpen, onClose, document, onUpdate, onDelete }) =>
                   Edit Details
                 </button>
               </div>
-              <button 
+              <button
                 onClick={() => {
                   if (window.confirm('Are you sure you want to delete this document?')) {
                     onDelete(document.id);

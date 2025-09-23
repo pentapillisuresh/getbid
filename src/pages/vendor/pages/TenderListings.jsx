@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { 
-  Search, 
-  Filter, 
-  Download, 
-  Eye, 
-  Calendar, 
-  DollarSign, 
+import {
+  Search,
+  Filter,
+  Download,
+  Eye,
+  Calendar,
+  DollarSign,
   Building2,
   MapPin,
   Clock,
@@ -151,16 +151,16 @@ const TenderListings = () => {
 
   const filteredTenders = tenders.filter(tender => {
     const matchesSearch = tender.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         tender.department.toLowerCase().includes(searchTerm.toLowerCase());
+      tender.department.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || tender.category.toLowerCase().includes(selectedCategory);
     const matchesStatus = selectedStatus === 'all' || tender.status.toLowerCase().replace(' ', '-') === selectedStatus;
-    
+
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
   const getStatusBadge = (status, statusColor, daysLeft) => {
     const baseClasses = "inline-block px-3 py-1 rounded-full text-xs font-medium";
-    
+
     if (statusColor === 'green') {
       return `${baseClasses} bg-green-100 text-green-600`;
     } else if (statusColor === 'yellow' || daysLeft <= 7) {
@@ -281,9 +281,9 @@ const TenderListings = () => {
                         )}
                       </div>
                     </div>
-                    
+
                     <p className="text-gray-600 mb-4 leading-relaxed">{tender.description}</p>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                       <div className="bg-green-50 p-4 rounded-lg">
                         <div className="text-sm text-green-600 font-medium">Estimated Value</div>
@@ -299,7 +299,7 @@ const TenderListings = () => {
                         <div className="font-bold text-blue-700">{tender.publishedDate}</div>
                       </div>
                     </div>
-                    
+
                     <div className="bg-gray-50 p-4 rounded-lg mb-4">
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                         <div>
@@ -318,17 +318,17 @@ const TenderListings = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                   <div className="flex items-center gap-4">
-                    <button 
+                    <button
                       onClick={() => openPopup('details', tender)}
                       className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium transition-colors"
                     >
                       <Eye className="w-4 h-4" />
                       View Details
                     </button>
-                    <button 
+                    <button
                       onClick={() => openPopup('qa', tender)}
                       className="flex items-center gap-2 text-purple-600 hover:text-purple-700 font-medium transition-colors"
                     >
@@ -339,7 +339,7 @@ const TenderListings = () => {
                       <Download className="w-4 h-4" />
                       Download
                     </button>
-                    <button 
+                    <button
                       onClick={() => openPopup('support')}
                       className="flex items-center gap-2 text-orange-600 hover:text-orange-700 font-medium transition-colors"
                     >
@@ -354,9 +354,9 @@ const TenderListings = () => {
                         Closing Soon
                       </span>
                     )}
-                    <button 
+                    <button
                       onClick={() => openPopup('submit', tender)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all transform hover:scale-105"
+                      className="bg-primary-500 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all transform hover:scale-105"
                     >
                       Submit Bid
                     </button>
@@ -383,15 +383,15 @@ const TenderListings = () => {
       {activePopup === 'details' && selectedTender && (
         <ViewDetailsPopup tender={selectedTender} onClose={closePopup} />
       )}
-      
+
       {activePopup === 'qa' && selectedTender && (
         <QAPopup tender={selectedTender} onClose={closePopup} />
       )}
-      
+
       {activePopup === 'submit' && selectedTender && (
         <SubmitBidPopup tender={selectedTender} onClose={closePopup} />
       )}
-      
+
       {activePopup === 'support' && (
         <SupportPopup onClose={closePopup} />
       )}

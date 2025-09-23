@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { 
-  Clock, 
-  CheckCircle, 
-  XCircle, 
-  AlertTriangle, 
-  FileText, 
+import {
+  Clock,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  FileText,
   DollarSign,
   Eye,
   Download,
@@ -162,7 +162,7 @@ const BidManagement = () => {
   const filteredBids = bids.filter(bid => {
     const matchesTab = activeTab === 'all' || bid.status === activeTab;
     const matchesSearch = bid.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         bid.department.toLowerCase().includes(searchTerm.toLowerCase());
+      bid.department.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesTab && matchesSearch;
   });
 
@@ -204,7 +204,7 @@ const BidManagement = () => {
               <h1 className="text-3xl font-bold text-gray-900">All Bid Submissions</h1>
               <p className="text-gray-600 mt-1">Track all your bid submissions with real-time status updates</p>
             </div>
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+            <button className="bg-primary-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
               Refresh
             </button>
           </div>
@@ -253,11 +253,10 @@ const BidManagement = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                    activeTab === tab.id
+                  className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id
                       ? 'border-blue-500 text-blue-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700'
-                  }`}
+                    }`}
                 >
                   {tab.label}
                   <span className="ml-2 bg-gray-100 text-gray-600 py-1 px-2 rounded-full text-xs">
@@ -284,10 +283,10 @@ const BidManagement = () => {
                         </span>
                       )}
                     </div>
-                    
+
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">{bid.title}</h3>
                     <p className="text-gray-600 mb-3">Tender ID: {bid.tenderId} • Bid ID: {bid.id}</p>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-4">
                       <div>
                         <span className="text-sm text-gray-500 block">Bid Amount</span>
@@ -314,7 +313,7 @@ const BidManagement = () => {
                     {bid.evaluated && bid.status === 'awarded' && (
                       <div className="flex items-center gap-2 mb-3">
                         <Users className="w-4 h-4 text-purple-600" />
-                        <button 
+                        <button
                           onClick={() => handleShowParticipants(bid)}
                           className="text-purple-600 hover:text-purple-700 font-medium text-sm"
                         >
@@ -335,16 +334,16 @@ const BidManagement = () => {
                 {/* Actions */}
                 <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                   <div className="flex items-center gap-4">
-                    <button 
+                    <button
                       onClick={() => handleViewTender(bid)}
                       className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm"
                     >
                       <Eye className="w-4 h-4" />
                       View Tender
                     </button>
-                    
+
                     {bid.evaluated && (
-                      <button 
+                      <button
                         onClick={() => handleShowParticipants(bid)}
                         className="flex items-center gap-2 text-purple-600 hover:text-purple-700 font-medium text-sm"
                       >
@@ -352,16 +351,16 @@ const BidManagement = () => {
                         Participants List
                       </button>
                     )}
-                    
+
                     <button className="flex items-center gap-2 text-gray-600 hover:text-gray-700 font-medium text-sm">
                       <Download className="w-4 h-4" />
                       Download
                     </button>
                   </div>
-                  
+
                   <div className="flex items-center gap-3">
                     {bid.canRebid && (
-                      <button 
+                      <button
                         onClick={() => handleShowRebid(bid)}
                         className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors"
                       >
@@ -374,7 +373,7 @@ const BidManagement = () => {
                       </button>
                     )}
                     {bid.status === 'rejected' && (
-                      <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors">
+                      <button className="bg-primary-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors">
                         View Feedback
                       </button>
                     )}
@@ -392,12 +391,12 @@ const BidManagement = () => {
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">No bids found</h3>
               <p className="text-gray-500 mb-6">
-                {activeTab === 'all' 
-                  ? "You haven't submitted any bids yet" 
+                {activeTab === 'all'
+                  ? "You haven't submitted any bids yet"
                   : `No bids found in ${tabs.find(t => t.id === activeTab)?.label.toLowerCase()} status`
                 }
               </p>
-              <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+              <button className="bg-primary-500 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
                 Browse Tenders
               </button>
             </div>

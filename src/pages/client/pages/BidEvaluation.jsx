@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { 
-  Eye, 
-  Download, 
-  CheckCircle, 
+import {
+  Eye,
+  Download,
+  CheckCircle,
   XCircle,
   Clock,
   Star,
@@ -34,7 +34,7 @@ const BidEvaluation = () => {
   const tenders = [
     'All Tenders',
     'Highway Construction Project Phase II',
-    'Government Office IT Infrastructure', 
+    'Government Office IT Infrastructure',
     'Medical Equipment Procurement',
     'Smart City Infrastructure Development'
   ];
@@ -179,7 +179,7 @@ const BidEvaluation = () => {
 
   const getStatusBadge = (status) => {
     const baseClasses = "inline-block px-3 py-1 rounded-full text-xs font-medium";
-    
+
     switch (status) {
       case 'pending':
         return `${baseClasses} bg-orange-100 text-orange-600`;
@@ -218,11 +218,10 @@ const BidEvaluation = () => {
     return Array.from({ length: 5 }, (_, i) => (
       <Star
         key={i}
-        className={`w-4 h-4 ${
-          i < Math.floor(rating) 
-            ? 'text-yellow-400 fill-current' 
+        className={`w-4 h-4 ${i < Math.floor(rating)
+            ? 'text-yellow-400 fill-current'
             : 'text-gray-300'
-        }`}
+          }`}
       />
     ));
   };
@@ -236,7 +235,7 @@ const BidEvaluation = () => {
     const matchesTab = activeTab === 'all' || bid.status === activeTab;
     const matchesTender = selectedTender === 'all' || selectedTender === 'All Tenders' || bid.tenderTitle === selectedTender;
     const matchesSearch = bid.vendorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         bid.tenderTitle.toLowerCase().includes(searchTerm.toLowerCase());
+      bid.tenderTitle.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesTab && matchesTender && matchesSearch;
   });
 
@@ -308,11 +307,10 @@ const BidEvaluation = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === tab.id
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === tab.id
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
+                }`}
             >
               {tab.label}
               <span className="ml-2 bg-gray-100 text-gray-600 py-1 px-2 rounded-full text-xs">
@@ -339,7 +337,7 @@ const BidEvaluation = () => {
                       ID: {bid.id}
                     </span>
                   </div>
-                  
+
                   <div className="flex items-center gap-4 mb-4">
                     <div className="flex items-center gap-2">
                       <User className="w-4 h-4 text-gray-500" />
@@ -354,7 +352,7 @@ const BidEvaluation = () => {
                       <span className="text-sm text-gray-600 capitalize">{bid.complianceStatus.replace('-', ' ')}</span>
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                     <div>
                       <span className="text-sm text-gray-500">Bid Amount</span>
@@ -386,8 +384,8 @@ const BidEvaluation = () => {
                       <span className="font-medium">{bid.completionPercentage}%</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                      <div
+                        className="bg-primary-500 h-2 rounded-full transition-all duration-300"
                         style={{ width: `${bid.completionPercentage}%` }}
                       ></div>
                     </div>
@@ -411,7 +409,7 @@ const BidEvaluation = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="text-right">
                 <span className={getStatusBadge(bid.status)}>
                   {bid.evaluationStage.charAt(0).toUpperCase() + bid.evaluationStage.slice(1)}
@@ -433,7 +431,7 @@ const BidEvaluation = () => {
                   Download Documents
                 </button>
               </div>
-              
+
               <div className="flex items-center gap-2">
                 {bid.status === 'completed' && bid.evaluationStage === 'awarded' ? (
                   <span className="flex items-center gap-1 text-green-600 font-medium text-sm">
@@ -445,14 +443,14 @@ const BidEvaluation = () => {
                     <button className="text-red-600 hover:text-red-700 text-sm font-medium">
                       Reject
                     </button>
-                    <button 
+                    <button
                       onClick={() => handleEvaluateBid(bid)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors"
+                      className="bg-primary-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors"
                     >
                       {bid.status === 'pending' ? 'Start Evaluation' :
-                       bid.status === 'technical' ? 'Continue Technical' :
-                       bid.status === 'financial' ? 'Continue Financial' :
-                       'Review Completed'}
+                        bid.status === 'technical' ? 'Continue Technical' :
+                          bid.status === 'financial' ? 'Continue Financial' :
+                            'Review Completed'}
                     </button>
                   </>
                 )}
@@ -470,8 +468,8 @@ const BidEvaluation = () => {
           </div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">No bids found</h3>
           <p className="text-gray-500">
-            {searchTerm || selectedTender !== 'All Tenders' 
-              ? 'Try adjusting your search criteria or filters' 
+            {searchTerm || selectedTender !== 'All Tenders'
+              ? 'Try adjusting your search criteria or filters'
               : 'No bids available for evaluation at this time'}
           </p>
         </div>
@@ -479,7 +477,7 @@ const BidEvaluation = () => {
 
       {/* Evaluation Modal */}
       {isModalOpen && selectedBid && (
-        <EvaluationModal 
+        <EvaluationModal
           bid={selectedBid}
           onClose={() => setIsModalOpen(false)}
         />

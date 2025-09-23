@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { 
-  X, 
-  FileText, 
-  Eye, 
+import {
+  X,
+  FileText,
+  Eye,
   Download,
   CheckCircle,
   Clock
@@ -106,7 +106,7 @@ const EvaluationModal = ({ bid, onClose }) => {
           {Object.entries(criteria).map(([key, criterion]) => {
             const criterionInfo = criteriaLabels[category][key];
             const percentage = criterion.maxScore > 0 ? (criterion.score / criterion.maxScore) * 100 : 0;
-            
+
             return (
               <div key={key} className="border border-gray-200 rounded-lg p-4 bg-white">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
@@ -126,15 +126,15 @@ const EvaluationModal = ({ bid, onClose }) => {
                     <span className="text-gray-500 text-sm">/ {criterion.maxScore}</span>
                   </div>
                 </div>
-                
+
                 {/* Progress Bar */}
                 <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                  <div
+                    className="bg-primary-500 h-2 rounded-full transition-all duration-300"
                     style={{ width: `${percentage}%` }}
                   ></div>
                 </div>
-                
+
                 {/* Score Percentage */}
                 <div className="text-right mt-1">
                   <span className="text-xs text-gray-500">{percentage.toFixed(1)}%</span>
@@ -176,7 +176,7 @@ const EvaluationModal = ({ bid, onClose }) => {
               Bid Evaluation - {activeTab === 'technical' ? 'Technical Assessment' : 'Financial Assessment'}
             </p>
           </div>
-          <button 
+          <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0 ml-4"
           >
@@ -216,22 +216,20 @@ const EvaluationModal = ({ bid, onClose }) => {
           <nav className="flex px-6">
             <button
               onClick={() => setActiveTab('technical')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm mr-8 flex items-center gap-2 ${
-                activeTab === 'technical'
+              className={`py-4 px-1 border-b-2 font-medium text-sm mr-8 flex items-center gap-2 ${activeTab === 'technical'
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
+                }`}
             >
               <FileText className="w-4 h-4" />
               Technical Evaluation
             </button>
             <button
               onClick={() => setActiveTab('financial')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 ${
-                activeTab === 'financial'
+              className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 ${activeTab === 'financial'
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
+                }`}
             >
               💰 Financial Evaluation
             </button>
@@ -262,7 +260,7 @@ const EvaluationModal = ({ bid, onClose }) => {
             </button>
             <button
               onClick={handleCompleteEvaluation}
-              className="flex-1 sm:flex-none px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+              className="flex-1 sm:flex-none px-6 py-2 bg-primary-500 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
             >
               Complete {activeTab === 'technical' ? 'Technical' : 'Financial'} Evaluation
             </button>

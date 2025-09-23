@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { 
-  BarChart3, 
-  TrendingUp, 
-  Download, 
+import {
+  BarChart3,
+  TrendingUp,
+  Download,
   Calendar,
   DollarSign,
   Users,
@@ -218,9 +218,8 @@ const ReportsAnalytics = () => {
                   <div className="text-sm text-gray-600">{kpi.title}</div>
                 </div>
               </div>
-              <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                kpi.changeType === 'positive' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
-              }`}>
+              <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${kpi.changeType === 'positive' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
+                }`}>
                 <span>{kpi.change}</span>
               </div>
             </div>
@@ -240,7 +239,7 @@ const ReportsAnalytics = () => {
                 View Details →
               </button>
             </div>
-            
+
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -339,7 +338,7 @@ const ReportsAnalytics = () => {
             <button className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50">Daily</button>
           </div>
         </div>
-        
+
         <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
           <div className="text-center">
             <BarChart3 className="w-12 h-12 text-gray-400 mx-auto mb-3" />
@@ -363,7 +362,7 @@ const ReportsAnalytics = () => {
             <button className="px-4 py-2 bg-white border border-blue-300 text-blue-700 rounded-lg hover:bg-blue-50">
               Excel Export
             </button>
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            <button className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-blue-700">
               Custom Report
             </button>
           </div>

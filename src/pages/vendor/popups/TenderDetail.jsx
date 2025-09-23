@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { 
-  ArrowLeft, 
-  Download, 
-  Share2, 
-  CheckCircle, 
+import {
+  ArrowLeft,
+  Download,
+  Share2,
+  CheckCircle,
   Clock,
   AlertTriangle,
   Users,
@@ -26,7 +26,7 @@ const TenderDetail = ({ tender, onBack, onShowParticipants, onShowRebid }) => {
   ];
 
   const evaluationScores = [
-    { criteria: 'Technical', score: 85, maxScore: 100, color: 'bg-blue-500' },
+    { criteria: 'Technical', score: 85, maxScore: 100, color: 'bg-primary' },
     { criteria: 'Financial', score: 78, maxScore: 100, color: 'bg-green-500' },
     { criteria: 'Experience', score: 92, maxScore: 100, color: 'bg-purple-500' },
     { criteria: 'Compliance', score: 88, maxScore: 100, color: 'bg-orange-500' }
@@ -57,14 +57,14 @@ const TenderDetail = ({ tender, onBack, onShowParticipants, onShowRebid }) => {
     <div className="max-w-7xl mx-auto p-6">
       {/* Header */}
       <div className="mb-6">
-        <button 
+        <button
           onClick={onBack}
           className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium mb-4"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Bid Submissions
         </button>
-        
+
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">{tender.title}</h1>
@@ -82,7 +82,7 @@ const TenderDetail = ({ tender, onBack, onShowParticipants, onShowRebid }) => {
               </span>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-3">
             <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
               <Download className="w-4 h-4" />
@@ -161,7 +161,7 @@ const TenderDetail = ({ tender, onBack, onShowParticipants, onShowRebid }) => {
                     <span className="text-lg font-bold text-gray-900">{score.score}/{score.maxScore}</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
+                    <div
                       className={`h-2 rounded-full ${score.color}`}
                       style={{ width: `${(score.score / score.maxScore) * 100}%` }}
                     ></div>
@@ -196,7 +196,7 @@ const TenderDetail = ({ tender, onBack, onShowParticipants, onShowRebid }) => {
           {/* Project Details */}
           <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Project Details</h2>
-            
+
             <div className="space-y-4">
               <div>
                 <h3 className="font-medium text-gray-700 mb-2">Technical Proposal</h3>
@@ -204,28 +204,28 @@ const TenderDetail = ({ tender, onBack, onShowParticipants, onShowRebid }) => {
                   We propose a comprehensive office furniture solution featuring ergonomic designs, sustainable materials, and modern aesthetics. Our furniture meets all GSA standards and includes 5-year warranty.
                 </p>
               </div>
-              
+
               <div>
                 <h3 className="font-medium text-gray-700 mb-2">Financial Breakdown</h3>
                 <p className="text-sm text-gray-600">
                   Executive desks: $35,000, Office chairs: $28,000, Conference tables: $22,000, Storage units: $25,000, Workstations: $35,000
                 </p>
               </div>
-              
+
               <div>
                 <h3 className="font-medium text-gray-700 mb-2">Company Experience</h3>
                 <p className="text-sm text-gray-600">
                   15+ years in government furniture supply with projects worth over $50M. ISO 9001:2015 certified with GREENGUARD Gold certification.
                 </p>
               </div>
-              
+
               <div>
                 <h3 className="font-medium text-gray-700 mb-2">Team Composition</h3>
                 <p className="text-sm text-gray-600">
                   Project Manager: John Smith (10 years exp), Quality Inspector: Sarah Johnson (8 years exp), Installation Team: 6 certified technicians
                 </p>
               </div>
-              
+
               <div>
                 <h3 className="font-medium text-gray-700 mb-2">Quality Assurance Plan</h3>
                 <p className="text-sm text-gray-600">

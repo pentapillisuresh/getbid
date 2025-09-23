@@ -1,8 +1,8 @@
 import React from 'react';
-import { 
-  ArrowLeft, 
-  Star, 
-  CheckCircle, 
+import {
+  ArrowLeft,
+  Star,
+  CheckCircle,
   XCircle,
   AlertTriangle,
   User,
@@ -24,11 +24,10 @@ const VendorDetails = ({ vendor, onClose }) => {
     return Array.from({ length: 5 }, (_, i) => (
       <Star
         key={i}
-        className={`w-4 h-4 ${
-          i < Math.floor(rating) 
-            ? 'text-yellow-400 fill-current' 
+        className={`w-4 h-4 ${i < Math.floor(rating)
+            ? 'text-yellow-400 fill-current'
             : 'text-gray-300'
-        }`}
+          }`}
       />
     ));
   };
@@ -65,7 +64,7 @@ const VendorDetails = ({ vendor, onClose }) => {
       <div className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button 
+            <button
               onClick={onClose}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
@@ -81,7 +80,7 @@ const VendorDetails = ({ vendor, onClose }) => {
               <Download className="w-4 h-4" />
               Download Profile
             </button>
-            <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors">
+            <button className="flex items-center gap-2 bg-primary-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors">
               <MessageSquare className="w-4 h-4" />
               Send Message
             </button>
@@ -119,7 +118,7 @@ const VendorDetails = ({ vendor, onClose }) => {
                     )}
                   </div>
                   <p className="text-gray-600 mb-4">{vendor.category}</p>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-3">
                       <div className="flex items-center gap-3">

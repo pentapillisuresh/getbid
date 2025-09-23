@@ -1,9 +1,9 @@
 import React from 'react';
-import { 
-  FileText, 
-  Clock, 
-  CheckCircle, 
-  TrendingUp, 
+import {
+  FileText,
+  Clock,
+  CheckCircle,
+  TrendingUp,
   Download,
   ExternalLink,
   Calendar,
@@ -211,9 +211,8 @@ const VendorDashboardHome = () => {
                 </div>
               </div>
               {stat.change !== '0' && (
-                <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                  stat.changeType === 'positive' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
-                }`}>
+                <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${stat.changeType === 'positive' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
+                  }`}>
                   <span>{stat.change}</span>
                 </div>
               )}
@@ -255,7 +254,7 @@ const VendorDashboardHome = () => {
                 View All Tender Listings →
               </button>
             </div>
-            
+
             <div className="space-y-4">
               {recentTenders.map((tender) => (
                 <div key={tender.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
@@ -281,17 +280,16 @@ const VendorDashboardHome = () => {
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                        tender.statusColor === 'green' ? 'bg-green-100 text-green-600' :
-                        tender.statusColor === 'yellow' ? 'bg-yellow-100 text-yellow-600' :
-                        'bg-gray-100 text-gray-600'
-                      }`}>
+                      <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${tender.statusColor === 'green' ? 'bg-green-100 text-green-600' :
+                          tender.statusColor === 'yellow' ? 'bg-yellow-100 text-yellow-600' :
+                            'bg-gray-100 text-gray-600'
+                        }`}>
                         {tender.status}
                       </span>
                       <div className="text-sm text-gray-500 mt-1">{tender.daysLeft} days left</div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center gap-2 pt-3 border-t border-gray-100">
                     <button className="flex items-center gap-2 text-primary-600 hover:text-primary-700 text-sm font-medium">
                       <Eye className="w-4 h-4" />
@@ -309,7 +307,7 @@ const VendorDashboardHome = () => {
                 </div>
               ))}
             </div>
-            
+
             <div className="mt-6 text-center">
               <button className="text-primary-600 hover:text-primary-700 font-medium">
                 View All Bid Submissions →
@@ -344,22 +342,20 @@ const VendorDashboardHome = () => {
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Upcoming Deadlines</h3>
             <div className="space-y-3">
               {upcomingDeadlines.map((item, index) => (
-                <div key={index} className={`p-3 rounded-lg border-l-4 ${
-                  item.priority === 'high' ? 'border-red-400 bg-red-50' :
-                  item.priority === 'medium' ? 'border-blue-400 bg-blue-50' :
-                  'border-blue-400 bg-blue-50'
-                }`}>
+                <div key={index} className={`p-3 rounded-lg border-l-4 ${item.priority === 'high' ? 'border-red-400 bg-red-50' :
+                    item.priority === 'medium' ? 'border-blue-400 bg-blue-50' :
+                      'border-blue-400 bg-blue-50'
+                  }`}>
                   <div className="flex justify-between items-start">
                     <div>
                       <p className="font-medium text-gray-900 text-sm">{item.title}</p>
                       <p className="text-sm text-gray-600">{item.type}</p>
                       <p className="text-xs text-gray-500 mt-1">Due: {item.deadline}</p>
                     </div>
-                    <span className={`text-xs font-medium ${
-                      item.priority === 'high' ? 'text-red-600' :
-                      item.priority === 'medium' ? 'text-blue-600' :
-                      'text-blue-600'
-                    }`}>
+                    <span className={`text-xs font-medium ${item.priority === 'high' ? 'text-red-600' :
+                        item.priority === 'medium' ? 'text-blue-600' :
+                          'text-blue-600'
+                      }`}>
                       {item.daysLeft} days left
                     </span>
                   </div>
@@ -376,10 +372,10 @@ const VendorDashboardHome = () => {
                 Mark All Read
               </button>
             </div>
-            
+
             <div className="space-y-3">
               <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
-                <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
                 <div>
                   <p className="text-sm font-medium text-gray-900">New Tender Available ●</p>
                   <p className="text-sm text-gray-600">Smart City Infrastructure Development Project - Phase II has been published.</p>
@@ -405,7 +401,7 @@ const VendorDashboardHome = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="mt-4 text-center">
               <button className="text-primary-600 hover:text-primary-700 text-sm font-medium">
                 View All Notifications →
