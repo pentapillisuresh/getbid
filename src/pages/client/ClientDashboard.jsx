@@ -17,6 +17,7 @@ import VendorManagement from './pages/VendorManagement';
 import ReportsAnalytics from './pages/ReportsAnalytics';
 import AuditTrail from './pages/AuditTrail';
 import ProfilePage from "./pages/ProfilePage";
+import TenderDashboard from './pages/TenderDashboard';
 
 const ClientDashboard = () => {
   const location = useLocation();
@@ -59,6 +60,7 @@ const ClientDashboard = () => {
             <Route path="/reports-analytics" element={<ReportsAnalytics />} />
             <Route path="/audit-trail" element={<AuditTrail />} />
             <Route path="/profile" element={<ProfilePage userInfo={userInfo} />} />
+            <Route path="/tender" element={<TenderDashboard />} />
           </Routes>
         </main>
       </div>

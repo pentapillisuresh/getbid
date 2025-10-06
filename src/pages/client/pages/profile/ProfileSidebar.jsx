@@ -16,18 +16,17 @@ const ProfileSidebar = ({ activeTab, onTabChange }) => {
 
   return (
     <div className="w-80 bg-white border-r border-gray-200 p-6 flex flex-col">
-      {/* Back Button */}
+      {/* ✅ Back Button */}
       <button
-        onClick={() => navigate(-1)}
+        onClick={() => navigate('/client/tender')}
         className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
       >
         <ArrowLeft className="w-5 h-5" />
-        <span>Back</span>
+        <span>Back to Dashboard</span>
       </button>
 
       {/* Company Info */}
       <div className="flex flex-col items-center mb-8">
-        {/* Replace icon with image */}
         <div className="w-32 h-32 rounded-full overflow-hidden shadow-lg mb-4">
           <img
             src="https://img.freepik.com/free-photo/modern-business-center_1127-2923.jpg?t=st=1759776011~exp=1759779611~hmac=b58c89e66d477f29b7e1efa24c161c6020a5df605cb2777aad2edbd07037b2bb&w=1060"
