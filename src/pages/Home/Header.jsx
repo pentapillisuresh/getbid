@@ -9,7 +9,7 @@ const Header = () => {
           {/* Logo */}
           <div className="flex items-center space-x-2">
           
-           <img src="/images/getlogo.png" alt="E-Tendering Logo" style={{width:"100px"}} />
+           <img src="/images/logo2.png" alt="E-Tendering Logo" style={{width:"100px"}} />
           </div>
 
           {/* Navigation */}

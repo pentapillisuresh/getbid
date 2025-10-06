@@ -7,7 +7,7 @@ const Footer = () => {
         <div className="grid md:grid-cols-4 gap-8 mb-8">
           <div>
             <div className="flex items-center space-x-2 mb-4">
-           <img src="/images/getbidlogo.jpeg" alt="E-Tendering Logo" style={{width:"100px"}} />
+           <img src="/images/logo.jpeg" alt="E-Tendering Logo" style={{width:"100px"}} />
               
             
             </div>
