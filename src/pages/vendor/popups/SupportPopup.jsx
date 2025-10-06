@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Search, HelpCircle, MessageCircle, Phone, FileText, Settings, Users, DollarSign } from 'lucide-react';
+import { X, Search, HelpCircle, MessageCircle, Phone, FileText, Settings, Users, } from 'lucide-react';
 
 const SupportPopup = ({ onClose }) => {
   const [activeTab, setActiveTab] = useState('help');
@@ -107,11 +107,10 @@ const SupportPopup = ({ onClose }) => {
         <div className="flex border-b border-gray-200">
           <button
             onClick={() => setActiveTab('help')}
-            className={`px-6 py-3 font-medium text-sm transition-colors ${
-              activeTab === 'help'
+            className={`px-6 py-3 font-medium text-sm transition-colors ${activeTab === 'help'
                 ? 'border-b-2 border-orange-500 text-orange-600'
                 : 'text-gray-500 hover:text-gray-700'
-            }`}
+              }`}
           >
             <div className="flex items-center gap-2">
               <HelpCircle className="w-4 h-4" />
@@ -120,11 +119,10 @@ const SupportPopup = ({ onClose }) => {
           </button>
           <button
             onClick={() => setActiveTab('tickets')}
-            className={`px-6 py-3 font-medium text-sm transition-colors ${
-              activeTab === 'tickets'
+            className={`px-6 py-3 font-medium text-sm transition-colors ${activeTab === 'tickets'
                 ? 'border-b-2 border-orange-500 text-orange-600'
                 : 'text-gray-500 hover:text-gray-700'
-            }`}
+              }`}
           >
             <div className="flex items-center gap-2">
               <FileText className="w-4 h-4" />
@@ -133,11 +131,10 @@ const SupportPopup = ({ onClose }) => {
           </button>
           <button
             onClick={() => setActiveTab('contact')}
-            className={`px-6 py-3 font-medium text-sm transition-colors ${
-              activeTab === 'contact'
+            className={`px-6 py-3 font-medium text-sm transition-colors ${activeTab === 'contact'
                 ? 'border-b-2 border-orange-500 text-orange-600'
                 : 'text-gray-500 hover:text-gray-700'
-            }`}
+              }`}
           >
             <div className="flex items-center gap-2">
               <Phone className="w-4 h-4" />
@@ -256,7 +253,7 @@ const SupportPopup = ({ onClose }) => {
           {activeTab === 'contact' && (
             <div className="max-w-2xl mx-auto">
               <h3 className="text-lg font-semibold text-gray-900 mb-6">Contact Information</h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <div className="text-center p-6 bg-blue-50 rounded-lg border border-blue-200">
                   <Phone className="w-8 h-8 text-blue-600 mx-auto mb-3" />
@@ -264,7 +261,7 @@ const SupportPopup = ({ onClose }) => {
                   <p className="text-gray-600 text-sm mb-3">Mon-Fri, 9 AM - 6 PM IST</p>
                   <p className="font-semibold text-blue-600">+91-1800-123-4567</p>
                 </div>
-                
+
                 <div className="text-center p-6 bg-green-50 rounded-lg border border-green-200">
                   <MessageCircle className="w-8 h-8 text-green-600 mx-auto mb-3" />
                   <h4 className="font-semibold text-gray-900 mb-2">Email Support</h4>

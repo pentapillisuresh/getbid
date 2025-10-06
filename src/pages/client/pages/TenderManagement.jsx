@@ -16,11 +16,16 @@ import {
   Download
 } from 'lucide-react';
 import TenderFormModal from "../popup/TenderFormModal";
+import TenderDetailsModal from "../popup/TenderDetailsModal";
+
 
 const TenderManagement = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [selectedTender, setSelectedTender] = useState(null);
+  const [showDetails, setShowDetails] = useState(false);
+
 
   const handleNewTender = (data) => {
     console.log("New Tender Data:", data);
@@ -243,8 +248,8 @@ const TenderManagement = () => {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === tab.id
-                  ? 'border-primary-500 text-primary-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                ? 'border-primary-500 text-primary-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
                 }`}
             >
               {tab.label}
@@ -325,10 +330,17 @@ const TenderManagement = () => {
 
             <div className="flex items-center justify-between pt-4 border-t border-gray-200">
               <div className="flex items-center gap-3">
-                <button className="flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium text-sm">
+                <button
+                  onClick={() => {
+                    setSelectedTender(tender);
+                    setShowDetails(true);
+                  }}
+                  className="flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium text-sm"
+                >
                   <Eye className="w-4 h-4" />
                   View Details
                 </button>
+
                 {tender.status === 'draft' ? (
                   <button className="flex items-center gap-2 text-green-600 hover:text-green-700 font-medium text-sm">
                     <Edit className="w-4 h-4" />
@@ -403,6 +415,12 @@ const TenderManagement = () => {
         onClose={() => setShowModal(false)}
         onSubmit={handleNewTender}
       />
+      <TenderDetailsModal
+        show={showDetails}
+        onClose={() => setShowDetails(false)}
+        tender={selectedTender}
+      />
+
 
     </div>
   );

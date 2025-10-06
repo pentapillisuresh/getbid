@@ -40,7 +40,7 @@ const BidManagement = () => {
       tenderId: 'T2024-015',
       title: 'Complete Office Furniture Setup for New Government Building',
       department: 'Department of Public Works',
-      bidAmount: '$145,000',
+      bidAmount: '145,000',
       submittedDate: '2024-01-20',
       deadline: '2024-02-05',
       status: 'under-evaluation',
@@ -51,9 +51,9 @@ const BidManagement = () => {
       lastActivity: 'Awaiting technical evaluation',
       activityDate: '2024-01-22 09:00',
       category: 'Furniture & Fixtures',
-      estimatedValue: '$150,000',
+      estimatedValue: '150,000',
       competitors: 8,
-      averageBid: '$148,500',
+      averageBid: '148,500',
       evaluated: false
     },
     {
@@ -61,7 +61,7 @@ const BidManagement = () => {
       tenderId: 'T2024-012',
       title: 'Annual Cleaning and Maintenance Services for Government Complex',
       department: 'Maintenance Department',
-      bidAmount: '$89,500',
+      bidAmount: '89,500',
       submittedDate: '2024-01-15',
       deadline: '2024-01-30',
       status: 'awarded',
@@ -72,9 +72,9 @@ const BidManagement = () => {
       lastActivity: 'Contract awarded - awaiting signing',
       activityDate: '2024-01-28 14:30',
       category: 'Maintenance Services',
-      estimatedValue: '$95,000',
+      estimatedValue: '95,000',
       competitors: 4,
-      averageBid: '$92,300',
+      averageBid: '92,300',
       evaluated: true
     },
     {
@@ -82,7 +82,7 @@ const BidManagement = () => {
       tenderId: 'T2024-018',
       title: 'Comprehensive Security Services for Government Campus',
       department: 'Security Department',
-      bidAmount: '$320,000',
+      bidAmount: '320,000',
       submittedDate: '2024-01-25',
       deadline: '2024-02-10',
       status: 'submitted',
@@ -93,9 +93,9 @@ const BidManagement = () => {
       lastActivity: 'Re-bid available before deadline',
       activityDate: '2024-01-25 16:45',
       category: 'Security Services',
-      estimatedValue: '$350,000',
+      estimatedValue: '350,000',
       competitors: 6,
-      averageBid: '$335,000',
+      averageBid: '335,000',
       canRebid: true
     },
     {
@@ -103,7 +103,7 @@ const BidManagement = () => {
       tenderId: 'T2024-008',
       title: 'Employee Cafeteria and Catering Services',
       department: 'Human Resources',
-      bidAmount: '$67,800',
+      bidAmount: '67,800',
       submittedDate: '2024-01-10',
       deadline: '2024-01-25',
       status: 'rejected',
@@ -114,9 +114,9 @@ const BidManagement = () => {
       lastActivity: 'Feedback available for review',
       activityDate: '2024-01-26 10:15',
       category: 'Food Services',
-      estimatedValue: '$75,000',
+      estimatedValue: '75,000',
       competitors: 5,
-      averageBid: '$71,200',
+      averageBid: '71,200',
       evaluated: true
     },
     {
@@ -124,7 +124,7 @@ const BidManagement = () => {
       tenderId: 'T2024-020',
       title: 'Official Transportation and Fleet Management Services',
       department: 'Transport Department',
-      bidAmount: '$245,000',
+      bidAmount: '245,000',
       submittedDate: '2024-01-28',
       deadline: '2024-02-02',
       status: 'submitted',
@@ -135,9 +135,9 @@ const BidManagement = () => {
       lastActivity: 'Tender closed - awaiting evaluation',
       activityDate: '2024-02-02 17:00',
       category: 'Transportation Services',
-      estimatedValue: '$260,000',
+      estimatedValue: '260,000',
       competitors: 7,
-      averageBid: '$248,500'
+      averageBid: '248,500'
     }
   ];
 
