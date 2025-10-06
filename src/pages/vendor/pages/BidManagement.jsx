@@ -5,7 +5,7 @@ import {
   XCircle,
   AlertTriangle,
   FileText,
-  DollarSign,
+  IndianRupee,
   Eye,
   Download,
   Filter,
@@ -170,7 +170,7 @@ const BidManagement = () => {
     { label: 'Total Bids', value: '12', icon: <FileText className="w-6 h-6 text-blue-600" /> },
     { label: 'Success Rate', value: '68%', icon: <CheckCircle className="w-6 h-6 text-green-600" /> },
     { label: 'Under Review', value: '3', icon: <Clock className="w-6 h-6 text-orange-600" /> },
-    { label: 'Total Value', value: '$1.2M', icon: <DollarSign className="w-6 h-6 text-purple-600" /> }
+    { label: 'Total Value', value: '1.2M', icon: <IndianRupee className="w-6 h-6 text-purple-600" /> }
   ];
 
   // Handlers

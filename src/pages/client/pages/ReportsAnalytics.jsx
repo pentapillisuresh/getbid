@@ -4,7 +4,7 @@ import {
   TrendingUp,
   Download,
   Calendar,
-  DollarSign,
+  IndianRupee,
   Users,
   FileText,
   Award,
@@ -40,7 +40,7 @@ const ReportsAnalytics = () => {
       value: '₹72.5 Cr',
       change: '+15.2%',
       changeType: 'positive',
-      icon: <DollarSign className="w-8 h-8 text-green-600" />,
+      icon: <IndianRupee className="w-8 h-8 text-green-600" />,
       description: 'Total value of all published tenders'
     },
     {

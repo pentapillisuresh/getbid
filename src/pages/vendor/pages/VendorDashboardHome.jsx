@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+
 import {
   FileText,
   Clock,
@@ -7,12 +8,14 @@ import {
   Download,
   ExternalLink,
   Calendar,
-  DollarSign,
+  IndianRupee,
   Award,
-  Eye
+  Eye,
+  X
 } from 'lucide-react';
 
 const VendorDashboardHome = () => {
+    const [showTopupModal, setShowTopupModal] = useState(false);
   const stats = [
     {
       title: 'Active Tenders',
@@ -166,10 +169,59 @@ const VendorDashboardHome = () => {
     }
   ];
 
+
+  
+  // --- Subscription Plans for Popup ---
+  const plans = [
+    {
+      name: "Basic",
+      price: "₹5,000",
+      submissions: "3 Tender Submissions",
+      validity: "Valid for 90 days",
+      features: [
+        "Submit up to 3 bids",
+        "Full tender access & details",
+        "Email notifications",
+        "Standard support",
+      ],
+      popular: false,
+      color: "border-gray-200",
+    },
+    {
+      name: "Starter Pack",
+      price: "₹7,000",
+      submissions: "5 Tender Submissions",
+      validity: "Valid for 90 days",
+      features: [
+        "Submit up to 5 bids",
+        "Full tender access & details",
+        "Priority notifications",
+        "Enhanced support",
+      ],
+      popular: true,
+      color: "border-blue-500",
+    },
+    {
+      name: "Pro Pack",
+      price: "₹13,000",
+      submissions: "10 Tender Submissions",
+      validity: "Valid for 120 days",
+      features: [
+        "Submit up to 10 bids",
+        "Full tender access & details",
+        "Priority notifications",
+        "Premium support",
+        "Top-up anytime option",
+      ],
+      popular: false,
+      color: "border-gray-200",
+    },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-primary-600 to-primary-700 rounded-xl p-6 text-white">
+       <div className="bg-gradient-to-r from-primary-600 to-primary-700 rounded-xl p-6 text-white">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold mb-2">Welcome back, TechCorp Ltd.</h1>
@@ -187,14 +239,54 @@ const VendorDashboardHome = () => {
           </div>
           <div className="text-right">
             <div className="bg-white/20 backdrop-blur rounded-lg p-4">
-              <div className="text-2xl font-bold">Active Subscription</div>
-              <div className="text-primary-100">Starter Pack</div>
+              <div className="text-2xl font-bold">Starter Pack</div>
+              <div className="text-primary-100 text-sm">Active Subscription</div>
               <div className="text-sm text-primary-200 mt-2">Valid until: 2024-06-15</div>
-              <button className="mt-3 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                Top-up
-              </button>
             </div>
           </div>
+        </div>
+      </div>
+
+
+      
+      {/* Active Subscription Section */}
+      <div className="bg-green-50 border border-green-200 rounded-xl p-6">
+        <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+          <Award className="w-5 h-5 text-green-600" />
+          Active Subscription
+        </h2>
+        <div className="flex flex-wrap items-center justify-between gap-6">
+          <div>
+            <p className="text-sm text-gray-600">Plan</p>
+            <h3 className="text-lg font-bold text-green-700">Starter Pack</h3>
+          </div>
+          <div className="text-center">
+            <p className="text-sm text-gray-600">Remaining Tenders</p>
+            <h3 className="text-xl font-bold text-gray-800">3</h3>
+          </div>
+          <div className="text-center">
+            <p className="text-sm text-gray-600">Tenders Used</p>
+            <h3 className="text-xl font-bold text-gray-800">2</h3>
+          </div>
+          <div className="text-center">
+            <p className="text-sm text-gray-600">Days Remaining</p>
+            <h3 className="text-xl font-bold text-orange-600">45</h3>
+          </div>
+          <div>
+              <button
+              onClick={() => setShowTopupModal(true)}
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            >
+              + Top-up
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+            <div className="bg-green-500 h-2 rounded-full" style={{ width: '40%' }}></div>
+          </div>
+          <p className="text-xs text-gray-500 mt-1">Usage Progress: 2/5 used | Valid until 2024-04-15</p>
         </div>
       </div>
 
@@ -273,7 +365,7 @@ const VendorDashboardHome = () => {
                       </div>
                       <div className="flex items-center gap-4 text-sm">
                         <span className="flex items-center gap-1 text-green-600 font-medium">
-                          <DollarSign className="w-4 h-4" />
+                          <IndianRupee className="w-4 h-4" />
                           {tender.estimatedValue}
                         </span>
                         <span className="text-gray-500">Deadline: {tender.deadline}</span>
@@ -281,8 +373,8 @@ const VendorDashboardHome = () => {
                     </div>
                     <div className="text-right">
                       <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${tender.statusColor === 'green' ? 'bg-green-100 text-green-600' :
-                          tender.statusColor === 'yellow' ? 'bg-yellow-100 text-yellow-600' :
-                            'bg-gray-100 text-gray-600'
+                        tender.statusColor === 'yellow' ? 'bg-yellow-100 text-yellow-600' :
+                          'bg-gray-100 text-gray-600'
                         }`}>
                         {tender.status}
                       </span>
@@ -343,8 +435,8 @@ const VendorDashboardHome = () => {
             <div className="space-y-3">
               {upcomingDeadlines.map((item, index) => (
                 <div key={index} className={`p-3 rounded-lg border-l-4 ${item.priority === 'high' ? 'border-red-400 bg-red-50' :
-                    item.priority === 'medium' ? 'border-blue-400 bg-blue-50' :
-                      'border-blue-400 bg-blue-50'
+                  item.priority === 'medium' ? 'border-blue-400 bg-blue-50' :
+                    'border-blue-400 bg-blue-50'
                   }`}>
                   <div className="flex justify-between items-start">
                     <div>
@@ -353,8 +445,8 @@ const VendorDashboardHome = () => {
                       <p className="text-xs text-gray-500 mt-1">Due: {item.deadline}</p>
                     </div>
                     <span className={`text-xs font-medium ${item.priority === 'high' ? 'text-red-600' :
-                        item.priority === 'medium' ? 'text-blue-600' :
-                          'text-blue-600'
+                      item.priority === 'medium' ? 'text-blue-600' :
+                        'text-blue-600'
                       }`}>
                       {item.daysLeft} days left
                     </span>
@@ -410,6 +502,63 @@ const VendorDashboardHome = () => {
           </div>
         </div>
       </div>
+      
+      {/* --- TOP-UP MODAL --- */}
+      {showTopupModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full p-8 relative">
+            <button
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+              onClick={() => setShowTopupModal(false)}
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            <h2 className="text-2xl font-bold text-center mb-2">
+              Choose Your Subscription Plan
+            </h2>
+            <p className="text-center text-gray-600 mb-8">
+              Select the plan that best fits your bidding needs
+            </p>
+
+            <div className="grid md:grid-cols-3 gap-6">
+              {plans.map((plan, index) => (
+                <div
+                  key={index}
+                  className={`relative border-2 rounded-xl p-6 text-center shadow-sm hover:shadow-md transition-all ${plan.color}`}
+                >
+                  {plan.popular && (
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
+                      Popular
+                    </div>
+                  )}
+                  <h3 className="text-lg font-bold mb-2">{plan.name}</h3>
+                  <h4 className="text-3xl font-bold text-blue-700 mb-2">
+                    {plan.price}
+                  </h4>
+                  <p className="text-gray-600 mb-1">{plan.submissions}</p>
+                  <p className="text-green-600 font-medium mb-4">
+                    {plan.validity}
+                  </p>
+
+                  <ul className="text-sm text-gray-600 mb-6 text-left space-y-2">
+                    {plan.features.map((feature, i) => (
+                      <li key={i} className="flex items-center gap-2">
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition-colors">
+                    Choose {plan.name}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

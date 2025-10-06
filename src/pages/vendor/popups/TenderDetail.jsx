@@ -8,7 +8,7 @@ import {
   AlertTriangle,
   Users,
   FileText,
-  DollarSign,
+  IndianRupee,
   Award,
   Calendar
 } from 'lucide-react';

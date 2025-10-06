@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Building2, Bell, User, LogOut, Menu, X } from 'lucide-react';
+import { Building2, Bell, User, LogOut, Menu, UserCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const DashboardLayout = ({ children, title, subtitle, userInfo, userType }) => {
@@ -12,6 +12,11 @@ const DashboardLayout = ({ children, title, subtitle, userInfo, userType }) => {
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
+  };
+
+  const handleProfile = () => {
+    // Navigate to the profile page
+    navigate(`/${userType}/profile`);
   };
 
   return (
@@ -58,6 +63,17 @@ const DashboardLayout = ({ children, title, subtitle, userInfo, userType }) => {
                 <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
                   <User className="w-5 h-5 text-gray-600" />
                 </div>
+
+                {/* Profile Icon */}
+                <button
+                  onClick={handleProfile}
+                  className="p-2 text-gray-500 hover:text-primary-600 rounded-lg hover:bg-primary-50 transition-colors"
+                  title="Profile"
+                >
+                  <UserCircle className="w-5 h-5" />
+                </button>
+
+                {/* Logout */}
                 <button 
                   onClick={handleLogout}
                   className="p-2 text-gray-500 hover:text-primary-600 rounded-lg hover:bg-primary-50 transition-colors"

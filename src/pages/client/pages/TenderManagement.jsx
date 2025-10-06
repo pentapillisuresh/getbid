@@ -8,7 +8,7 @@ import {
   Copy,
   Calendar,
   Users,
-  DollarSign,
+  IndianRupee,
   Clock,
   CheckCircle,
   AlertTriangle,
@@ -185,7 +185,7 @@ const TenderManagement = () => {
   const stats = [
     { label: 'Total Tenders', value: '25', icon: <FileText className="w-6 h-6 text-blue-600" /> },
     { label: 'Active Tenders', value: '12', icon: <CheckCircle className="w-6 h-6 text-green-600" /> },
-    { label: 'Total Value', value: '₹72.5Cr', icon: <DollarSign className="w-6 h-6 text-purple-600" /> },
+    { label: 'Total Value', value: '₹72.5Cr', icon: <IndianRupee className="w-6 h-6 text-purple-600" /> },
     { label: 'Avg Response Rate', value: '78%', icon: <Users className="w-6 h-6 text-orange-600" /> }
   ];
 

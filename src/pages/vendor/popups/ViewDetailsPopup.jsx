@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Building2, MapPin, Calendar, DollarSign, Download, FileText } from 'lucide-react';
+import { X, Building2, MapPin, Calendar, IndianRupee, Download, FileText } from 'lucide-react';
 
 const ViewDetailsPopup = ({ tender, onClose }) => {
   const eligibilityItems = [

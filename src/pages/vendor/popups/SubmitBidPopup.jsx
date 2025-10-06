@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { X, Upload, FileText, CheckCircle, AlertCircle, Building2, DollarSign, Calendar, User } from 'lucide-react';
+import { X, Upload, FileText, CheckCircle, AlertCircle, Building2, IndianRupee, Calendar } from 'lucide-react';
 import VerifyBidPopup from './VerifyBidPopup';
 
 const SubmitBidPopup = ({ tender, onClose }) => {
@@ -8,13 +8,11 @@ const SubmitBidPopup = ({ tender, onClose }) => {
   const [techProposal, setTechProposal] = useState('');
   const [selectedDocs, setSelectedDocs] = useState([]);
   const [quotationFile, setQuotationFile] = useState(null);
-  const [boqFile, setBOQFile] = useState(null);
   const [agreedTerms, setAgreedTerms] = useState(false);
   const [agreedFinancial, setAgreedFinancial] = useState(false);
   const [showVerifyPopup, setShowVerifyPopup] = useState(false);
 
   const quotationFileRef = useRef(null);
-  const boqFileRef = useRef(null);
 
   const companyDocs = [
     { id: 1, name: 'Company Registration Certificate.pdf', selected: true },
@@ -33,12 +31,8 @@ const SubmitBidPopup = ({ tender, onClose }) => {
     ));
   };
 
-  const handleFileUpload = (type, file) => {
-    if (type === 'quotation') {
-      setQuotationFile(file);
-    } else if (type === 'boq') {
-      setBOQFile(file);
-    }
+  const handleFileUpload = (file) => {
+    setQuotationFile(file);
   };
 
   const handleQuotationFileChange = (e) => {
@@ -62,41 +56,12 @@ const SubmitBidPopup = ({ tender, onClose }) => {
         return;
       }
 
-      handleFileUpload('quotation', file);
-    }
-  };
-
-  const handleBOQFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      // Check file size (10MB limit)
-      if (file.size > 10 * 1024 * 1024) {
-        alert('File size must be less than 10MB');
-        return;
-      }
-
-      // Check file type
-      const allowedTypes = [
-        'application/pdf',
-        'application/vnd.ms-excel',
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-      ];
-
-      if (!allowedTypes.includes(file.type)) {
-        alert('Please upload only PDF or Excel files');
-        return;
-      }
-
-      handleFileUpload('boq', file);
+      handleFileUpload(file);
     }
   };
 
   const triggerQuotationUpload = () => {
     quotationFileRef.current?.click();
-  };
-
-  const triggerBOQUpload = () => {
-    boqFileRef.current?.click();
   };
 
   const handleProceedToVerify = () => {
@@ -111,11 +76,10 @@ const SubmitBidPopup = ({ tender, onClose }) => {
     // Handle successful verification
     setShowVerifyPopup(false);
     onClose();
-    // Add any success logic here
   };
 
   const selectedDocCount = documents.filter(doc => doc.selected).length;
-  const isFormValid = bidAmount && deliveryTimeline && techProposal && quotationFile && boqFile && agreedTerms && agreedFinancial;
+  const isFormValid = bidAmount && deliveryTimeline && techProposal && quotationFile && agreedTerms && agreedFinancial;
 
   // Create bid data for verification popup
   const bidData = {
@@ -201,16 +165,13 @@ const SubmitBidPopup = ({ tender, onClose }) => {
                       Note: Your bid amount must be below the estimated contract value of {tender?.estimatedValue}
                     </span>
                   </div>
-                  <div className="relative">
-                    <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                    <input
-                      type="text"
-                      value={bidAmount}
-                      onChange={(e) => setBidAmount(e.target.value)}
-                      placeholder="Enter your competitive bid amount"
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    value={bidAmount}
+                    onChange={(e) => setBidAmount(e.target.value)}
+                    placeholder="Enter your competitive bid amount"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
                 </div>
 
                 {/* Delivery Timeline */}
@@ -247,65 +208,33 @@ const SubmitBidPopup = ({ tender, onClose }) => {
                   </div>
                 </div>
 
-                {/* File Uploads */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Quotation Upload */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Upload Quotation <span className="text-red-500">*</span>
-                    </label>
-                    <p className="text-xs text-gray-500 mb-3">Upload your detailed quotation file (visible to client)</p>
-                    <div
-                      onClick={triggerQuotationUpload}
-                      className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors cursor-pointer"
-                    >
-                      <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                      <p className="text-sm font-medium text-gray-900">Choose Quotation File</p>
-                      <p className="text-xs text-gray-500 mt-1">Supported: PDF, Excel (.xls, .xlsx) • Max 10MB</p>
-                      {quotationFile && (
-                        <div className="mt-2 text-xs text-green-600 flex items-center justify-center gap-1">
-                          <CheckCircle className="w-3 h-3" />
-                          {quotationFile.name}
-                        </div>
-                      )}
-                    </div>
-                    <input
-                      type="file"
-                      ref={quotationFileRef}
-                      onChange={handleQuotationFileChange}
-                      accept=".pdf,.xls,.xlsx"
-                      className="hidden"
-                    />
+                {/* Quotation Upload */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Upload Quotation <span className="text-red-500">*</span>
+                  </label>
+                  <p className="text-xs text-gray-500 mb-3">Upload your detailed quotation file (visible to client)</p>
+                  <div
+                    onClick={triggerQuotationUpload}
+                    className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors cursor-pointer"
+                  >
+                    <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-sm font-medium text-gray-900">Choose Quotation File</p>
+                    <p className="text-xs text-gray-500 mt-1">Supported: PDF, Excel (.xls, .xlsx) • Max 10MB</p>
+                    {quotationFile && (
+                      <div className="mt-2 text-xs text-green-600 flex items-center justify-center gap-1">
+                        <CheckCircle className="w-3 h-3" />
+                        {quotationFile.name}
+                      </div>
+                    )}
                   </div>
-
-                  {/* BOQ Upload */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Upload Bill of Quantities (BOQ) <span className="text-red-500">*</span>
-                    </label>
-                    <p className="text-xs text-gray-500 mb-3">Upload your Bill of Quantities (BOQ)</p>
-                    <div
-                      onClick={triggerBOQUpload}
-                      className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors cursor-pointer"
-                    >
-                      <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                      <p className="text-sm font-medium text-gray-900">Choose BOQ File</p>
-                      <p className="text-xs text-gray-500 mt-1">Supported: PDF, Excel (.xls, .xlsx) • Max 10MB</p>
-                      {boqFile && (
-                        <div className="mt-2 text-xs text-green-600 flex items-center justify-center gap-1">
-                          <CheckCircle className="w-3 h-3" />
-                          {boqFile.name}
-                        </div>
-                      )}
-                    </div>
-                    <input
-                      type="file"
-                      ref={boqFileRef}
-                      onChange={handleBOQFileChange}
-                      accept=".pdf,.xls,.xlsx"
-                      className="hidden"
-                    />
-                  </div>
+                  <input
+                    type="file"
+                    ref={quotationFileRef}
+                    onChange={handleQuotationFileChange}
+                    accept=".pdf,.xls,.xlsx"
+                    className="hidden"
+                  />
                 </div>
 
                 {/* Document Selection */}
@@ -410,8 +339,8 @@ const SubmitBidPopup = ({ tender, onClose }) => {
                   disabled={!isFormValid}
                   onClick={handleProceedToVerify}
                   className={`px-8 py-3 rounded-lg font-medium transition-all ${isFormValid
-                      ? 'bg-primary hover:bg-blue-700 text-white transform hover:scale-105'
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    ? 'bg-primary hover:bg-blue-700 text-white transform hover:scale-105'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     }`}
                 >
                   proceed to verify
