@@ -40,7 +40,7 @@ const ChooseLoginType = () => {
 
   return (
     <>
-      <Header />
+      {/* <Header /> */}
       <div className="min-h-screen flex bg-white"> 
         {/* Left Side Video (Fixed / Stable) */}
         <div className="hidden lg:flex w-1/2 fixed top-15 left-0 h-full bg-white items-start justify-center p-8">

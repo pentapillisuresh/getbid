@@ -1,58 +1,63 @@
-import React from 'react';
-
-const Footer = () => {
+function Footer() {
   return (
-    <footer className="bg-black text-white py-12">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="grid md:grid-cols-4 gap-8 mb-8">
+    <footer className="bg-gray-900 text-white py-12 px-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-12 mb-8">
           <div>
-            <div className="flex items-center space-x-2 mb-4">
-           <img src="/images/logo.jpeg" alt="E-Tendering Logo" style={{width:"100px"}} />
-              
-            
-            </div>
-            <p className="text-gray-400">
-              Transforming procurement with transparent, secure, and efficient digital tendering solutions.
+            <h3 className="text-2xl font-bold mb-4">GenMall</h3>
+            <p className="text-gray-400 mb-6 leading-relaxed">
+              GenMall is a cloud-based project to developing country-led globally cutting edge platforms where we connect buyers and sellers through our e-marketplace, e-auction and reverse auction.
             </p>
+            <div className="flex gap-4">
+              <a href="#" className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-purple-600 transition">
+                f
+              </a>
+              <a href="#" className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-purple-600 transition">
+                in
+              </a>
+              <a href="#" className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-purple-600 transition">
+                𝕏
+              </a>
+              <a href="#" className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-purple-600 transition">
+                ▶
+              </a>
+            </div>
           </div>
 
           <div>
-            <h4 className="text-lg font-semibold mb-4 text-[#FD9A00]">Quick Links</h4>
-            <ul className="space-y-2 text-gray-400">
-              <li><a href="#" className="hover:text-[#FD9A00] transition-colors">About Us</a></li>
-              <li><a href="#" className="hover:text-[#FD9A00] transition-colors">Why Choose Us</a></li>
-              <li><a href="#" className="hover:text-[#FD9A00] transition-colors">How It Works</a></li>
-              <li><a href="#" className="hover:text-[#FD9A00] transition-colors">Vendor Login</a></li>
+            <h4 className="text-xl font-bold mb-4">Quick Links</h4>
+            <ul className="space-y-3">
+              <li><a href="#" className="text-gray-400 hover:text-purple-400 transition">Home</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-purple-400 transition">About Us</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-purple-400 transition">Services</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-purple-400 transition">Contact</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-purple-400 transition">Support</a></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="text-lg font-semibold mb-4 text-[#FD9A00]">Support</h4>
-            <ul className="space-y-2 text-gray-400">
-              <li><a href="#" className="hover:text-[#FD9A00] transition-colors">Help Center</a></li>
-              <li><a href="#" className="hover:text-[#FD9A00] transition-colors">Contact Support</a></li>
-              <li><a href="#" className="hover:text-[#FD9A00] transition-colors">Documentation</a></li>
-              <li><a href="#" className="hover:text-[#FD9A00] transition-colors">API</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-lg font-semibold mb-4 text-[#FD9A00]">Legal</h4>
-            <ul className="space-y-2 text-gray-400">
-              <li><a href="#" className="hover:text-[#FD9A00] transition-colors">Privacy Policy</a></li>
-              <li><a href="#" className="hover:text-[#FD9A00] transition-colors">Terms of Service</a></li>
-              <li><a href="#" className="hover:text-[#FD9A00] transition-colors">Cookie Policy</a></li>
-              <li><a href="#" className="hover:text-[#FD9A00] transition-colors">Compliance</a></li>
+            <h4 className="text-xl font-bold mb-4">Services</h4>
+            <ul className="space-y-3">
+              <li><a href="#" className="text-gray-400 hover:text-purple-400 transition">Tender Search</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-purple-400 transition">Bid Management</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-purple-400 transition">Compliance</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-purple-400 transition">Analytics</a></li>
+              <li><a href="#" className="text-gray-400 hover:text-purple-400 transition">Training</a></li>
             </ul>
           </div>
         </div>
 
-        <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
-          <p>&copy; 2025 getbid E-Tendering Portal. All rights reserved. | Secure • Transparent • Efficient</p>
+        <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-gray-400 text-sm">© 2025 GenMall. All rights reserved.</p>
+          <div className="flex gap-6">
+            <a href="#" className="text-gray-400 hover:text-purple-400 text-sm transition">Privacy Policy</a>
+            <a href="#" className="text-gray-400 hover:text-purple-400 text-sm transition">Terms of Service</a>
+            <a href="#" className="text-gray-400 hover:text-purple-400 text-sm transition">Refund Policy</a>
+          </div>
         </div>
       </div>
     </footer>
   );
-};
+}
 
 export default Footer;

@@ -1,29 +1,28 @@
 import React from 'react';
 import Header from './Header';
 import HeroSection from './HeroSection';
-import VendorSubscriptionPlans from './VendorSubscriptionPlans';
-import PlanComparison from './PlanComparison';
-import ReadyToBid from './ReadyToBid';
+import PricingPlans from './PricingPlans';
 import WhyChooseUs from './WhyChooseUs';
-import Statistics from './Statistics';
-import SubscriptionForm from './SubscriptionForm';
-import FinalCTA from './FinalCTA';
+import AboutSection from './AboutSection';
 import Footer from './Footer';
+import FeaturesSection from './FeaturesSection';
+import ServicesSection from './ServicesSection';
+import GetInTouch from './GetInTouch';
 // import './index.css';
 
 function HomeMain() {
   return (
     <div className="App">
-      <Header />
+      {/* <Header /> */}
       <HeroSection />
-      <VendorSubscriptionPlans />
-      <PlanComparison />
-      <ReadyToBid />
+      <FeaturesSection />
+      <ServicesSection />
+     
+      <PricingPlans />
       <WhyChooseUs />
-      <Statistics />
-      <SubscriptionForm />
-      <FinalCTA />
-      <Footer />
+      <AboutSection />
+      <GetInTouch />
+      {/* <Footer /> */}
     </div>
   );
 }
