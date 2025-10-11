@@ -1,65 +1,92 @@
+import React from "react";
+
 function ServicesSection() {
   const services = [
     {
       title: "Tender Search & Discovery",
-      description: "Stay ahead of the competition with our comprehensive tender search tool. Access thousands of tenders from various industries and government bodies. Get real-time alerts, detailed tender information, and intelligent matching based on your business profile.",
-      bgColor: "from-yellow-50 to-orange-50",
-      imgBg: "bg-yellow-100"
+      description:
+        "We take a comprehensive approach to tender discovery starting from search algorithms and filters to tender categorization and alerts for private sector opportunities.",
+      imgUrl: "/images/why1.jpg",
     },
     {
       title: "Bid Management",
-      description: "Streamline your entire bidding process with our advanced management tools. Track deadlines, collaborate with team members, manage documents, and submit bids efficiently. Our platform ensures you never miss an opportunity and stay organized throughout the bidding cycle.",
-      bgColor: "from-blue-50 to-cyan-50",
-      imgBg: "bg-blue-100"
+      description:
+        "From concept to bid submission, GetBid covers the entire business tender management process for private companies and contractors...",
+      imgUrl: "/images/why2.jpg",
     },
     {
       title: "Document Management",
-      description: "Organize and secure all your bidding documents in one centralized location. Easy upload, version control, and quick access to certificates, company profiles, and past submissions. Ensure compliance and maintain a complete audit trail of all documentation.",
-      bgColor: "from-pink-50 to-purple-50",
-      imgBg: "bg-pink-100"
+      description:
+        "GetBid focuses on your document security by increasing the quality and quantity of our Document Services for private sector clients.",
+      imgUrl: "/images/why3.jpg",
     },
     {
       title: "Compliance Support",
-      description: "Navigate complex tender requirements with confidence. Our compliance tools help you understand regulations, maintain necessary certifications, and ensure all submissions meet specified criteria. Get expert guidance on documentation and regulatory requirements.",
-      bgColor: "from-blue-50 to-purple-50",
-      imgBg: "bg-blue-100"
+      description:
+        "Navigate complex tender requirements with confidence. Our compliance tools help you understand regulations, maintain certifications, and ensure submissions meet all criteria.",
+      imgUrl: "/images/why4.jpg",
     },
     {
       title: "Training & Support",
-      description: "Empower your team with comprehensive training programs and ongoing support. Learn best practices for tender preparation, bidding strategies, and platform utilization. Access expert consultants and resources to maximize your success rate.",
-      bgColor: "from-green-50 to-teal-50",
-      imgBg: "bg-green-100"
+      description:
+        "Empower your team with comprehensive training programs and ongoing support. Learn best practices for tender preparation, bidding strategies, and platform use.",
+      imgUrl: "/images/why5.jpg",
     },
     {
       title: "Analytics & Reporting",
-      description: "Make data-driven decisions with powerful analytics and reporting tools. Track your bidding performance, success rates, and ROI. Gain insights into market trends, competition analysis, and identify opportunities for improvement and growth.",
-      bgColor: "from-indigo-50 to-blue-50",
-      imgBg: "bg-indigo-900"
-    }
+      description:
+        "Make data-driven decisions with powerful analytics and reporting tools. Track your bidding performance, success rates, and ROI while analyzing market trends.",
+      imgUrl: "/images/why6.jpg",
+    },
   ];
 
   return (
-    <div className="bg-gradient-to-br from-blue-900 via-purple-900 to-green-700 py-20 px-6">
+    <div className="bg-gradient-to-r from-purple-700 via-indigo-700 to-teal-600 py-16 px-4">
       <div className="max-w-7xl mx-auto">
+        {/* Section Header */}
         <div className="text-center mb-12">
-          <p className="text-gray-200 mb-2">Why Choose US</p>
-          <h2 className="text-4xl font-bold text-white mb-4">Our Services</h2>
-          <p className="text-gray-200 max-w-2xl mx-auto">
-            The GenMall platform is the lowest priced enterprise, contractors, and businesses to build a strong tendering strategy
+          <p className="text-white/90 text-sm uppercase tracking-wide mb-2">
+            Why Choose Us
+          </p>
+          <h2 className="text-4xl font-bold text-white mb-3">Our Services</h2>
+          <p className="text-white/80 max-w-2xl mx-auto text-base">
+            GetBid provides comprehensive tender, bid, and document management
+            solutions for modern businesses and contractors.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6">
+        {/* Cards Grid */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {services.map((service, index) => (
-            <div key={index} className={`bg-gradient-to-br ${service.bgColor} rounded-2xl p-6 shadow-lg`}>
-              <div className={`${service.imgBg} rounded-xl h-40 mb-6`}></div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">{service.title}</h3>
-              <p className="text-gray-600 text-sm leading-relaxed mb-6">
+            <div
+              key={index}
+              className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 p-6 flex flex-col text-center"
+            >
+              {/* Title */}
+              <h3 className="text-lg font-bold text-gray-900 mb-4">
+                {service.title}
+              </h3>
+
+              {/* Image */}
+              <div className="w-full h-48 overflow-hidden rounded-lg mb-5">
+                <img
+                  src={service.imgUrl}
+                  alt={service.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              {/* Description */}
+              <p className="text-gray-600 text-sm leading-relaxed mb-6 flex-grow">
                 {service.description}
               </p>
-              <button className="bg-purple-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-purple-700 transition w-full">
-                Read more
-              </button>
+
+              {/* Button - perfectly aligned */}
+              <div className="mt-auto flex justify-center">
+                <button className="bg-purple-700 text-white w-36 py-2 rounded-md font-semibold hover:bg-purple-800 transition-colors">
+                  Read More
+                </button>
+              </div>
             </div>
           ))}
         </div>
