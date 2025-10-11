@@ -26,7 +26,7 @@ function App() {
     <Router>
       <div className="min-h-screen flex flex-col bg-gray-50">
         {/* Header - shown on every page */}
-        <Header />
+        {/* <Header /> */}
 
         {/* Main Page Content */}
         <main className="flex-grow">
@@ -51,7 +51,7 @@ function App() {
         </main>
 
         {/* Footer - shown on every page */}
-        <Footer />
+        {/* <Footer /> */}
       </div>
     </Router>
   );

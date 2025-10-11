@@ -13,7 +13,7 @@ import GetInTouch from './GetInTouch';
 function HomeMain() {
   return (
     <div className="App">
-      {/* <Header /> */}
+      <Header />
       <HeroSection />
       <FeaturesSection />
       <ServicesSection />
@@ -22,7 +22,7 @@ function HomeMain() {
       <WhyChooseUs />
       <AboutSection />
       <GetInTouch />
-      {/* <Footer /> */}
+      <Footer />
     </div>
   );
 }
