@@ -26,7 +26,7 @@ const AnalyticsReporting = () => {
           </div>
           <div>
             <img
-              src="https://images.pexels.com/photos/590022/pexels-photo-590022.jpeg?auto=compress&cs=tinysrgb&w=800"
+              src="/images/ana1.jpg"
               alt="Analytics Dashboard"
               className="rounded-2xl shadow-2xl w-full"
             />
@@ -168,7 +168,7 @@ const AnalyticsReporting = () => {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <img
-                src="https://images.pexels.com/photos/669615/pexels-photo-669615.jpeg?auto=compress&cs=tinysrgb&w=800"
+                src="/images/ana2.jpg"
                 alt="Data Analytics"
                 className="rounded-2xl shadow-2xl w-full"
               />

@@ -26,35 +26,17 @@ function TenderSearch() {
           </div>
 
           {/* Right Mockup */}
-          <div className="relative">
-            <div className="bg-gradient-to-br from-blue-900 to-blue-700 rounded-2xl shadow-2xl p-8 transform lg:scale-105">
-              <div className="bg-white rounded-lg p-4 shadow-lg">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="flex gap-1">
-                    <div className="w-3 h-3 rounded-full bg-red-400"></div>
-                    <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-                    <div className="w-3 h-3 rounded-full bg-green-400"></div>
-                  </div>
-                  <div className="flex-1 bg-gray-100 rounded px-3 py-1 text-xs text-gray-600">Dashboard</div>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex gap-2">
-                    <div className="bg-blue-100 rounded p-2 flex-1 h-16"></div>
-                    <div className="bg-green-100 rounded p-2 flex-1 h-16"></div>
-                  </div>
-                  <div className="bg-gray-50 rounded p-3 space-y-2">
-                    <div className="h-2 bg-blue-200 rounded w-3/4"></div>
-                    <div className="h-2 bg-blue-200 rounded w-1/2"></div>
-                    <div className="h-2 bg-blue-200 rounded w-5/6"></div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="bg-purple-50 rounded p-2 h-12"></div>
-                    <div className="bg-pink-50 rounded p-2 h-12"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+         {/* Right Image Section */}
+<div className="relative">
+  <div className="rounded-2xl overflow-hidden shadow-2xl transform lg:scale-105">
+    <img
+      src="/images/tender1.jpg" // <-- replace with your image path
+      alt="Dashboard Preview"
+      className="w-full h-auto object-cover"
+    />
+  </div>
+</div>
+
         </div>
       </section>
 
@@ -266,29 +248,15 @@ function TenderSearch() {
             </div>
 
             {/* Right Image */}
-            <div className="relative">
-              <div className="bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl p-8">
-                <div className="bg-white rounded-xl shadow-2xl p-6 space-y-4">
-                  <div className="flex gap-4">
-                    <div className="flex-1 bg-blue-500 rounded-lg h-32"></div>
-                    <div className="flex-1 space-y-2">
-                      <div className="bg-green-400 rounded-lg h-15"></div>
-                      <div className="bg-purple-400 rounded-lg h-15"></div>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="bg-orange-300 rounded-lg h-20"></div>
-                    <div className="bg-cyan-300 rounded-lg h-20"></div>
-                    <div className="bg-pink-300 rounded-lg h-20"></div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="h-3 bg-gray-200 rounded w-full"></div>
-                    <div className="h-3 bg-gray-200 rounded w-4/5"></div>
-                    <div className="h-3 bg-gray-200 rounded w-3/5"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div className="relative">
+  <div className="rounded-2xl overflow-hidden shadow-2xl transform lg:scale-105">
+    <img
+      src="/images/tender2.jpg" // <-- replace with your image path
+      alt="Dashboard Preview"
+      className="w-full h-auto object-cover"
+    />
+  </div>
+</div>
           </div>
         </div>
       </section>
@@ -314,52 +282,7 @@ function TenderSearch() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-gray-300 px-6 py-12">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-8">
-          {/* Brand */}
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <File className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-white font-bold text-xl">E-Tendering Portal</span>
-            </div>
-            <p className="text-sm leading-relaxed">
-              Advanced tender search and discovery platform helping businesses find the right government opportunities with AI-powered matching and real-time alerts.
-            </p>
-          </div>
-
-          {/* Quick Links */}
-          <div>
-            <h4 className="text-white font-semibold mb-4">Quick Links</h4>
-            <ul className="space-y-2 text-sm">
-              <li><a href="#" className="hover:text-blue-400 transition-colors">Home</a></li>
-              <li><a href="#" className="hover:text-blue-400 transition-colors">Bid Management</a></li>
-              <li><a href="#" className="hover:text-blue-400 transition-colors">Document Management</a></li>
-              <li><a href="#" className="hover:text-blue-400 transition-colors">Login</a></li>
-            </ul>
-          </div>
-
-          {/* Contact */}
-          <div>
-            <h4 className="text-white font-semibold mb-4">Contact Us</h4>
-            <ul className="space-y-3 text-sm">
-              <li className="flex items-center gap-2">
-                <Phone className="w-4 h-4" />
-                <span>+91 91001 55553</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Mail className="w-4 h-4" />
-                <span>info@etenderingportal.tech</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="max-w-7xl mx-auto mt-8 pt-8 border-t border-gray-800 text-center text-sm">
-          <p>E-Tendering Portal © 2024 | All Rights Reserved</p>
-        </div>
-      </footer>
+   
     </div>
   )
 }

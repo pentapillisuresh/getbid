@@ -26,7 +26,7 @@ const TrainingSupport = () => {
           </div>
           <div>
             <img
-              src="https://images.pexels.com/photos/1181406/pexels-photo-1181406.jpeg?auto=compress&cs=tinysrgb&w=800"
+              src="/images/tra1.jpg"
               alt="Training Session"
               className="rounded-2xl shadow-2xl w-full"
             />
@@ -350,7 +350,7 @@ const TrainingSupport = () => {
 
             <div>
               <img
-                src="https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=800"
+                src="/images/tra2.jpg"
                 alt="Success Team"
                 className="rounded-2xl shadow-2xl w-full"
               />

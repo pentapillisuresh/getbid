@@ -26,7 +26,7 @@ const BidManagement = () => {
           </div>
           <div>
             <img
-              src="https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg?auto=compress&cs=tinysrgb&w=800"
+              src="/images/bid1.jpg"
               alt="Bid Management Dashboard"
               className="rounded-2xl shadow-2xl w-full"
             />
@@ -168,7 +168,7 @@ const BidManagement = () => {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <img
-                src="https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=800"
+                src="/images/bid2.jpg"
                 alt="Successful Team"
                 className="rounded-2xl shadow-2xl w-full"
               />

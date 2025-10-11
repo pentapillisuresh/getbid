@@ -12,7 +12,7 @@ function CTASection() {
             Ready to Transform Your Tendering Success?
           </h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Contact our expert team today and discover how GenMall can help you win more tenders and grow your business.
+            Contact our expert team today and discover how Getbid can help you win more tenders and grow your business.
           </p>
         </div>
 
@@ -38,7 +38,7 @@ function CTASection() {
                 </div>
                 <div>
                   <p className="font-semibold text-gray-900">Email</p>
-                  <p className="text-gray-600">contact@genmall.in</p>
+                  <p className="text-gray-600">contact@Getbid.in</p>
                 </div>
               </div>
 
@@ -49,8 +49,8 @@ function CTASection() {
                 <div>
                   <p className="font-semibold text-gray-900">Address</p>
                   <p className="text-gray-600">
-                    A-06, Sector 60,<br/>
-                    Noida, Uttar Pradesh<br/>
+                    A-06, Sector 60,<br />
+                    Noida, Uttar Pradesh<br />
                     India 201301
                   </p>
                 </div>

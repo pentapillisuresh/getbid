@@ -26,7 +26,7 @@ const DocumentManagement = () => {
           </div>
           <div>
             <img
-              src="https://images.pexels.com/photos/6693661/pexels-photo-6693661.jpeg?auto=compress&cs=tinysrgb&w=800"
+              src="/images/doc1.jpg"
               alt="Document Management"
               className="rounded-2xl shadow-2xl w-full"
             />
@@ -225,7 +225,7 @@ const DocumentManagement = () => {
 
             <div>
               <img
-                src="https://images.pexels.com/photos/60504/security-protection-anti-virus-software-60504.jpeg?auto=compress&cs=tinysrgb&w=800"
+                src="/images/doc2.jpg"
                 alt="Security"
                 className="rounded-2xl shadow-2xl w-full"
               />

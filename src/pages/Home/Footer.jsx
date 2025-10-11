@@ -10,7 +10,7 @@ function Footer() {
           <div>
             <div className="flex items-center gap-3 mb-4">
               {/* Replace with your actual logo image if you have one */}
-              <img src="images/logo.jpeg" alt="GetBid Logo" className="w-20 h-20 object-contain" />
+              <img src="/images/logo.jpeg" alt="GetBid Logo" className="w-20 h-20 object-contain" />
               <h3 className="text-2xl font-bold">GetBid</h3>
             </div>
             <p className="text-gray-400 mb-6 leading-relaxed">

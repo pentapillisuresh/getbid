@@ -70,10 +70,10 @@ const Header = () => {
           </button>
 
           {/* About */}
-          <button
-            onClick={() => navigate("/about")}
+     <button
+            onClick={() => scrollToSection("about")}
             className={`font-medium transition ${
-              isActive("/about")
+              location.search.includes("scroll=about")
                 ? "text-[#6B21A8]"
                 : "text-gray-800 hover:text-[#6B21A8]"
             }`}

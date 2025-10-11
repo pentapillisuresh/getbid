@@ -26,7 +26,7 @@ const ComplianceSupport = () => {
           </div>
           <div>
             <img
-              src="https://images.pexels.com/photos/7688336/pexels-photo-7688336.jpeg?auto=compress&cs=tinysrgb&w=800"
+              src="/images/sup1.jpg"
               alt="Compliance Office"
               className="rounded-2xl shadow-2xl w-full"
             />
@@ -222,7 +222,7 @@ const ComplianceSupport = () => {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <img
-                src="https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=800"
+                src="/images/sup2.jpg"
                 alt="Compliance Team"
                 className="rounded-2xl shadow-2xl w-full"
               />
