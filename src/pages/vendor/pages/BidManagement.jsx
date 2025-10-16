@@ -88,6 +88,20 @@ const BidManagement = () => {
     };
   };
 
+  // try to read stored user id from localStorage (robust to several id field names)
+  const getStoredUserId = () => {
+    try {
+      if (typeof window === "undefined" || !window.localStorage) return null;
+      const raw = window.localStorage.getItem("user");
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object") return null;
+      return parsed._id || parsed.id || parsed.userId || null;
+    } catch (e) {
+      return null;
+    }
+  };
+
   const filteredBids = bids.map(normalize).filter((bid) => {
     const matchesTab =
       activeTab === "all" || (bid.status && bid.status === activeTab);
@@ -106,8 +120,12 @@ const BidManagement = () => {
       setLoading(true);
       setError(null);
       try {
+        const userId = getStoredUserId();
+        const queryParams = { page: p, limit };
+        if (userId) queryParams.user = userId;
+
         const resp = await api.get("/v1/bids", {
-          queryParams: { page: p, limit },
+          queryParams,
         });
         // expected resp.data is array
         const data = resp && resp.data ? resp.data : [];

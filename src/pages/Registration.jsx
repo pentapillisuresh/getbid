@@ -1,11 +1,26 @@
-import { useState } from 'react';
-import { Building2, User, Shield, ChevronRight, ArrowLeft, RefreshCw, CheckCircle, Send, Phone, Check } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from "react";
+import {
+  Building2,
+  User,
+  Shield,
+  Eye,
+  EyeOff,
+  ChevronRight,
+  ArrowLeft,
+  RefreshCw,
+  CheckCircle,
+  Send,
+  Phone,
+  Check,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import api from "../services/apiService";
+import toastService from "../services/toastService";
 const Registration = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
-  const [registrationType, setRegistrationType] = useState('vendor');
-  const [entityType, setEntityType] = useState('individual');
+  const [registrationType, setRegistrationType] = useState("vendor");
+  const [entityType, setEntityType] = useState("individual");
   const [showPanOtp, setShowPanOtp] = useState(false);
   const [panVerified, setPanVerified] = useState(false);
   const [showGstOtp, setShowGstOtp] = useState(false);
@@ -14,140 +29,155 @@ const Registration = () => {
   const [showMobileOtp, setShowMobileOtp] = useState(false);
   const [emailVerified, setEmailVerified] = useState(false);
   const [mobileVerified, setMobileVerified] = useState(false);
-  const [captchaCode] = useState('8K2M');
+  const [captchaCode] = useState("8K2M");
+  const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
-    panNumber: '',
-    panOtp: '',
-    gstNumber: '',
-    gstOtp: '',
-    firstName: 'Rajesh',
-    lastName: 'Kumar',
-    fatherName: 'Ramesh Kumar',
-    dateOfBirth: '1985-06-15',
-    address: '123, MG Road, Commercial Complex',
-    city: 'Mumbai',
-    state: 'Maharashtra',
-    email: '',
-    mobile: '',
-    alternatePhone: '',
-    website: '',
-    emailOtp: '',
-    mobileOtp: '',
-    businessCategory: '',
-    annualTurnover: '',
-    experience: '',
-    captcha: '',
+    panNumber: "",
+    panOtp: "",
+    gstNumber: "",
+    gstOtp: "",
+    firstName: "Rajesh",
+    lastName: "Kumar",
+    fatherName: "Ramesh Kumar",
+    dateOfBirth: "1985-06-15",
+    address: "123, MG Road, Commercial Complex",
+    city: "Mumbai",
+    state: "Maharashtra",
+    email: "",
+    mobile: "",
+    alternatePhone: "",
+    website: "",
+    password: "",
+    emailOtp: "",
+    mobileOtp: "",
+    businessCategory: "",
+    annualTurnover: "",
+    experience: "",
+    captcha: "",
     agreeTerms: false,
-    agreePrivacy: false
+    agreePrivacy: false,
   });
+  const [loading, setLoading] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
 
-    if (name === 'panOtp' || name === 'emailOtp' || name === 'mobileOtp' || name === 'gstOtp') {
+    if (
+      name === "panOtp" ||
+      name === "emailOtp" ||
+      name === "mobileOtp" ||
+      name === "gstOtp"
+    ) {
       if (value.length <= 6 && /^\d*$/.test(value)) {
-        setFormData(prev => ({ ...prev, [name]: value }));
+        setFormData((prev) => ({ ...prev, [name]: value }));
       }
       return;
     }
 
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
   const sendPanOtp = () => {
     if (formData.panNumber.length === 10) {
       setShowPanOtp(true);
-      alert('OTP sent to your registered mobile number');
+      alert("OTP sent to your registered mobile number");
     } else {
-      alert('Please enter a valid PAN number');
+      alert("Please enter a valid PAN number");
     }
   };
 
   const verifyPanOtp = () => {
-    if (formData.panOtp === '123456') {
+    if (formData.panOtp === "123456") {
       setPanVerified(true);
       setShowPanOtp(false);
-      alert('PAN verified successfully!');
+      alert("PAN verified successfully!");
     } else {
-      alert('Invalid OTP. Please try again.');
+      alert("Invalid OTP. Please try again.");
     }
   };
 
   const sendGstOtp = () => {
     if (formData.gstNumber.length === 15) {
       setShowGstOtp(true);
-      alert('OTP sent to your registered mobile number');
+      alert("OTP sent to your registered mobile number");
     } else {
-      alert('Please enter a valid GST number');
+      alert("Please enter a valid GST number");
     }
   };
 
   const verifyGstOtp = () => {
-    if (formData.gstOtp === '123456') {
+    if (formData.gstOtp === "123456") {
       setGstVerified(true);
       setShowGstOtp(false);
-      alert('GST verified successfully!');
+      alert("GST verified successfully!");
     } else {
-      alert('Invalid OTP. Please try again.');
+      alert("Invalid OTP. Please try again.");
     }
   };
 
   const sendEmailOtp = () => {
     if (formData.email) {
       setShowEmailOtp(true);
-      alert('OTP sent to your email address');
+      alert("OTP sent to your email address");
     } else {
-      alert('Please enter your email address');
+      alert("Please enter your email address");
     }
   };
 
   const verifyEmailOtp = () => {
-    if (formData.emailOtp === '123456') {
+    if (formData.emailOtp === "123456") {
       setEmailVerified(true);
       setShowEmailOtp(false);
-      alert('Email verified successfully!');
+      alert("Email verified successfully!");
     } else {
-      alert('Invalid OTP. Please try again.');
+      alert("Invalid OTP. Please try again.");
     }
   };
 
   const sendMobileOtp = () => {
     if (formData.mobile.length === 10) {
       setShowMobileOtp(true);
-      alert('OTP sent to your mobile number');
+      alert("OTP sent to your mobile number");
     } else {
-      alert('Please enter a valid 10-digit mobile number');
+      alert("Please enter a valid 10-digit mobile number");
     }
   };
 
   const verifyMobileOtp = () => {
-    if (formData.mobileOtp === '123456') {
+    if (formData.mobileOtp === "123456") {
       setMobileVerified(true);
       setShowMobileOtp(false);
-      alert('Mobile number verified successfully!');
+      alert("Mobile number verified successfully!");
     } else {
-      alert('Invalid OTP. Please try again.');
+      alert("Invalid OTP. Please try again.");
     }
   };
 
   const handleNext = () => {
     if (currentStep === 1) {
-      if (entityType === 'individual' && !panVerified) {
-        alert('Please verify your PAN number first');
+      if (entityType === "individual" && !panVerified) {
+        alert("Please verify your PAN number first");
         return;
       }
-      if (entityType === 'company' && !gstVerified) {
-        alert('Please verify your GST number first');
+      if (entityType === "company" && !gstVerified) {
+        alert("Please verify your GST number first");
         return;
       }
     }
-    if (currentStep === 2 && (!emailVerified || !mobileVerified)) {
-      alert('Please verify both email and mobile number');
-      return;
+    if (currentStep === 2) {
+      if (!emailVerified || !mobileVerified) {
+        alert("Please verify both email and mobile number");
+        return;
+      }
+      // Ensure user has provided a password (or it will be auto-generated at submit)
+      if (!formData.password || formData.password.length < 8) {
+        alert("Please enter a password of at least 8 characters");
+        return;
+      }
     }
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
@@ -160,26 +190,104 @@ const Registration = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const generateTempPassword = (length = 12) => {
+    const chars =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=";
+    let pw = "";
+    for (let i = 0; i < length; i++)
+      pw += chars.charAt(Math.floor(Math.random() * chars.length));
+    return pw;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (formData.captcha === captchaCode && formData.agreeTerms && formData.agreePrivacy) {
-      alert('Registration completed successfully!');
-         setTimeout(() => {
-        navigate('/choose-login-type');
-      }, 800);
-    } else {
-      if (formData.captcha !== captchaCode) {
-        alert('Invalid captcha code');
+
+    if (formData.captcha !== captchaCode) {
+      toastService.showError("Invalid captcha code");
+      return;
+    }
+    if (!formData.agreeTerms || !formData.agreePrivacy) {
+      toastService.showError("Please accept the terms and conditions");
+      return;
+    }
+
+    // Build payload according to API spec
+    const name =
+      [formData.firstName, formData.lastName]
+        .filter(Boolean)
+        .join(" ")
+        .trim() ||
+      formData.firstName ||
+      formData.lastName ||
+      "";
+    const password =
+      formData.password && formData.password.length >= 8
+        ? formData.password
+        : generateTempPassword(); // prefer user password if provided
+
+    const payload = {
+      name,
+      email: formData.email || undefined,
+      phoneNumber: formData.mobile || undefined,
+      role: registrationType === "client" ? "client" : "vendor",
+      entity: entityType === "company" ? "company" : "individual",
+      PAN:
+        entityType === "individual"
+          ? formData.panNumber || undefined
+          : undefined,
+      GST:
+        entityType === "company" ? formData.gstNumber || undefined : undefined,
+      alternativePhoneNumber: formData.alternatePhone || undefined,
+      website: formData.website || undefined,
+      password,
+      businessInfo: {
+        category: formData.businessCategory || undefined,
+        annualTurnover: formData.annualTurnover || undefined,
+        experience: formData.experience || undefined,
+      },
+      deviceDetails: {
+        deviceType: typeof navigator !== "undefined" ? "web" : "web",
+        deviceName:
+          (typeof navigator !== "undefined" &&
+            (navigator.platform || navigator.userAgent)) ||
+          "web-client",
+      },
+    };
+
+    try {
+      setLoading(true);
+      const res = await api.post("/auth/signup", {
+        body: payload,
+        // ask api service to show toasts based on response message keys
+        showToasts: false,
+      });
+
+      // If backend returns a message, show it; otherwise show generic success
+      if (res && (res.message || res.msg)) {
+        toastService.showSuccess(res.message || res.msg);
       } else {
-        alert('Please accept the terms and conditions');
+        toastService.showSuccess(
+          "Registration completed successfully. Please check your email."
+        );
       }
+
+      // navigate to login/choose page
+      setTimeout(() => navigate("/choose-login-type"), 800);
+    } catch (err) {
+      const message =
+        (err && err.data && err.data.message) ||
+        err.message ||
+        "Registration failed";
+      toastService.showError(message);
+    } finally {
+      setLoading(false);
     }
   };
 
   const stepTitles = {
-    1: 'Choose Registration Type',
-    2: 'Contact & Business Information',
-    3: 'Final Verification'
+    1: "Choose Registration Type",
+    2: "Contact & Business Information",
+    3: "Final Verification",
   };
 
   return (
@@ -187,24 +295,34 @@ const Registration = () => {
       <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
           <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-6">
-            <h1 className="text-2xl font-bold text-white text-center mb-4">Registration Portal</h1>
+            <h1 className="text-2xl font-bold text-white text-center mb-4">
+              Registration Portal
+            </h1>
 
             <div className="flex items-center justify-center">
               {[1, 2, 3].map((step) => (
                 <div key={step} className="flex items-center">
-                  <div className={`flex items-center justify-center w-10 h-10 rounded-full font-semibold ${
+                  <div
+                    className={`flex items-center justify-center w-10 h-10 rounded-full font-semibold ${
                       step === currentStep
-                        ? 'bg-white text-blue-600 shadow-lg'
+                        ? "bg-white text-blue-600 shadow-lg"
                         : step < currentStep
-                          ? 'bg-blue-200 text-blue-700'
-                          : 'bg-blue-400 text-blue-100'
-                    }`}>
-                    {step < currentStep ? <CheckCircle className="w-5 h-5" /> : step}
+                        ? "bg-blue-200 text-blue-700"
+                        : "bg-blue-400 text-blue-100"
+                    }`}
+                  >
+                    {step < currentStep ? (
+                      <CheckCircle className="w-5 h-5" />
+                    ) : (
+                      step
+                    )}
                   </div>
                   {step < 3 && (
-                    <div className={`w-16 h-1 mx-2 rounded ${
-                        step < currentStep ? 'bg-blue-200' : 'bg-blue-400'
-                      }`} />
+                    <div
+                      className={`w-16 h-1 mx-2 rounded ${
+                        step < currentStep ? "bg-blue-200" : "bg-blue-400"
+                      }`}
+                    />
                   )}
                 </div>
               ))}
@@ -219,80 +337,92 @@ const Registration = () => {
             {currentStep === 1 && (
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Choose Registration Type</h3>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                    Choose Registration Type
+                  </h3>
                   <div className="grid grid-cols-2 gap-4">
                     <button
-                      onClick={() => setRegistrationType('vendor')}
+                      onClick={() => setRegistrationType("vendor")}
                       className={`p-6 rounded-xl border-2 transition-all ${
-                          registrationType === 'vendor'
-                            ? 'border-blue-500 bg-blue-50 text-blue-700'
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
+                        registrationType === "vendor"
+                          ? "border-blue-500 bg-blue-50 text-blue-700"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
                     >
                       <Building2 className="w-8 h-8 mx-auto mb-3 text-blue-600" />
                       <div className="font-semibold mb-1">Vendor</div>
-                      <div className="text-xs text-gray-600">Register as vendor</div>
+                      <div className="text-xs text-gray-600">
+                        Register as vendor
+                      </div>
                     </button>
 
                     <button
-                      onClick={() => setRegistrationType('client')}
+                      onClick={() => setRegistrationType("client")}
                       className={`p-6 rounded-xl border-2 transition-all ${
-                          registrationType === 'client'
-                            ? 'border-blue-500 bg-blue-50 text-blue-700'
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
+                        registrationType === "client"
+                          ? "border-blue-500 bg-blue-50 text-blue-700"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
                     >
                       <Building2 className="w-8 h-8 mx-auto mb-3 text-blue-600" />
                       <div className="font-semibold mb-1">Client</div>
-                      <div className="text-xs text-gray-600">Register as buyer</div>
+                      <div className="text-xs text-gray-600">
+                        Register as buyer
+                      </div>
                     </button>
                   </div>
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Entity Type</h3>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                    Entity Type
+                  </h3>
                   <div className="grid grid-cols-2 gap-4">
                     <button
                       onClick={() => {
-                        setEntityType('individual');
+                        setEntityType("individual");
                         setPanVerified(false);
                         setShowPanOtp(false);
                         setGstVerified(false);
                         setShowGstOtp(false);
                       }}
                       className={`p-6 rounded-xl border-2 transition-all ${
-                          entityType === 'individual'
-                            ? 'border-gray-500 bg-gray-50'
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
+                        entityType === "individual"
+                          ? "border-gray-500 bg-gray-50"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
                     >
                       <User className="w-8 h-8 mx-auto mb-3 text-gray-600" />
                       <div className="font-semibold mb-1">Individual</div>
-                      <div className="text-xs text-gray-600">Register with PAN</div>
+                      <div className="text-xs text-gray-600">
+                        Register with PAN
+                      </div>
                     </button>
 
                     <button
                       onClick={() => {
-                        setEntityType('company');
+                        setEntityType("company");
                         setPanVerified(false);
                         setShowPanOtp(false);
                         setGstVerified(false);
                         setShowGstOtp(false);
                       }}
                       className={`p-6 rounded-xl border-2 transition-all ${
-                          entityType === 'company'
-                            ? 'border-gray-500 bg-gray-50'
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
+                        entityType === "company"
+                          ? "border-gray-500 bg-gray-50"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
                     >
                       <Building2 className="w-8 h-8 mx-auto mb-3 text-gray-600" />
                       <div className="font-semibold mb-1">Company</div>
-                      <div className="text-xs text-gray-600">Register with GST</div>
+                      <div className="text-xs text-gray-600">
+                        Register with GST
+                      </div>
                     </button>
                   </div>
                 </div>
 
-                {entityType === 'individual' ? (
+                {entityType === "individual" ? (
                   <div className="bg-gray-50 rounded-xl p-4">
                     <label className="block text-sm font-semibold text-gray-700 mb-3">
                       PAN Number *
@@ -352,7 +482,9 @@ const Registration = () => {
                       <div className="mt-3 bg-blue-50 border-2 border-blue-200 rounded-lg p-3">
                         <div className="flex items-center gap-2 text-blue-700">
                           <CheckCircle className="w-5 h-5" />
-                          <span className="font-semibold">PAN verified successfully!</span>
+                          <span className="font-semibold">
+                            PAN verified successfully!
+                          </span>
                         </div>
                       </div>
                     )}
@@ -417,7 +549,9 @@ const Registration = () => {
                       <div className="mt-3 bg-blue-50 border-2 border-blue-200 rounded-lg p-3">
                         <div className="flex items-center gap-2 text-blue-700">
                           <CheckCircle className="w-5 h-5" />
-                          <span className="font-semibold">GST verified successfully!</span>
+                          <span className="font-semibold">
+                            GST verified successfully!
+                          </span>
                         </div>
                       </div>
                     )}
@@ -431,15 +565,22 @@ const Registration = () => {
                 <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
                   <div className="flex items-center gap-2 text-blue-700">
                     <CheckCircle className="w-5 h-5" />
-                    <span className="font-semibold">{entityType === 'individual' ? 'PAN' : 'GST'} verified! Details auto-filled.</span>
+                    <span className="font-semibold">
+                      {entityType === "individual" ? "PAN" : "GST"} verified!
+                      Details auto-filled.
+                    </span>
                   </div>
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Auto-filled Details</h3>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                    Auto-filled Details
+                  </h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-semibold text-gray-700 mb-2">First Name</label>
+                      <label className="block text-xs font-semibold text-gray-700 mb-2">
+                        First Name
+                      </label>
                       <input
                         type="text"
                         value={formData.firstName}
@@ -448,7 +589,9 @@ const Registration = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-gray-700 mb-2">Last Name</label>
+                      <label className="block text-xs font-semibold text-gray-700 mb-2">
+                        Last Name
+                      </label>
                       <input
                         type="text"
                         value={formData.lastName}
@@ -457,7 +600,9 @@ const Registration = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-gray-700 mb-2">Father's Name</label>
+                      <label className="block text-xs font-semibold text-gray-700 mb-2">
+                        Father's Name
+                      </label>
                       <input
                         type="text"
                         value={formData.fatherName}
@@ -466,7 +611,9 @@ const Registration = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-gray-700 mb-2">Date of Birth</label>
+                      <label className="block text-xs font-semibold text-gray-700 mb-2">
+                        Date of Birth
+                      </label>
                       <input
                         type="date"
                         value={formData.dateOfBirth}
@@ -475,7 +622,9 @@ const Registration = () => {
                       />
                     </div>
                     <div className="col-span-2">
-                      <label className="block text-xs font-semibold text-gray-700 mb-2">Address</label>
+                      <label className="block text-xs font-semibold text-gray-700 mb-2">
+                        Address
+                      </label>
                       <input
                         type="text"
                         value={formData.address}
@@ -484,7 +633,9 @@ const Registration = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-gray-700 mb-2">City</label>
+                      <label className="block text-xs font-semibold text-gray-700 mb-2">
+                        City
+                      </label>
                       <input
                         type="text"
                         value={formData.city}
@@ -493,7 +644,9 @@ const Registration = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-gray-700 mb-2">State</label>
+                      <label className="block text-xs font-semibold text-gray-700 mb-2">
+                        State
+                      </label>
                       <input
                         type="text"
                         value={formData.state}
@@ -505,13 +658,21 @@ const Registration = () => {
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Contact Information</h3>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                    Contact Information
+                  </h3>
 
                   <div className="space-y-4">
-                    <div className={`p-4 rounded-xl border-2 ${
-                        emailVerified ? 'border-blue-200 bg-blue-50' : 'border-gray-200 bg-gray-50'
-                      }`}>
-                      <label className="block text-xs font-semibold text-gray-700 mb-2">Email Address *</label>
+                    <div
+                      className={`p-4 rounded-xl border-2 ${
+                        emailVerified
+                          ? "border-blue-200 bg-blue-50"
+                          : "border-gray-200 bg-gray-50"
+                      }`}
+                    >
+                      <label className="block text-xs font-semibold text-gray-700 mb-2">
+                        Email Address *
+                      </label>
                       <div className="flex gap-2 mb-3">
                         <input
                           type="email"
@@ -570,10 +731,16 @@ const Registration = () => {
                       )}
                     </div>
 
-                    <div className={`p-4 rounded-xl border-2 ${
-                        mobileVerified ? 'border-blue-200 bg-blue-50' : 'border-gray-200 bg-gray-50'
-                      }`}>
-                      <label className="block text-xs font-semibold text-gray-700 mb-2">Mobile Number *</label>
+                    <div
+                      className={`p-4 rounded-xl border-2 ${
+                        mobileVerified
+                          ? "border-blue-200 bg-blue-50"
+                          : "border-gray-200 bg-gray-50"
+                      }`}
+                    >
+                      <label className="block text-xs font-semibold text-gray-700 mb-2">
+                        Mobile Number *
+                      </label>
                       <div className="flex gap-2 mb-3">
                         <input
                           type="tel"
@@ -634,7 +801,9 @@ const Registration = () => {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-2">Alternate Phone</label>
+                        <label className="block text-xs font-semibold text-gray-700 mb-2">
+                          Alternate Phone
+                        </label>
                         <input
                           type="tel"
                           name="alternatePhone"
@@ -645,7 +814,9 @@ const Registration = () => {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-2">Website</label>
+                        <label className="block text-xs font-semibold text-gray-700 mb-2">
+                          Website
+                        </label>
                         <input
                           type="url"
                           name="website"
@@ -656,14 +827,52 @@ const Registration = () => {
                         />
                       </div>
                     </div>
+
+                    <div className="mt-4 col-span-2">
+                      <label className="block text-xs font-semibold text-gray-700 mb-2">
+                        Choose a Password *
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          name="password"
+                          value={formData.password}
+                          onChange={handleInputChange}
+                          placeholder="At least 8 characters"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm pr-10"
+                          required
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((s) => !s)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 p-1"
+                          aria-label={
+                            showPassword ? "Hide password" : "Show password"
+                          }
+                        >
+                          {showPassword ? (
+                            <EyeOff className="w-5 h-5" />
+                          ) : (
+                            <Eye className="w-5 h-5" />
+                          )}
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2">
+                        Use a strong password. Minimum 8 characters recommended.
+                      </p>
+                    </div>
                   </div>
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Business Information</h3>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                    Business Information
+                  </h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-semibold text-gray-700 mb-2">Business Category *</label>
+                      <label className="block text-xs font-semibold text-gray-700 mb-2">
+                        Business Category *
+                      </label>
                       <select
                         name="businessCategory"
                         value={formData.businessCategory}
@@ -679,7 +888,9 @@ const Registration = () => {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-gray-700 mb-2">Annual Turnover</label>
+                      <label className="block text-xs font-semibold text-gray-700 mb-2">
+                        Annual Turnover
+                      </label>
                       <select
                         name="annualTurnover"
                         value={formData.annualTurnover}
@@ -695,7 +906,9 @@ const Registration = () => {
                     </div>
                   </div>
                   <div className="mt-4">
-                    <label className="block text-xs font-semibold text-gray-700 mb-2">Experience</label>
+                    <label className="block text-xs font-semibold text-gray-700 mb-2">
+                      Experience
+                    </label>
                     <textarea
                       name="experience"
                       value={formData.experience}
@@ -715,8 +928,12 @@ const Registration = () => {
                   <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <CheckCircle className="w-10 h-10 text-blue-600" />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-800 mb-2">Almost Done!</h3>
-                  <p className="text-gray-600">Complete verification and accept terms</p>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                    Almost Done!
+                  </h3>
+                  <p className="text-gray-600">
+                    Complete verification and accept terms
+                  </p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -738,7 +955,10 @@ const Registration = () => {
                         <div className="bg-gray-200 px-4 py-3 rounded-lg font-mono font-bold text-gray-700 text-lg tracking-wider">
                           {captchaCode}
                         </div>
-                        <button type="button" className="p-3 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg">
+                        <button
+                          type="button"
+                          className="p-3 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg"
+                        >
                           <RefreshCw className="w-5 h-5" />
                         </button>
                       </div>
@@ -756,7 +976,14 @@ const Registration = () => {
                         required
                       />
                       <span className="text-sm text-gray-700">
-                        I agree to the <button type="button" className="text-blue-600 underline font-semibold">Terms and Conditions</button> *
+                        I agree to the{" "}
+                        <button
+                          type="button"
+                          className="text-blue-600 underline font-semibold"
+                        >
+                          Terms and Conditions
+                        </button>{" "}
+                        *
                       </span>
                     </label>
 
@@ -770,7 +997,14 @@ const Registration = () => {
                         required
                       />
                       <span className="text-sm text-gray-700">
-                        I agree to the <button type="button" className="text-blue-600 underline font-semibold">Privacy Policy</button> *
+                        I agree to the{" "}
+                        <button
+                          type="button"
+                          className="text-blue-600 underline font-semibold"
+                        >
+                          Privacy Policy
+                        </button>{" "}
+                        *
                       </span>
                     </label>
                   </div>
@@ -781,7 +1015,9 @@ const Registration = () => {
                         <span className="text-white text-xs font-bold">!</span>
                       </div>
                       <div>
-                        <h4 className="font-semibold text-gray-900 mb-2">Important</h4>
+                        <h4 className="font-semibold text-gray-900 mb-2">
+                          Important
+                        </h4>
                         <ul className="text-xs text-gray-700 space-y-1">
                           <li>• Registration reviewed within 24-48 hours</li>
                           <li>• Email confirmation upon verification</li>
@@ -824,7 +1060,9 @@ const Registration = () => {
                 )}
                 <button
                   onClick={handleNext}
-                  className={`flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold shadow-lg ${currentStep === 1 ? 'ml-auto' : ''}`}
+                  className={`flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold shadow-lg ${
+                    currentStep === 1 ? "ml-auto" : ""
+                  }`}
                 >
                   Continue
                   <ChevronRight className="w-4 h-4" />
@@ -838,25 +1076,28 @@ const Registration = () => {
           <div className="flex items-start gap-3">
             <Shield className="w-5 h-5 text-blue-600 mt-0.5" />
             <div>
-              <h4 className="font-semibold text-blue-900 mb-1">Secure Registration</h4>
+              <h4 className="font-semibold text-blue-900 mb-1">
+                Secure Registration
+              </h4>
               <p className="text-sm text-blue-700">
-                Your information is encrypted and securely stored. We use government-verified APIs.
+                Your information is encrypted and securely stored. We use
+                government-verified APIs.
               </p>
             </div>
           </div>
         </div>
 
         <div className="mt-8 text-center">
-  <p className="text-gray-700 text-sm">
-    Already registered?{" "}
-    <button
-      onClick={() => navigate("/choose-login-type")}
-      className="text-blue-600 hover:text-blue-800 font-semibold underline transition-colors"
-    >
-      Login here
-    </button>
-  </p>
-</div>
+          <p className="text-gray-700 text-sm">
+            Already registered?{" "}
+            <button
+              onClick={() => navigate("/choose-login-type")}
+              className="text-blue-600 hover:text-blue-800 font-semibold underline transition-colors"
+            >
+              Login here
+            </button>
+          </p>
+        </div>
 
         <div className="mt-6 text-center text-sm text-gray-600">
           <div className="flex justify-center gap-6 mb-2">
@@ -864,7 +1105,9 @@ const Registration = () => {
             <button className="hover:text-blue-600 font-medium">Privacy</button>
             <button className="hover:text-blue-600 font-medium">Support</button>
           </div>
-          <div className="text-xs">© 2025 eTender Portal. All rights reserved.</div>
+          <div className="text-xs">
+            © 2025 eTender Portal. All rights reserved.
+          </div>
         </div>
       </div>
     </div>

@@ -240,7 +240,13 @@ const api = createApiClient();
 
 // Convenience: allow updating the default singleton configuration at runtime
 api.setDefaults = (newCfg = {}) => {
+  // shallow merge top-level config, but ensure headers are merged deeply
   const merged = Object.assign({}, api.defaults, newCfg);
+  merged.headers = Object.assign(
+    {},
+    api.defaults.headers || {},
+    newCfg.headers || {}
+  );
   // replace internal defaults by creating a new client
   const newClient = createApiClient(merged);
   // copy methods onto api object

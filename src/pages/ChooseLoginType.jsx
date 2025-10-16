@@ -33,7 +33,10 @@ const ChooseLoginType = () => {
     let newValue = value;
     // keep captcha uppercase and limited to 4 chars
     if (name === "captcha") {
-      newValue = value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 4);
+      newValue = value
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, "")
+        .slice(0, 4);
       // clear captcha error while user types
       if (captchaError) setCaptchaError("");
     }
@@ -71,7 +74,10 @@ const ChooseLoginType = () => {
 
     setLoading(true);
     try {
-      const res = await api.post("/auth/login", { body: payload, showToasts: false });
+      const res = await api.post("/auth/login", {
+        body: payload,
+        showToasts: false,
+      });
 
       // expected response: { accessToken, user, sessionId }
       if (res && res.accessToken) {
@@ -85,14 +91,23 @@ const ChooseLoginType = () => {
           console.error("Failed to save auth data", e);
         }
 
-        // set default Authorization header for api singleton
+        // set default Authorization header for api singleton (preserve existing headers)
         try {
-          api.setDefaults({ headers: { Authorization: `Bearer ${res.accessToken}` } });
+          if (typeof api.setAuthToken === "function") {
+            api.setAuthToken(`Bearer ${res.accessToken}`);
+          } else {
+            // fallback to setDefaults but merge headers to avoid losing Content-Type
+            api.setDefaults({
+              headers: { Authorization: `Bearer ${res.accessToken}` },
+            });
+          }
         } catch (e) {
           // ignore
         }
 
-        toastService.showSuccess("Login successful. Please enter the OTP sent to your email.");
+        toastService.showSuccess(
+          "Login successful. Please enter the OTP sent to your email."
+        );
 
         // navigate to OTP verification (keep previous behaviour)
         navigate("/otp-verification", {
@@ -105,7 +120,8 @@ const ChooseLoginType = () => {
       }
     } catch (err) {
       // api.request already shows toast when showToasts true; here show explicit message
-      const msg = (err && err.data && err.data.message) || err.message || "Login failed";
+      const msg =
+        (err && err.data && err.data.message) || err.message || "Login failed";
       toastService.showError(msg);
     } finally {
       setLoading(false);
@@ -119,7 +135,7 @@ const ChooseLoginType = () => {
   return (
     <>
       {/* <Header /> */}
-      <div className="min-h-screen flex bg-white"> 
+      <div className="min-h-screen flex bg-white">
         {/* Left Side Video (Fixed / Stable) */}
         <div className="hidden lg:flex w-1/2 fixed top-15 left-0 h-full bg-white items-start justify-center p-8">
           <div className="max-w-lg w-full">
@@ -133,7 +149,6 @@ const ChooseLoginType = () => {
             />
           </div>
         </div>
-
 
         {/* Right Side Content (Scrollable) */}
         <div className="w-full lg:w-1/2 lg:ml-[50%] flex flex-col min-h-screen overflow-y-auto">
@@ -164,7 +179,9 @@ const ChooseLoginType = () => {
                     <div className="flex flex-col items-center text-center space-y-3">
                       <Building2
                         className={`w-8 h-8 ${
-                          loginType === "vendor" ? "text-gray-600" : "text-gray-400"
+                          loginType === "vendor"
+                            ? "text-gray-600"
+                            : "text-gray-400"
                         }`}
                       />
                       <div className="space-y-1">
@@ -188,7 +205,9 @@ const ChooseLoginType = () => {
                     <div className="flex flex-col items-center text-center space-y-3">
                       <Users
                         className={`w-8 h-8 ${
-                          loginType === "client" ? "text-gray-600" : "text-gray-400"
+                          loginType === "client"
+                            ? "text-gray-600"
+                            : "text-gray-400"
                         }`}
                       />
                       <div className="space-y-1">
@@ -204,7 +223,8 @@ const ChooseLoginType = () => {
                 {/* Access Level */}
                 <div className="mb-6">
                   <label className="block text-sm font-medium text-gray-700 mb-3">
-                    🏢 {loginType === "vendor" ? "Vendor" : "Client"} Access Level
+                    🏢 {loginType === "vendor" ? "Vendor" : "Client"} Access
+                    Level
                   </label>
                   <div className="relative">
                     <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -280,27 +300,29 @@ const ChooseLoginType = () => {
                         required
                       />
                       <div className="flex items-center justify-center sm:justify-start gap-2">
-                          <div className="bg-gray-100 px-4 py-3 rounded-lg font-mono font-bold text-gray-700 border-2 border-gray-200 select-all">
-                            {captchaCode}
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setCaptchaCode(generateCaptcha());
-                              setFormData((prev) => ({ ...prev, captcha: "" }));
-                              setCaptchaError("");
-                            }}
-                            aria-label="Refresh captcha"
-                            title="Refresh captcha"
-                            className="p-3 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                          >
-                            <RefreshCw className="w-5 h-5" />
-                          </button>
+                        <div className="bg-gray-100 px-4 py-3 rounded-lg font-mono font-bold text-gray-700 border-2 border-gray-200 select-all">
+                          {captchaCode}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCaptchaCode(generateCaptcha());
+                            setFormData((prev) => ({ ...prev, captcha: "" }));
+                            setCaptchaError("");
+                          }}
+                          aria-label="Refresh captcha"
+                          title="Refresh captcha"
+                          className="p-3 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                        >
+                          <RefreshCw className="w-5 h-5" />
+                        </button>
                       </div>
                     </div>
-                      {captchaError && (
-                        <p className="mt-2 text-sm text-red-600">{captchaError}</p>
-                      )}
+                    {captchaError && (
+                      <p className="mt-2 text-sm text-red-600">
+                        {captchaError}
+                      </p>
+                    )}
                   </div>
 
                   {/* Remember Me & Forgot Password */}
@@ -329,9 +351,17 @@ const ChooseLoginType = () => {
                   <button
                     type="submit"
                     disabled={loading}
-                    className={`w-full ${loading ? 'opacity-70 cursor-not-allowed' : 'bg-primary-500 hover:bg-gray-700'} text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200`}
+                    className={`w-full ${
+                      loading
+                        ? "opacity-70 cursor-not-allowed"
+                        : "bg-primary-500 hover:bg-gray-700"
+                    } text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200`}
                   >
-                    {loading ? 'Signing in…' : `🏢 Sign in as ${loginType === "vendor" ? "Vendor" : "Client"}`}
+                    {loading
+                      ? "Signing in…"
+                      : `🏢 Sign in as ${
+                          loginType === "vendor" ? "Vendor" : "Client"
+                        }`}
                   </button>
                 </form>
 
@@ -360,8 +390,8 @@ const ChooseLoginType = () => {
                       Security Notice
                     </h4>
                     <p className="text-sm text-gray-600 leading-relaxed">
-                      Your session will automatically timeout after 30 minutes of
-                      inactivity. Always logout when using shared computers.
+                      Your session will automatically timeout after 30 minutes
+                      of inactivity. Always logout when using shared computers.
                     </p>
                   </div>
                 </div>
