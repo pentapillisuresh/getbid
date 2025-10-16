@@ -13,6 +13,7 @@ import ViewDetailsPopup from "../popups/ViewDetailsPopup";
 import QAPopup from "../popups/QAPopup";
 import SubmitBidPopup from "../popups/SubmitBidPopup";
 import SupportPopup from "../popups/SupportPopup";
+import TopupModal from "../../../components/shared/TopupModal";
 import api from "../../../services/apiService";
 
 const TenderListings = () => {
@@ -60,6 +61,10 @@ const TenderListings = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const sentinelRef = useRef(null);
   const isFetchingRef = useRef(false);
+  // Topup modal state (plans/subscriptions) - local copy so modal can function standalone
+  const [plans, setPlans] = useState([]);
+  const [plansLoading, setPlansLoading] = useState(false);
+  const [plansError, setPlansError] = useState(null);
 
   const formatCurrency = (val) => {
     if (val === undefined || val === null) return "-";
@@ -156,6 +161,37 @@ const TenderListings = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadPage]);
 
+  // load available plans for topup modal
+  useEffect(() => {
+    (async () => {
+      try {
+        setPlansLoading(true);
+        setPlansError(null);
+        const resp = await api.get("/v1/plans");
+        const items = (resp && resp.data) || [];
+        const mapped = items.map((p) => ({
+          id: p._id,
+          planID: p.planID,
+          icon: p.icon || "",
+          name: p.name || "Plan",
+          price: p.price || 0,
+          tendersLimit: p.tendersLimit || 0,
+          validDays: p.validDays || null,
+          included: Array.isArray(p.included) ? p.included : [],
+          excluded: Array.isArray(p.excluded) ? p.excluded : [],
+          isPopular: !!p.isPopular,
+          isActive: !!p.isActive,
+        }));
+        setPlans(mapped);
+      } catch (err) {
+        console.error("Failed to load plans", err);
+        setPlansError((err && err.message) || "Failed to load plans");
+      } finally {
+        setPlansLoading(false);
+      }
+    })();
+  }, []);
+
   // reset when filters/search change
   useEffect(() => {
     // when filters change, reset to first page and reload
@@ -235,15 +271,52 @@ const TenderListings = () => {
   };
 
   // -------------------- Popup Handlers --------------------
+  const handleSubmitClick = async (tender) => {
+    try {
+      // Call subscriptions endpoint
+      const res = await api.get("/v1/subscriptions");
+      const subs = res.data || [];
+      console.log(subs);
+
+      if (Array.isArray(subs) && subs.length > 0) {
+        // user has at least one subscription -> open submit bid
+        openPopup("submit", tender);
+      } else {
+        // no subscriptions -> show topup modal
+        console.log("111111111111111111111111111111x");
+        openPopup("topup");
+      }
+    } catch (err) {
+      // on error, surface error and show topup so user can purchase
+      setError(err?.message || "Failed to check subscriptions");
+      openPopup("topup");
+    }
+  };
+
   const openPopup = (popupType, tender = null) => {
     setSelectedTender(tender);
     setActivePopup(popupType);
   };
-  const closePopup = () => {
+  const closePopup = (refresh = false) => {
     setActivePopup(null);
     setSelectedTender(null);
+    // if caller requests, reload first page to fetch fresh tenders data
+    if (refresh) {
+      // loadPage is stable via useCallback
+      loadPage(1, false);
+    }
   };
 
+  // when topup succeeds, close modal and refresh first page of tenders
+  const handleTopupSuccess = async () => {
+    try {
+      // reload tenders to reflect any changes
+      loadPage(1, false);
+      setActivePopup(null);
+    } catch (err) {
+      console.error("Failed to refresh tenders after topup", err);
+    }
+  };
   // -------------------- Render --------------------
   return (
     <div className="min-h-screen bg-gray-50">
@@ -466,7 +539,7 @@ const TenderListings = () => {
                         </button>
                       ) : (
                         <button
-                          onClick={() => openPopup("submit", t)}
+                          onClick={() => handleSubmitClick(t)}
                           className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-transform hover:scale-105"
                         >
                           Submit Bid
@@ -527,8 +600,27 @@ const TenderListings = () => {
         <QAPopup tender={selectedTender} onClose={closePopup} />
       )}
       {activePopup === "submit" && selectedTender && (
-        <SubmitBidPopup tender={selectedTender} onClose={closePopup} />
+        <SubmitBidPopup
+          tender={selectedTender}
+          onClose={(refresh) => closePopup(refresh)}
+          // some implementations of SubmitBidPopup may call onSubmitted after a successful submission
+          onSubmitted={() => {
+            // ensure modal closes and we reload tenders
+            closePopup(false);
+            loadPage(1, false);
+          }}
+        />
       )}
+      {/* TopupModal: show prop controls visibility. Provide plans and handlers so it works standalone. */}
+      <TopupModal
+        show={activePopup === "topup"}
+        onClose={closePopup}
+        plans={plans}
+        plansLoading={plansLoading}
+        plansError={plansError}
+        onSuccess={handleTopupSuccess}
+        formatCurrency={formatCurrency}
+      />
       {activePopup === "support" && <SupportPopup onClose={closePopup} />}
     </div>
   );

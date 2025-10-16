@@ -13,7 +13,7 @@ import VerifyBidPopup from "./VerifyBidPopup";
 import api, { createApiClient } from "../../../services/apiService";
 import toastService from "../../../services/toastService";
 
-const SubmitBidPopup = ({ tender, onClose }) => {
+const SubmitBidPopup = ({ tender, onClose, onSubmitted }) => {
   const [bidAmount, setBidAmount] = useState("");
   const [deliveryTimeline, setDeliveryTimeline] = useState("");
   const [techProposal, setTechProposal] = useState("");
@@ -148,11 +148,20 @@ const SubmitBidPopup = ({ tender, onClose }) => {
         };
 
         const resp = await api.post("/v1/bids", { body, showToasts: true });
-        toastService.showSuccess(
-          (resp && resp.message) || "Bid submitted successfully"
-        );
+        // API client will show toasts when showToasts is true. Avoid duplicate toasts here.
         setShowVerifyPopup(false);
-        onClose();
+        // Notify parent to refresh data. Prefer onSubmitted callback when provided.
+        if (typeof onSubmitted === "function") {
+          try {
+            await onSubmitted();
+          } catch (e) {
+            // ignore parent errors
+            console.error("onSubmitted callback failed", e);
+          }
+        } else {
+          // fallback: call onClose with refresh flag so parents like TenderListings can reload
+          onClose && onClose(true);
+        }
       } catch (err) {
         console.error("Submit bid failed", err);
         const msg = (err && err.message) || "Failed to submit bid";
