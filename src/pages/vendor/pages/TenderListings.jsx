@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Search,
   Download,
@@ -54,9 +54,12 @@ const TenderListings = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [totalCount, setTotalCount] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0); // last loaded page
   const [totalPages, setTotalPages] = useState(1);
   const [limit] = useState(10);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const sentinelRef = useRef(null);
+  const isFetchingRef = useRef(false);
 
   const formatCurrency = (val) => {
     if (val === undefined || val === null) return '-';
@@ -85,55 +88,84 @@ const TenderListings = () => {
     return diff;
   };
 
-  useEffect(() => {
-    let mounted = true;
-    async function fetchTenders() {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await api.get('/v1/tenders', { queryParams: { page: currentPage, limit } });
-        // API shape: { success, message, totalCount, currentPage, totalPages, data: [...] }
-        if (!mounted) return;
-        setTotalCount(res.totalCount || (res.data ? res.data.length : 0));
-        setCurrentPage(res.currentPage || currentPage);
-        setTotalPages(res.totalPages || 1);
-        // normalize items for UI
-        const items = (res.data || []).map((it) => ({
-          _id: it._id,
-          title: it.title,
-          department: it.postedBy ? it.postedBy.name : '—',
-          location: `${it.district || ''}${it.district && it.state ? ', ' : ''}${it.state || ''}`,
-          state: it.state,
-          district: it.district,
-          category: it.category,
-          estimatedValue: formatCurrency(it.value),
-          publishedDate: formatDate(it.createdAt),
-          deadline: formatDate(it.bidDeadline),
-          description: it.description || it.technicalSpecifications || '-',
-          eligibility: (it.eligibilityCriteria || []).join(', '),
-          documentFee: it.documentFee || '-',
-          emd: it.emd || '-',
-          status: it.isActive ? 'Open' : 'Closed',
-          daysLeft: calculateDaysLeft(it.bidDeadline),
-          statusColor:
-            calculateDaysLeft(it.bidDeadline) <= 7 ? 'yellow' : 'green',
-          priority: it.priority || 'medium',
-          raw: it,
-        }));
-        setTenders(items);
-      } catch (err) {
-        if (!mounted) return;
-        setError(err.message || 'Failed to load tenders');
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    }
+  const hasMore = currentPage < totalPages;
 
-    fetchTenders();
-    return () => {
-      mounted = false;
-    };
-  }, [currentPage, limit]);
+  const loadPage = useCallback(async (page = 1, append = false) => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
+    if (append) setLoadingMore(true);
+    else setLoading(true);
+    setError(null);
+    try {
+      const res = await api.get('/v1/tenders', { queryParams: { page, limit } });
+      // API shape: { success, message, totalCount, currentPage, totalPages, data: [...] }
+      const items = (res.data || []).map((it) => ({
+        _id: it._id,
+        title: it.title,
+        department: it.postedBy ? it.postedBy.name : '—',
+        location: `${it.district || ''}${it.district && it.state ? ', ' : ''}${it.state || ''}`,
+        state: it.state,
+        district: it.district,
+        category: it.category,
+        estimatedValue: formatCurrency(it.value),
+        publishedDate: formatDate(it.createdAt),
+        deadline: formatDate(it.bidDeadline),
+        description: it.description || it.technicalSpecifications || '-',
+        eligibility: (it.eligibilityCriteria || []).join(', '),
+        documentFee: it.documentFee || '-',
+        emd: it.emd || '-',
+        status: it.isActive ? 'Open' : 'Closed',
+        daysLeft: calculateDaysLeft(it.bidDeadline),
+        statusColor: calculateDaysLeft(it.bidDeadline) <= 7 ? 'yellow' : 'green',
+        priority: it.priority || 'medium',
+        raw: it,
+      }));
+
+      setTotalCount(res.totalCount || (items ? items.length : 0));
+      setTotalPages(res.totalPages || 1);
+      setCurrentPage(res.currentPage || page);
+
+      setTenders((prev) => (append ? prev.concat(items) : items));
+    } catch (err) {
+      setError(err.message || 'Failed to load tenders');
+    } finally {
+      if (append) setLoadingMore(false);
+      else setLoading(false);
+      isFetchingRef.current = false;
+    }
+  }, [limit]);
+
+  // initial load
+  useEffect(() => {
+    loadPage(1, false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadPage]);
+
+  // reset when filters/search change
+  useEffect(() => {
+    // when filters change, reset to first page and reload
+    setTenders([]);
+    setTotalPages(1);
+    setCurrentPage(0);
+    loadPage(1, false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTerm, selectedCategory, selectedStatus, selectedState, selectedDistrict]);
+
+  // IntersectionObserver to load more when sentinel is visible
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && !loadingMore && !loading && currentPage < totalPages) {
+          loadPage(currentPage + 1, true);
+        }
+      });
+    }, { root: null, rootMargin: '200px', threshold: 0.1 });
+
+    obs.observe(sentinel);
+    return () => obs.disconnect();
+  }, [currentPage, totalPages, loadingMore, loading, loadPage]);
 
   // -------------------- Filter Logic --------------------
   const filteredTenders = tenders.filter((tender) => {
@@ -367,25 +399,15 @@ const TenderListings = () => {
             ))
           )}
 
-          {/* Pagination */}
-          {!loading && !error && totalPages > 1 && (
-            <div className="flex items-center justify-center gap-4 py-4">
-              <button
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage <= 1}
-                className="px-4 py-2 bg-gray-100 rounded disabled:opacity-50"
-              >
-                Prev
-              </button>
-              <div className="text-sm text-gray-600">Page {currentPage} of {totalPages}</div>
-              <button
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                disabled={currentPage >= totalPages}
-                className="px-4 py-2 bg-gray-100 rounded disabled:opacity-50"
-              >
-                Next
-              </button>
-            </div>
+          {/* Infinite scroll sentinel */}
+          <div ref={sentinelRef} />
+
+          {loadingMore && (
+            <div className="text-center py-4 text-sm text-gray-600">Loading more...</div>
+          )}
+
+          {!loading && !loadingMore && !error && !hasMore && tenders.length > 0 && (
+            <div className="text-center py-4 text-sm text-gray-500">No more tenders</div>
           )}
         </div>
 

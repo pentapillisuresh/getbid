@@ -17,6 +17,18 @@ const defaultConfig = {
   successMessageKey: "message",
   // keys to look for on error responses to display as toast
   errorMessageKey: "message",
+  // Optional function to retrieve auth token dynamically (called per-request).
+  // By default it will attempt to read `localStorage.getItem('token')` or `localStorage.getItem('accessToken')`.
+  getAuthToken: () => {
+    try {
+      if (typeof window !== "undefined" && window.localStorage) {
+        return window.localStorage.getItem("accessToken") || null;
+      }
+    } catch (e) {
+      // ignore
+    }
+    return null;
+  },
 };
 
 function buildQueryString(params) {
@@ -60,6 +72,30 @@ const createApiClient = (config = {}) => {
       errorMessageKey: reqErrorKey,
     } = opts;
     const mergedHeaders = mergeHeaders(cfg.headers, headers);
+
+    // Attach Authorization header dynamically if not already provided.
+    // Priority: per-request opts.getAuthToken -> global cfg.getAuthToken -> localStorage fallback.
+    try {
+      const tokenGetter = opts.getAuthToken || cfg.getAuthToken;
+      let token = null;
+      if (typeof tokenGetter === "function") {
+        token = tokenGetter();
+      } else if (typeof window !== "undefined" && window.localStorage) {
+        token = window.localStorage.getItem("accessToken");
+      }
+      if (token) {
+        const hasAuth = Object.keys(mergedHeaders).some(
+          (k) => k.toLowerCase() === "authorization"
+        );
+        if (!hasAuth) {
+          mergedHeaders["Authorization"] = token.startsWith("Bearer")
+            ? token
+            : `Bearer ${token}`;
+        }
+      }
+    } catch (e) {
+      // ignore token attach errors
+    }
 
     let fullUrl = url;
     if (cfg.baseURL && !/^https?:\/\//i.test(url)) {
@@ -212,6 +248,19 @@ api.setDefaults = (newCfg = {}) => {
     api[k] = newClient[k];
   });
   api.defaults = merged;
+};
+
+// Convenience: set or clear the Authorization header on the default client.
+api.setAuthToken = (token) => {
+  const mergedHeaders = Object.assign({}, api.defaults.headers || {});
+  if (token) {
+    mergedHeaders.Authorization = token.startsWith("Bearer")
+      ? token
+      : `Bearer ${token}`;
+  } else {
+    delete mergedHeaders.Authorization;
+  }
+  api.setDefaults({ headers: mergedHeaders });
 };
 
 /**

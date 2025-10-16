@@ -1,5 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { X, Upload, File } from 'lucide-react';
+import api, { createApiClient } from '../../../services/apiService';
+import toastService from '../../../services/toastService';
 
 const UploadDocumentModal = ({ isOpen, onClose, onUpload }) => {
   const [formData, setFormData] = useState({
@@ -72,34 +74,88 @@ const UploadDocumentModal = ({ isOpen, onClose, onUpload }) => {
       alert('Please select a file and enter a document name');
       return;
     }
+    // perform two-step upload: 1) upload file (multipart) 2) create document record with file id
+    (async () => {
+      // loading state
+      try {
+        setIsUploading(true);
 
-    const documentData = {
-      name: formData.name,
-      type: formData.category,
-      description: formData.description,
-      tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
-      expiryDate: formData.expiryDate || null,
-      size: `${(formData.file.size / (1024 * 1024)).toFixed(1)} MB`,
-      format: formData.file.name.split('.').pop().toUpperCase()
-    };
+        // Prepare multipart formdata
+        const fd = new FormData();
+        fd.append('image', formData.file, formData.file.name);
 
-    onUpload(documentData);
-    
-    // Reset form
-    setFormData({
-      name: '',
-      category: 'certificates',
-      description: '',
-      tags: '',
-      expiryDate: '',
-      file: null
-    });
+        // Create a client without default JSON Content-Type so the browser sets the multipart boundary
+        const multipartClient = createApiClient({
+          baseURL: api.defaults.baseURL,
+          // empty headers will override the default Content-Type from the singleton
+          headers: {},
+          getAuthToken: api.defaults.getAuthToken,
+        });
+
+        // 1) Upload file
+        const uploadResp = await multipartClient.post('/v1/File/upload', {
+          body: fd,
+          // Accept any response; the api client will attach Authorization automatically via getAuthToken
+        });
+
+        const uploadedFile = uploadResp && uploadResp.file ? uploadResp.file : null;
+        if (!uploadedFile || !uploadedFile._id) {
+          throw new Error('File upload failed: invalid response');
+        }
+
+        // 2) Create document using returned file id
+        const createBody = {
+          name: formData.name,
+          category: // map internal category values to human-readable labels used by API
+            formData.category === 'certificates' ? 'Legal Documents' :
+            formData.category === 'financial' ? 'Financial Documents' :
+            formData.category === 'technical' ? 'Technical Documents' :
+            formData.category === 'proposals' ? 'Marketing Materials' :
+            formData.category === 'contracts' ? 'Experience Documents' : formData.category,
+          file: uploadedFile._id,
+          description: formData.description,
+          tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [],
+          expiryDate: formData.expiryDate || null,
+          // Include client-side metadata so UI can render immediately without depending on API fill-in
+          fileName: formData.file.name,
+          size: `${(formData.file.size / (1024 * 1024)).toFixed(1)} MB`,
+          format: formData.file.name.split('.').pop().toUpperCase(),
+        };
+
+        const createResp = await api.post('/v1/documents', {
+          body: createBody,
+        });
+
+        // notify consumer with created document data if available
+        const created = createResp && createResp.data ? createResp.data : createResp;
+        toastService.showSuccess((createResp && createResp.message) || 'Document uploaded');
+        if (typeof onUpload === 'function') onUpload(created);
+
+        // Reset form
+        setFormData({
+          name: '',
+          category: 'certificates',
+          description: '',
+          tags: '',
+          expiryDate: '',
+          file: null
+        });
+      } catch (err) {
+        const msg = (err && err.message) || 'Upload failed';
+        toastService.showError(msg);
+        console.error('UploadDocumentModal error:', err);
+      } finally {
+        setIsUploading(false);
+      }
+    })();
   };
+
+  const [isUploading, setIsUploading] = useState(false);
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div style={{ marginTop: 0 }} className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 md:items-center mt-0">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900">Upload Document</h2>
@@ -111,7 +167,7 @@ const UploadDocumentModal = ({ isOpen, onClose, onUpload }) => {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+  <form onSubmit={handleSubmit} className="p-6 space-y-0 md:space-y-6">
           {/* File Upload Area */}
           <div
             className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
@@ -261,10 +317,13 @@ const UploadDocumentModal = ({ isOpen, onClose, onUpload }) => {
             </button>
             <button
               type="submit"
-              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+              disabled={isUploading}
+              className={`flex items-center gap-2 px-6 py-2 rounded-lg font-medium transition-colors ${
+                isUploading ? 'bg-green-400 text-white cursor-wait' : 'bg-green-600 hover:bg-green-700 text-white'
+              }`}
             >
               <Upload className="w-4 h-4" />
-              Upload Document
+              {isUploading ? 'Uploading...' : 'Upload Document'}
             </button>
           </div>
         </form>
