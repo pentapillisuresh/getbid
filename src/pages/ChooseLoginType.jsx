@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Building2, Users, Eye, EyeOff, RefreshCw } from "lucide-react";
 import Header from "../components/shared/Header";
+import api from "../services/apiService";
+import toastService from "../services/toastService";
 
 const ChooseLoginType = () => {
   const navigate = useNavigate();
@@ -13,24 +15,100 @@ const ChooseLoginType = () => {
     captcha: "",
     rememberMe: false,
   });
-  const [captchaCode] = useState("7K9M");
+  // generate a random 4-character captcha: uppercase letters + digits
+  const generateCaptcha = () => {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let code = "";
+    for (let i = 0; i < 4; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+  };
+
+  const [captchaCode, setCaptchaCode] = useState(() => generateCaptcha());
+  const [captchaError, setCaptchaError] = useState("");
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
+    let newValue = value;
+    // keep captcha uppercase and limited to 4 chars
+    if (name === "captcha") {
+      newValue = value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 4);
+      // clear captcha error while user types
+      if (captchaError) setCaptchaError("");
+    }
+
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: type === "checkbox" ? checked : newValue,
     }));
   };
 
-  const handleSubmit = (e) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (formData.captcha === captchaCode) {
-      navigate("/otp-verification", {
-        state: { loginType, email: formData.email },
-      });
-    } else {
-      alert("Invalid captcha code");
+    if (formData.captcha.trim().toUpperCase() !== captchaCode) {
+      setCaptchaError("Invalid captcha. Please try again.");
+      // regenerate captcha after a failed attempt
+      setCaptchaCode(generateCaptcha());
+      // clear the entered captcha
+      setFormData((prev) => ({ ...prev, captcha: "" }));
+      return;
+    }
+
+    // prepare payload and call login API
+    const payload = {
+      email: formData.email,
+      password: formData.password,
+      role: loginType === "vendor" ? "vendor" : "client",
+      deviceDetails: {
+        deviceType: "web",
+        deviceName:
+          (typeof navigator !== "undefined" && navigator.userAgent) || "web",
+      },
+    };
+
+    setLoading(true);
+    try {
+      const res = await api.post("/auth/login", { body: payload, showToasts: false });
+
+      // expected response: { accessToken, user, sessionId }
+      if (res && res.accessToken) {
+        // persist tokens and user info
+        try {
+          localStorage.setItem("accessToken", res.accessToken);
+          localStorage.setItem("sessionId", res.sessionId || "");
+          localStorage.setItem("user", JSON.stringify(res.user || {}));
+        } catch (e) {
+          // ignore storage errors
+          console.error("Failed to save auth data", e);
+        }
+
+        // set default Authorization header for api singleton
+        try {
+          api.setDefaults({ headers: { Authorization: `Bearer ${res.accessToken}` } });
+        } catch (e) {
+          // ignore
+        }
+
+        toastService.showSuccess("Login successful. Please enter the OTP sent to your email.");
+
+        // navigate to OTP verification (keep previous behaviour)
+        navigate("/otp-verification", {
+          state: { loginType, email: formData.email },
+        });
+      } else {
+        // unexpected response
+        const msg = (res && (res.message || res.error)) || "Login failed";
+        toastService.showError(msg);
+      }
+    } catch (err) {
+      // api.request already shows toast when showToasts true; here show explicit message
+      const msg = (err && err.data && err.data.message) || err.message || "Login failed";
+      toastService.showError(msg);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -75,18 +153,19 @@ const ChooseLoginType = () => {
                 {/* Login Type Selection */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                   <button
+                    type="button"
                     onClick={() => setLoginType("vendor")}
-                    className={`p-4 sm:p-6 rounded-xl border-2 transition-all duration-300 hover:shadow-md ${loginType === "vendor"
+                    className={`p-4 sm:p-6 rounded-xl border-2 transition-all duration-300 hover:shadow-md ${
+                      loginType === "vendor"
                         ? "border-primary-500 bg-primary-50 text-primary-600"
                         : "border-gray-200 hover:border-gray-300 text-gray-700"
-                      }`}
+                    }`}
                   >
                     <div className="flex flex-col items-center text-center space-y-3">
                       <Building2
-                        className={`w-8 h-8 ${loginType === "vendor"
-                            ? "text-gray-600"
-                            : "text-gray-400"
-                          }`}
+                        className={`w-8 h-8 ${
+                          loginType === "vendor" ? "text-gray-600" : "text-gray-400"
+                        }`}
                       />
                       <div className="space-y-1">
                         <div className="font-semibold">🏢 Vendor</div>
@@ -98,18 +177,19 @@ const ChooseLoginType = () => {
                   </button>
 
                   <button
+                    type="button"
                     onClick={() => setLoginType("client")}
-                    className={`p-4 sm:p-6 rounded-xl border-2 transition-all duration-300 hover:shadow-md ${loginType === "client"
+                    className={`p-4 sm:p-6 rounded-xl border-2 transition-all duration-300 hover:shadow-md ${
+                      loginType === "client"
                         ? "border-primary-500 bg-primary-50 text-primary-600"
                         : "border-gray-200 hover:border-gray-300 text-gray-700"
-                      }`}
+                    }`}
                   >
                     <div className="flex flex-col items-center text-center space-y-3">
                       <Users
-                        className={`w-8 h-8 ${loginType === "client"
-                            ? "text-gray-600"
-                            : "text-gray-400"
-                          }`}
+                        className={`w-8 h-8 ${
+                          loginType === "client" ? "text-gray-600" : "text-gray-400"
+                        }`}
                       />
                       <div className="space-y-1">
                         <div className="font-semibold">🏛️ Client</div>
@@ -200,17 +280,27 @@ const ChooseLoginType = () => {
                         required
                       />
                       <div className="flex items-center justify-center sm:justify-start gap-2">
-                        <div className="bg-gray-100 px-4 py-3 rounded-lg font-mono font-bold text-gray-700 border-2 border-gray-200">
-                          {captchaCode}
-                        </div>
-                        <button
-                          type="button"
-                          className="p-3 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                        >
-                          <RefreshCw className="w-5 h-5" />
-                        </button>
+                          <div className="bg-gray-100 px-4 py-3 rounded-lg font-mono font-bold text-gray-700 border-2 border-gray-200 select-all">
+                            {captchaCode}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCaptchaCode(generateCaptcha());
+                              setFormData((prev) => ({ ...prev, captcha: "" }));
+                              setCaptchaError("");
+                            }}
+                            aria-label="Refresh captcha"
+                            title="Refresh captcha"
+                            className="p-3 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                          >
+                            <RefreshCw className="w-5 h-5" />
+                          </button>
                       </div>
                     </div>
+                      {captchaError && (
+                        <p className="mt-2 text-sm text-red-600">{captchaError}</p>
+                      )}
                   </div>
 
                   {/* Remember Me & Forgot Password */}
@@ -238,10 +328,10 @@ const ChooseLoginType = () => {
                   {/* Sign In Button */}
                   <button
                     type="submit"
-                    className="w-full bg-primary-500 hover:bg-gray-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200"
+                    disabled={loading}
+                    className={`w-full ${loading ? 'opacity-70 cursor-not-allowed' : 'bg-primary-500 hover:bg-gray-700'} text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200`}
                   >
-                    🏢 Sign in as{" "}
-                    {loginType === "vendor" ? "Vendor" : "Client"}
+                    {loading ? 'Signing in…' : `🏢 Sign in as ${loginType === "vendor" ? "Vendor" : "Client"}`}
                   </button>
                 </form>
 

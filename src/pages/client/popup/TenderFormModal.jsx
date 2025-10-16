@@ -1,7 +1,10 @@
 // src/components/popups/TenderFormModal.jsx
 import React, { useState, useEffect } from "react";
+import { createPortal } from 'react-dom';
+import api from "../../../services/apiService";
+import toastService from "../../../services/toastService";
 
-const TenderFormModal = ({ show, onClose, onSubmit, user }) => {
+const TenderFormModal = ({ show, onClose, onSubmit, user, mode = 'create', initialData = null }) => {
   const [formData, setFormData] = useState({
     title: "",
     category: "",
@@ -21,9 +24,34 @@ const TenderFormModal = ({ show, onClose, onSubmit, user }) => {
     createdBy: "",
     userType: "",
   });
+  const [submitting, setSubmitting] = useState(false);
 
   // Auto-fill user info when modal opens
   useEffect(() => {
+    // If the modal is opening for a fresh create (no initialData), reset form to defaults
+    if (show && !initialData && mode === 'create') {
+      setFormData({
+        title: "",
+        category: "",
+        estimatedValue: "",
+        deadline: "",
+        description: "",
+        eligibility: [""],
+        specifications: "",
+        preBidMeeting: false,
+        meetingDate: "",
+        venue: "",
+        state: "",
+        district: "",
+        projectAddress: "",
+        contactPerson: "",
+        contactNumbers: "",
+        createdBy: user ? (user.name || "—") : "",
+        userType: user ? (user.type || "—") : "",
+      });
+      return;
+    }
+
     if (user) {
       setFormData((prev) => ({
         ...prev,
@@ -31,7 +59,29 @@ const TenderFormModal = ({ show, onClose, onSubmit, user }) => {
         userType: user.type || "—",
       }));
     }
-  }, [user, show]);
+
+    // if initialData provided (edit or duplicate), map it to form fields
+    if (initialData) {
+      setFormData((prev) => ({
+        ...prev,
+        title: initialData.title || prev.title,
+        category: initialData.category || prev.category,
+        estimatedValue: initialData.value ? String(initialData.value) : (initialData.estimatedValue || prev.estimatedValue),
+        deadline: initialData.bidDeadline ? initialData.bidDeadline.split('T')[0] : (initialData.deadline || prev.deadline),
+        description: initialData.description || prev.description,
+        eligibility: initialData.eligibilityCriteria || initialData.eligibility || prev.eligibility,
+        specifications: initialData.technicalSpecifications || initialData.specifications || prev.specifications,
+        preBidMeeting: initialData.preBidMeeting || prev.preBidMeeting,
+        meetingDate: initialData.meetingDate || prev.meetingDate,
+        venue: initialData.venue || prev.venue,
+        state: initialData.state || prev.state,
+        district: initialData.district || prev.district,
+        projectAddress: initialData.address || initialData.projectAddress || prev.projectAddress,
+        contactPerson: initialData.contactPerson || prev.contactPerson,
+        contactNumbers: initialData.contactNumber || initialData.contactNumbers || prev.contactNumbers,
+      }));
+    }
+  }, [user, show, initialData]);
 
   if (!show) return null;
 
@@ -55,17 +105,59 @@ const TenderFormModal = ({ show, onClose, onSubmit, user }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
-    onClose();
+    // map formData to API payload
+    const payload = {
+      title: formData.title,
+      category: formData.category,
+      value: Number(formData.estimatedValue || 0),
+      bidDeadline: formData.deadline,
+      description: formData.description,
+      eligibilityCriteria: (formData.eligibility || []).filter((c) => c && c.trim() !== ""),
+      technicalSpecifications: formData.specifications,
+      state: formData.state,
+      district: formData.district,
+      address: formData.projectAddress,
+      contactPerson: formData.contactPerson,
+      contactNumber: formData.contactNumbers,
+    };
+    // call API: POST for create/duplicate, PUT for edit
+    setSubmitting(true);
+    const token = typeof localStorage !== 'undefined' ? localStorage.getItem('accessToken') : null;
+    const reqOpts = { body: payload };
+    if (token) reqOpts.headers = { Authorization: `Bearer ${token}` };
+
+    const doPost = () => api.post("/v1/tenders", reqOpts);
+    const doPut = (id) => api.put(`/v1/tenders/${id}`, reqOpts);
+
+    const call = mode === 'edit' && initialData && initialData.id ? doPut(initialData.id) : doPost();
+
+    call
+      .then((resp) => {
+        if (resp && resp.success) {
+          const successMsg = mode === 'edit' ? (resp.message || 'Tender updated successfully') : (resp.message || 'Tender created successfully');
+          toastService.showSuccess(successMsg);
+          if (typeof onSubmit === "function") onSubmit(resp.data, mode);
+          onClose();
+        } else {
+          const msg = (resp && (resp.message || resp.error)) || (mode === 'edit' ? 'Failed to update tender' : 'Failed to create tender');
+          toastService.showError(msg);
+        }
+      })
+      .catch((err) => {
+        const msg = (err && err.data && err.data.message) || err.message || (mode === 'edit' ? 'Failed to update tender' : 'Failed to create tender');
+        toastService.showError(msg);
+      })
+      .finally(() => setSubmitting(false));
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+
+  return createPortal(
+    <div className="fixed inset-0 top-0 left-0 w-screen h-screen z-50 flex items-center justify-center bg-black bg-opacity-40">
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex justify-between items-center px-6 py-4 border-b">
           <h2 className="text-lg font-semibold text-gray-900">
-            Create New Tender
+            {mode === 'edit' ? 'Edit Tender' : mode === 'duplicate' ? 'Duplicate Tender' : 'Create New Tender'}
           </h2>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
             ✕
@@ -86,8 +178,9 @@ const TenderFormModal = ({ show, onClose, onSubmit, user }) => {
           </div>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="px-6 py-4 space-y-6">
+        {/* Form: make body scrollable while header/footer stay fixed */}
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+          <div className="overflow-y-auto px-6 py-4 space-y-6">
           {/* Basic Info */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
@@ -361,8 +454,9 @@ const TenderFormModal = ({ show, onClose, onSubmit, user }) => {
             )}
           </div>
 
-          {/* Actions */}
-          <div className="flex justify-end gap-3 pt-4 border-t">
+          </div>
+          {/* Actions (fixed footer within modal) */}
+          <div className="px-6 py-4 border-t flex justify-end gap-3 flex-none">
             <button
               type="button"
               onClick={onClose}
@@ -372,14 +466,16 @@ const TenderFormModal = ({ show, onClose, onSubmit, user }) => {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+              disabled={submitting}
+              className={`px-4 py-2 ${submitting ? 'opacity-70 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-700'} text-white rounded-lg`}
             >
-              Create Tender
+              {submitting ? (mode === 'edit' ? 'Updating…' : 'Saving…') : (mode === 'edit' ? 'Update Tender' : 'Create Tender')}
             </button>
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    typeof document !== 'undefined' ? document.body : document.getElementById('root')
   );
 };
 

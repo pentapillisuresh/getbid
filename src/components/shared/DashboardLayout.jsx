@@ -7,6 +7,13 @@ const DashboardLayout = ({ children, title, subtitle, userInfo, userType }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleLogout = () => {
+    // clear auth tokens and any related user data
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('sessionId');
+      localStorage.removeItem('user');
+      // optionally clear everything: localStorage.clear();
+    }
     navigate('/');
   };
 
@@ -58,7 +65,7 @@ const DashboardLayout = ({ children, title, subtitle, userInfo, userType }) => {
               <div className="flex items-center gap-3">
                 <div className="text-right hidden sm:block">
                   <p className="text-sm font-medium text-gray-900">{userInfo.name}</p>
-                  <p className="text-xs text-gray-600">{userInfo.role}</p>
+                  <p className="text-xs text-gray-600">{userInfo.email}</p>
                 </div>
                 <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
                   <User className="w-5 h-5 text-gray-600" />

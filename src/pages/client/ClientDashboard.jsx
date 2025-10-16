@@ -22,7 +22,23 @@ import TenderDashboard from './pages/TenderDashboard';
 const ClientDashboard = () => {
   const location = useLocation();
 
-  const userInfo = {
+  // Prefer stored user info from localStorage (set during login). Fallback to demo user.
+  const getStoredUser = () => {
+    try {
+      const raw = localStorage.getItem('user');
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      // Expecting at least an object with name and role
+      if (parsed && typeof parsed === 'object') return parsed;
+      return null;
+    } catch (e) {
+      // invalid JSON or access denied
+      return null;
+    }
+  };
+
+  const storedUser = getStoredUser();
+  const userInfo = storedUser || {
     name: 'Dr. Rajesh Kumar',
     role: 'Karnataka Public Works Department'
   };

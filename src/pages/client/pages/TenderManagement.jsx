@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Plus,
   Search,
@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import TenderFormModal from "../popup/TenderFormModal";
 import TenderDetailsModal from "../popup/TenderDetailsModal";
+import api from '../../../services/apiService';
+import toastService from '../../../services/toastService';
 
 
 const TenderManagement = () => {
@@ -24,13 +26,60 @@ const TenderManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [selectedTender, setSelectedTender] = useState(null);
+  // modal mode: 'create' | 'edit' | 'duplicate'
+  const [modalMode, setModalMode] = useState('create');
+  const [modalInitialData, setModalInitialData] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
 
+  // server-driven tenders state
+  const [tendersData, setTendersData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
-  const handleNewTender = (data) => {
-    console.log("New Tender Data:", data);
-    // TODO: Save to backend
+
+  const handleTenderSaved = (data, mode = 'create') => {
+    // mode === 'create' or 'duplicate' -> prepend
+    // mode === 'edit' -> replace existing item in list
+    if (!data) return;
+    if (mode === 'edit') {
+      setTendersData((prev) => prev.map((t) => (t.id === data.id ? data : t)));
+    } else {
+      setTendersData((prev) => [data, ...prev]);
+      setTotalCount((c) => (typeof c === 'number' ? c + 1 : 1));
+    }
   };
+
+  const fetchTenders = async (pg = page, lim = limit) => {
+    setLoading(true);
+    try {
+      const token = typeof localStorage !== 'undefined' ? localStorage.getItem('accessToken') : null;
+      const opts = { queryParams: { page: pg, limit: lim } };
+      if (token) opts.headers = { Authorization: `Bearer ${token}` };
+
+      const resp = await api.get('/v1/tenders', opts);
+      if (resp && resp.success) {
+        setTendersData(resp.data || []);
+        setTotalCount(resp.totalCount || 0);
+        setPage(resp.currentPage || pg);
+        setTotalPages(resp.totalPages || 1);
+      } else {
+        toastService.showError((resp && resp.message) || 'Failed to load tenders');
+      }
+    } catch (err) {
+      const msg = (err && err.data && err.data.message) || err.message || 'Failed to load tenders';
+      toastService.showError(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTenders(1, limit);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const tabs = [
     { id: 'all', label: 'All Tenders', count: 25 },
@@ -174,11 +223,30 @@ const TenderManagement = () => {
     }
   };
 
-  const filteredTenders = tenders.filter(tender => {
-    const matchesTab = activeTab === 'all' || tender.status === activeTab;
-    const matchesSearch = tender.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      tender.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      tender.category.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredTenders = tendersData.filter((tender) => {
+    // adapt server tender fields to local UI expectations where possible
+    const status = tender.status || tender.isActive ? 'published' : 'draft';
+    const title = tender.title || '';
+    const category = tender.category || '';
+    const department = tender.postedBy?.name || '';
+
+    const matchesTab = activeTab === 'all' || status === activeTab;
+    const matchesSearch =
+      title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      department.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      category.toLowerCase().includes(searchTerm.toLowerCase());
+
+    // attach derived fields used in UI for convenience
+    tender.title = title;
+    tender.category = category;
+    tender.department = department;
+    tender.estimatedValue = tender.value ? `₹${Number(tender.value).toLocaleString()}` : '—';
+    tender.publishedDate = tender.createdAt ? tender.createdAt.split('T')[0] : null;
+    tender.submissionDeadline = tender.bidDeadline ? tender.bidDeadline.split('T')[0] : '';
+    tender.bidsReceived = tender.bidsReceived || 0;
+    tender.daysLeft = tender.bidDeadline ? Math.ceil((new Date(tender.bidDeadline) - new Date()) / (1000 * 60 * 60 * 24)) : 0;
+    tender.status = status;
+
     return matchesTab && matchesSearch;
   });
 
@@ -197,7 +265,7 @@ const TenderManagement = () => {
           <h1 className="text-2xl font-bold text-gray-900">Tender Management</h1>
           <p className="text-gray-600">Create, manage, and track your tender publications</p>
         </div>
-        <button onClick={() => setShowModal(true)} className="flex items-center gap-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors">
+        <button onClick={() => { setModalMode('create'); setModalInitialData(null); setShowModal(true); }} className="flex items-center gap-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors">
           <Plus className="w-4 h-4" />
           Create New Tender
         </button>
@@ -347,12 +415,31 @@ const TenderManagement = () => {
                     Continue Editing
                   </button>
                 ) : (
-                  <button className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm">
+                  <button
+                    onClick={() => {
+                      // open modal in edit mode with this tender's data
+                      setModalMode('edit');
+                      setModalInitialData(tender);
+                      setShowModal(true);
+                    }}
+                    className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm"
+                  >
                     <Edit className="w-4 h-4" />
                     Edit Tender
                   </button>
                 )}
-                <button className="flex items-center gap-2 text-gray-600 hover:text-gray-700 font-medium text-sm">
+                <button
+                  onClick={() => {
+                    // open modal in duplicate mode with this tender's data
+                    setModalMode('duplicate');
+                    // for duplication we remove id so the modal creates a new tender
+                    const dup = { ...tender };
+                    delete dup.id;
+                    setModalInitialData(dup);
+                    setShowModal(true);
+                  }}
+                  className="flex items-center gap-2 text-gray-600 hover:text-gray-700 font-medium text-sm"
+                >
                   <Copy className="w-4 h-4" />
                   Duplicate
                 </button>
@@ -412,8 +499,17 @@ const TenderManagement = () => {
 
       <TenderFormModal
         show={showModal}
-        onClose={() => setShowModal(false)}
-        onSubmit={handleNewTender}
+        onClose={() => {
+          setShowModal(false);
+          // reset modal mode/data
+          setModalMode('create');
+          setModalInitialData(null);
+        }}
+        onSubmit={(data, mode) => {
+          handleTenderSaved(data, mode);
+        }}
+        mode={modalMode}
+        initialData={modalInitialData}
       />
       <TenderDetailsModal
         show={showDetails}
