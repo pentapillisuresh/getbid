@@ -1,11 +1,22 @@
-import React, { useState, useRef } from 'react';
-import { X, Upload, FileText, CheckCircle, AlertCircle, Building2, IndianRupee, Calendar } from 'lucide-react';
-import VerifyBidPopup from './VerifyBidPopup';
+import React, { useState, useRef, useEffect } from "react";
+import {
+  X,
+  Upload,
+  FileText,
+  CheckCircle,
+  AlertCircle,
+  Building2,
+  IndianRupee,
+  Calendar,
+} from "lucide-react";
+import VerifyBidPopup from "./VerifyBidPopup";
+import api, { createApiClient } from "../../../services/apiService";
+import toastService from "../../../services/toastService";
 
 const SubmitBidPopup = ({ tender, onClose }) => {
-  const [bidAmount, setBidAmount] = useState('');
-  const [deliveryTimeline, setDeliveryTimeline] = useState('');
-  const [techProposal, setTechProposal] = useState('');
+  const [bidAmount, setBidAmount] = useState("");
+  const [deliveryTimeline, setDeliveryTimeline] = useState("");
+  const [techProposal, setTechProposal] = useState("");
   const [selectedDocs, setSelectedDocs] = useState([]);
   const [quotationFile, setQuotationFile] = useState(null);
   const [agreedTerms, setAgreedTerms] = useState(false);
@@ -14,21 +25,42 @@ const SubmitBidPopup = ({ tender, onClose }) => {
 
   const quotationFileRef = useRef(null);
 
-  const companyDocs = [
-    { id: 1, name: 'Company Registration Certificate.pdf', selected: true },
-    { id: 2, name: 'Tax Registration.pdf', selected: true },
-    { id: 3, name: 'ISO Certifications.pdf', selected: true },
-    { id: 4, name: 'Audited Financial Statements.pdf', selected: true },
-    { id: 5, name: 'Company Profile.pdf', selected: true },
-    { id: 6, name: 'Previous Project References.pdf', selected: true },
-  ];
+  const [documents, setDocuments] = useState([]);
+  const [docsLoading, setDocsLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  const [documents, setDocuments] = useState(companyDocs);
+  // Fetch user's documents to allow selection in the bid form
+  useEffect(() => {
+    (async () => {
+      try {
+        setDocsLoading(true);
+        const resp = await api.get("/v1/documents");
+        const items = (resp && resp.data) || [];
+        const mapped = items.map((d) => ({
+          id: d._id,
+          name:
+            d.name || (d.file && d.file.fileName) || d.fileName || "Untitled",
+          selected: true,
+          fileId: d.file && d.file._id ? d.file._id : d.file || null,
+        }));
+        setDocuments(mapped);
+      } catch (err) {
+        console.error("Failed to load documents for bid form", err);
+        toastService.showError(
+          (err && err.message) || "Failed to load documents"
+        );
+      } finally {
+        setDocsLoading(false);
+      }
+    })();
+  }, []);
 
   const toggleDocument = (id) => {
-    setDocuments(documents.map(doc =>
-      doc.id === id ? { ...doc, selected: !doc.selected } : doc
-    ));
+    setDocuments(
+      documents.map((doc) =>
+        doc.id === id ? { ...doc, selected: !doc.selected } : doc
+      )
+    );
   };
 
   const handleFileUpload = (file) => {
@@ -40,19 +72,19 @@ const SubmitBidPopup = ({ tender, onClose }) => {
     if (file) {
       // Check file size (10MB limit)
       if (file.size > 10 * 1024 * 1024) {
-        alert('File size must be less than 10MB');
+        alert("File size must be less than 10MB");
         return;
       }
 
       // Check file type
       const allowedTypes = [
-        'application/pdf',
-        'application/vnd.ms-excel',
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        "application/pdf",
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       ];
 
       if (!allowedTypes.includes(file.type)) {
-        alert('Please upload only PDF or Excel files');
+        alert("Please upload only PDF or Excel files");
         return;
       }
 
@@ -73,20 +105,79 @@ const SubmitBidPopup = ({ tender, onClose }) => {
   };
 
   const handleVerifySubmit = () => {
-    // Handle successful verification
-    setShowVerifyPopup(false);
-    onClose();
+    // When user confirms in verification popup, submit the bid to API
+    (async () => {
+      try {
+        setSubmitting(true);
+
+        // 1) Upload quotation file (multipart) if present
+        let quotationFileId = null;
+        if (quotationFile) {
+          const fd = new FormData();
+          fd.append("image", quotationFile, quotationFile.name);
+
+          const multipartClient = createApiClient({
+            baseURL: api.defaults.baseURL,
+            headers: {},
+            getAuthToken: api.defaults.getAuthToken,
+          });
+
+          const uploadResp = await multipartClient.post("/v1/File/upload", {
+            body: fd,
+          });
+
+          const uploaded =
+            uploadResp && (uploadResp.file || uploadResp.data || uploadResp);
+          // uploaded could be the file object or an object containing file
+          const fileObj = uploaded && uploaded.file ? uploaded.file : uploaded;
+          if (fileObj && fileObj._id) quotationFileId = fileObj._id;
+        }
+
+        // 2) Prepare payload
+        const selectedDocIds = documents
+          .filter((d) => d.selected)
+          .map((d) => d.id);
+
+        const body = {
+          tender: tender?._id || tender?.id || tender?.title || "unknown",
+          amount: Number(String(bidAmount).replace(/,/g, "")) || 0,
+          timeline: deliveryTimeline,
+          summary: techProposal,
+          quotation: quotationFileId || "",
+          documents: selectedDocIds,
+        };
+
+        const resp = await api.post("/v1/bids", { body, showToasts: true });
+        toastService.showSuccess(
+          (resp && resp.message) || "Bid submitted successfully"
+        );
+        setShowVerifyPopup(false);
+        onClose();
+      } catch (err) {
+        console.error("Submit bid failed", err);
+        const msg = (err && err.message) || "Failed to submit bid";
+        toastService.showError(msg);
+      } finally {
+        setSubmitting(false);
+      }
+    })();
   };
 
-  const selectedDocCount = documents.filter(doc => doc.selected).length;
-  const isFormValid = bidAmount && deliveryTimeline && techProposal && quotationFile && agreedTerms && agreedFinancial;
+  const selectedDocCount = documents.filter((doc) => doc.selected).length;
+  const isFormValid =
+    bidAmount &&
+    deliveryTimeline &&
+    techProposal &&
+    quotationFile &&
+    agreedTerms &&
+    agreedFinancial;
 
   // Create bid data for verification popup
   const bidData = {
-    tender: tender?.title || 'Highway Construction Project Phase II',
+    tender: tender?.title || "Highway Construction Project Phase II",
     bidAmount: bidAmount,
     timeline: deliveryTimeline,
-    email: 'john.smith@techcorp.com'
+    email: "john.smith@techcorp.com",
   };
 
   return (
@@ -96,7 +187,9 @@ const SubmitBidPopup = ({ tender, onClose }) => {
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">Submit Bid</h2>
+              <h2 className="text-xl font-semibold text-gray-900">
+                Submit Bid
+              </h2>
               <p className="text-gray-600 text-sm mt-1">{tender?.title}</p>
             </div>
             <button
@@ -118,19 +211,27 @@ const SubmitBidPopup = ({ tender, onClose }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="text-gray-600">Company:</span>
-                    <div className="font-semibold text-gray-900">TechCorp Ltd.</div>
+                    <div className="font-semibold text-gray-900">
+                      TechCorp Ltd.
+                    </div>
                   </div>
                   <div>
                     <span className="text-gray-600">Registration:</span>
-                    <div className="font-semibold text-gray-900">TC-2019-001</div>
+                    <div className="font-semibold text-gray-900">
+                      TC-2019-001
+                    </div>
                   </div>
                   <div>
                     <span className="text-gray-600">Contact Person:</span>
-                    <div className="font-semibold text-gray-900">John Smith</div>
+                    <div className="font-semibold text-gray-900">
+                      John Smith
+                    </div>
                   </div>
                   <div>
                     <span className="text-gray-600">Email:</span>
-                    <div className="font-semibold text-blue-600">john.smith@techcorp.com</div>
+                    <div className="font-semibold text-blue-600">
+                      john.smith@techcorp.com
+                    </div>
                   </div>
                 </div>
               </div>
@@ -143,12 +244,18 @@ const SubmitBidPopup = ({ tender, onClose }) => {
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="text-gray-600">Estimated Contract Value:</span>
-                    <div className="font-bold text-green-600 text-xl">{tender?.estimatedValue}</div>
+                    <span className="text-gray-600">
+                      Estimated Contract Value:
+                    </span>
+                    <div className="font-bold text-green-600 text-xl">
+                      {tender?.estimatedValue}
+                    </div>
                   </div>
                   <div>
                     <span className="text-gray-600">Tender Category:</span>
-                    <div className="font-semibold text-gray-900">{tender?.category}</div>
+                    <div className="font-semibold text-gray-900">
+                      {tender?.category}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -162,7 +269,8 @@ const SubmitBidPopup = ({ tender, onClose }) => {
                   </label>
                   <div className="mb-2">
                     <span className="text-xs text-gray-500">
-                      Note: Your bid amount must be below the estimated contract value of {tender?.estimatedValue}
+                      Note: Your bid amount must be below the estimated contract
+                      value of {tender?.estimatedValue}
                     </span>
                   </div>
                   <input
@@ -194,7 +302,8 @@ const SubmitBidPopup = ({ tender, onClose }) => {
                 {/* Technical Proposal */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Technical Proposal Summary <span className="text-red-500">*</span>
+                    Technical Proposal Summary{" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   <textarea
                     rows="4"
@@ -213,14 +322,20 @@ const SubmitBidPopup = ({ tender, onClose }) => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Upload Quotation <span className="text-red-500">*</span>
                   </label>
-                  <p className="text-xs text-gray-500 mb-3">Upload your detailed quotation file (visible to client)</p>
+                  <p className="text-xs text-gray-500 mb-3">
+                    Upload your detailed quotation file (visible to client)
+                  </p>
                   <div
                     onClick={triggerQuotationUpload}
                     className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors cursor-pointer"
                   >
                     <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm font-medium text-gray-900">Choose Quotation File</p>
-                    <p className="text-xs text-gray-500 mt-1">Supported: PDF, Excel (.xls, .xlsx) • Max 10MB</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      Choose Quotation File
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Supported: PDF, Excel (.xls, .xlsx) • Max 10MB
+                    </p>
                     {quotationFile && (
                       <div className="mt-2 text-xs text-green-600 flex items-center justify-center gap-1">
                         <CheckCircle className="w-3 h-3" />
@@ -240,12 +355,16 @@ const SubmitBidPopup = ({ tender, onClose }) => {
                 {/* Document Selection */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-4">
-                    Select Documents from Your Profile <span className="text-red-500">*</span>
+                    Select Documents from Your Profile{" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   <div className="border border-gray-200 rounded-lg p-4">
                     <div className="space-y-3">
                       {documents.map((doc) => (
-                        <div key={doc.id} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded">
+                        <div
+                          key={doc.id}
+                          className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded"
+                        >
                           <input
                             type="checkbox"
                             id={`doc-${doc.id}`}
@@ -254,7 +373,10 @@ const SubmitBidPopup = ({ tender, onClose }) => {
                             className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                           />
                           <FileText className="w-4 h-4 text-blue-600" />
-                          <label htmlFor={`doc-${doc.id}`} className="text-sm text-gray-700 cursor-pointer flex-1">
+                          <label
+                            htmlFor={`doc-${doc.id}`}
+                            className="text-sm text-gray-700 cursor-pointer flex-1"
+                          >
                             {doc.name}
                           </label>
                         </div>
@@ -268,17 +390,37 @@ const SubmitBidPopup = ({ tender, onClose }) => {
 
                 {/* File Requirements */}
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <h4 className="font-medium text-yellow-800 mb-3">File Upload Requirements</h4>
+                  <h4 className="font-medium text-yellow-800 mb-3">
+                    File Upload Requirements
+                  </h4>
                   <ul className="text-sm text-yellow-700 space-y-1">
                     <li className="flex items-center gap-2">
-                      <span>• Quotation: Detailed pricing breakdown with line items</span>
-                      {!quotationFile && <span className="text-red-600 text-xs">❌ Required</span>}
-                      {quotationFile && <span className="text-green-600 text-xs">✅ Uploaded</span>}
+                      <span>
+                        • Quotation: Detailed pricing breakdown with line items
+                      </span>
+                      {!quotationFile && (
+                        <span className="text-red-600 text-xs">
+                          ❌ Required
+                        </span>
+                      )}
+                      {quotationFile && (
+                        <span className="text-green-600 text-xs">
+                          ✅ Uploaded
+                        </span>
+                      )}
                     </li>
-                    <li>• Format: PDF or Excel files only (.pdf, .xls, .xlsx)</li>
+                    <li>
+                      • Format: PDF or Excel files only (.pdf, .xls, .xlsx)
+                    </li>
                     <li>• Size Limit: Maximum 10MB per file</li>
-                    <li>• Visibility: Quotation file will be visible to the client during evaluation</li>
-                    <li>• Important: Files will be verified for completeness during evaluation</li>
+                    <li>
+                      • Visibility: Quotation file will be visible to the client
+                      during evaluation
+                    </li>
+                    <li>
+                      • Important: Files will be verified for completeness
+                      during evaluation
+                    </li>
                   </ul>
                 </div>
 
@@ -293,11 +435,18 @@ const SubmitBidPopup = ({ tender, onClose }) => {
                       className="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500 mt-1"
                     />
                     <div>
-                      <label htmlFor="financial-agreement" className="text-sm font-medium text-red-800 cursor-pointer">
+                      <label
+                        htmlFor="financial-agreement"
+                        className="text-sm font-medium text-red-800 cursor-pointer"
+                      >
                         Financial Responsibility Agreement:
                       </label>
                       <p className="text-xs text-red-700 mt-1">
-                        I acknowledge that this bidding portal is not responsible for any financial disputes, payment delays, or contractual issues between client and vendor. All financial matters are to be resolved directly between the contracting parties.
+                        I acknowledge that this bidding portal is not
+                        responsible for any financial disputes, payment delays,
+                        or contractual issues between client and vendor. All
+                        financial matters are to be resolved directly between
+                        the contracting parties.
                       </p>
                     </div>
                   </div>
@@ -310,8 +459,15 @@ const SubmitBidPopup = ({ tender, onClose }) => {
                       onChange={(e) => setAgreedTerms(e.target.checked)}
                       className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 mt-1"
                     />
-                    <label htmlFor="terms-agreement" className="text-sm text-gray-700 cursor-pointer">
-                      I accept all terms and conditions of the tender document and confirm that our company meets all eligibility criteria. I understand that false information may lead to disqualification. I also confirm that the uploaded quotation file is accurate and complete.
+                    <label
+                      htmlFor="terms-agreement"
+                      className="text-sm text-gray-700 cursor-pointer"
+                    >
+                      I accept all terms and conditions of the tender document
+                      and confirm that our company meets all eligibility
+                      criteria. I understand that false information may lead to
+                      disqualification. I also confirm that the uploaded
+                      quotation file is accurate and complete.
                     </label>
                   </div>
                 </div>
@@ -338,10 +494,11 @@ const SubmitBidPopup = ({ tender, onClose }) => {
                 <button
                   disabled={!isFormValid}
                   onClick={handleProceedToVerify}
-                  className={`px-8 py-3 rounded-lg font-medium transition-all ${isFormValid
-                    ? 'bg-primary hover:bg-blue-700 text-white transform hover:scale-105'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    }`}
+                  className={`px-8 py-3 rounded-lg font-medium transition-all ${
+                    isFormValid
+                      ? "bg-primary hover:bg-blue-700 text-white transform hover:scale-105"
+                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  }`}
                 >
                   proceed to verify
                 </button>
