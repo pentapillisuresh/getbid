@@ -7,36 +7,42 @@ function ServicesSection() {
       description:
         "We take a comprehensive approach to tender discovery starting from search algorithms and filters to tender categorization and alerts for private sector opportunities.",
       imgUrl: "/images/why1.jpg",
+      gifUrl: "/gifs/why1.mp4",
     },
     {
       title: "Bid Management",
       description:
         "From concept to bid submission, GetBid covers the entire business tender management process for private companies and contractors...",
       imgUrl: "/images/why2.jpg",
+      gifUrl: "/gifs/why2.mp4",
     },
     {
       title: "Document Management",
       description:
         "GetBid focuses on your document security by increasing the quality and quantity of our Document Services for private sector clients.",
       imgUrl: "/images/why3.jpg",
+      gifUrl: "/gifs/why3.mp4",
     },
     {
       title: "Compliance Support",
       description:
         "Navigate complex tender requirements with confidence. Our compliance tools help you understand regulations, maintain certifications, and ensure submissions meet all criteria.",
       imgUrl: "/images/why4.jpg",
+      gifUrl: "/gifs/why4.mp4",
     },
     {
       title: "Training & Support",
       description:
         "Empower your team with comprehensive training programs and ongoing support. Learn best practices for tender preparation, bidding strategies, and platform use.",
       imgUrl: "/images/why5.jpg",
+      gifUrl: "/gifs/why5.mp4",
     },
     {
       title: "Analytics & Reporting",
       description:
         "Make data-driven decisions with powerful analytics and reporting tools. Track your bidding performance, success rates, and ROI while analyzing market trends.",
       imgUrl: "/images/why6.jpg",
+      gifUrl: "/gifs/why6.mp4",
     },
   ];
 
@@ -69,10 +75,13 @@ function ServicesSection() {
 
               {/* Image */}
               <div className="w-full h-48 overflow-hidden rounded-lg mb-5">
-                <img
-                  src={service.imgUrl}
-                  alt={service.title}
-                  className="w-full h-full object-cover"
+                <video
+                  src={service.gifUrl}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-auto object-contain"
                 />
               </div>
 

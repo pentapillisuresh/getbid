@@ -4,7 +4,6 @@ import { Building2, Users, Eye, EyeOff, RefreshCw } from "lucide-react";
 import Header from "../components/shared/Header";
 import api from "../services/apiService";
 import toastService from "../services/toastService";
-import loginVideo from "../assets/login-animation-gif-download-12835554.mp4";
 
 const ChooseLoginType = () => {
   const navigate = useNavigate();
@@ -141,7 +140,7 @@ const ChooseLoginType = () => {
         <div className="hidden lg:flex w-1/2 fixed top-15 left-0 h-full bg-white items-start justify-center p-8">
           <div className="max-w-lg w-full">
             <video
-              src={loginVideo}
+              src="./gifs/login-animation-gif-download-12835554.mp4"
               autoPlay
               loop
               muted
