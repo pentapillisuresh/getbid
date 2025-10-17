@@ -583,9 +583,10 @@ const Registration = () => {
                       </label>
                       <input
                         type="text"
+                        name="firstName"
                         value={formData.firstName}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 text-sm"
-                        readOnly
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm"
                       />
                     </div>
                     <div>
@@ -594,9 +595,10 @@ const Registration = () => {
                       </label>
                       <input
                         type="text"
+                        name="lastName"
                         value={formData.lastName}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 text-sm"
-                        readOnly
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm"
                       />
                     </div>
                     <div>
@@ -605,9 +607,10 @@ const Registration = () => {
                       </label>
                       <input
                         type="text"
+                        name="fatherName"
                         value={formData.fatherName}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 text-sm"
-                        readOnly
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm"
                       />
                     </div>
                     <div>
@@ -616,9 +619,10 @@ const Registration = () => {
                       </label>
                       <input
                         type="date"
+                        name="dateOfBirth"
                         value={formData.dateOfBirth}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 text-sm"
-                        readOnly
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm"
                       />
                     </div>
                     <div className="col-span-2">
@@ -627,9 +631,10 @@ const Registration = () => {
                       </label>
                       <input
                         type="text"
+                        name="address"
                         value={formData.address}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 text-sm"
-                        readOnly
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm"
                       />
                     </div>
                     <div>
@@ -638,9 +643,10 @@ const Registration = () => {
                       </label>
                       <input
                         type="text"
+                        name="city"
                         value={formData.city}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 text-sm"
-                        readOnly
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm"
                       />
                     </div>
                     <div>
@@ -649,9 +655,10 @@ const Registration = () => {
                       </label>
                       <input
                         type="text"
+                        name="state"
                         value={formData.state}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 text-sm"
-                        readOnly
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm"
                       />
                     </div>
                   </div>

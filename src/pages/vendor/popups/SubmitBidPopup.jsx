@@ -182,11 +182,24 @@ const SubmitBidPopup = ({ tender, onClose, onSubmitted }) => {
     agreedFinancial;
 
   // Create bid data for verification popup
+  // read stored user info for auto-filled fields
+  let storedUser = {};
+  try {
+    if (typeof window !== "undefined" && window.localStorage) {
+      const raw = window.localStorage.getItem("user");
+      if (raw) storedUser = JSON.parse(raw) || {};
+    }
+  } catch (e) {
+    storedUser = {};
+  }
+
   const bidData = {
     tender: tender?.title || "Highway Construction Project Phase II",
     bidAmount: bidAmount,
     timeline: deliveryTimeline,
-    email: "john.smith@techcorp.com",
+    email: storedUser.email || "",
+    companyName: storedUser.companyName || storedUser.name || "Your Company",
+    contactPerson: storedUser.contactPerson || storedUser.name || "",
   };
 
   return (
@@ -221,7 +234,9 @@ const SubmitBidPopup = ({ tender, onClose, onSubmitted }) => {
                   <div>
                     <span className="text-gray-600">Company:</span>
                     <div className="font-semibold text-gray-900">
-                      TechCorp Ltd.
+                      {storedUser.companyName ||
+                        storedUser.name ||
+                        "Your Company"}
                     </div>
                   </div>
                   <div>
@@ -239,7 +254,7 @@ const SubmitBidPopup = ({ tender, onClose, onSubmitted }) => {
                   <div>
                     <span className="text-gray-600">Email:</span>
                     <div className="font-semibold text-blue-600">
-                      john.smith@techcorp.com
+                      {storedUser.email || ""}
                     </div>
                   </div>
                 </div>

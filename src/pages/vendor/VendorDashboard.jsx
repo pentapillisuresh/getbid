@@ -1,74 +1,87 @@
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  FileText, 
-  ClipboardList, 
-  User, 
+import React from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import {
+  LayoutDashboard,
+  FileText,
+  ClipboardList,
+  User,
   Folder,
   HeadphonesIcon,
-  TrendingUp
-} from 'lucide-react';
-import DashboardLayout from '../../components/shared/DashboardLayout';
-import Sidebar from '../../components/shared/Sidebar';
-import VendorDashboardHome from './pages/VendorDashboardHome';
-import TenderListings from './pages/TenderListings';
-import BidManagement from './pages/BidManagement';
-import ProfileManagement from './pages/ProfileManagement';
-import DocumentRepository from './pages/DocumentRepository';
-import ClarificationQA from './pages/ClarificationQA';
-import SupportHelpdesk from './pages/SupportHelpdesk';
+  TrendingUp,
+} from "lucide-react";
+import DashboardLayout from "../../components/shared/DashboardLayout";
+import Sidebar from "../../components/shared/Sidebar";
+import VendorDashboardHome from "./pages/VendorDashboardHome";
+import TenderListings from "./pages/TenderListings";
+import BidManagement from "./pages/BidManagement";
+import ProfileManagement from "./pages/ProfileManagement";
+import DocumentRepository from "./pages/DocumentRepository";
+import ClarificationQA from "./pages/ClarificationQA";
+import SupportHelpdesk from "./pages/SupportHelpdesk";
 
 const VendorDashboard = () => {
+  // Try to read logged-in user from localStorage (set during login)
+  let storedUser = {};
+  try {
+    if (typeof window !== "undefined" && window.localStorage) {
+      const raw = window.localStorage.getItem("user");
+      if (raw) storedUser = JSON.parse(raw) || {};
+    }
+  } catch (e) {
+    // ignore parse errors
+    storedUser = {};
+  }
+
   const userInfo = {
-    name: 'TechCorp Ltd.',
-    role: 'Verified Vendor'
+    name: storedUser.name || storedUser.companyName || "Guest",
+    email: storedUser.email || "",
+    role: storedUser.role || "Verified Vendor",
   };
 
   const sidebarItems = [
-    { 
-      icon: <LayoutDashboard className="w-5 h-5" />, 
-      label: 'Dashboard', 
-      path: '/dashboard' 
+    {
+      icon: <LayoutDashboard className="w-5 h-5" />,
+      label: "Dashboard",
+      path: "/dashboard",
     },
-    { 
-      icon: <FileText className="w-5 h-5" />, 
-      label: 'Tender Listings', 
-      path: '/tender-listings',
-      badge: '24'
+    {
+      icon: <FileText className="w-5 h-5" />,
+      label: "Tender Listings",
+      path: "/tender-listings",
+      badge: "24",
     },
-    { 
-      icon: <ClipboardList className="w-5 h-5" />, 
-      label: 'Bid Management', 
-      path: '/bid-management',
-      badge: '5'
+    {
+      icon: <ClipboardList className="w-5 h-5" />,
+      label: "Bid Management",
+      path: "/bid-management",
+      badge: "5",
     },
-    { 
-      icon: <User className="w-5 h-5" />, 
-      label: 'Profile Management', 
-      path: '/profile-management'
+    {
+      icon: <User className="w-5 h-5" />,
+      label: "Profile Management",
+      path: "/profile-management",
     },
-    { 
-      icon: <Folder className="w-5 h-5" />, 
-      label: 'Document Repository', 
-      path: '/document-repository'
+    {
+      icon: <Folder className="w-5 h-5" />,
+      label: "Document Repository",
+      path: "/document-repository",
     },
-    { 
-      icon: <TrendingUp className="w-5 h-5" />, 
-      label: 'Clarifications & Q&A', 
-      path: '/clarifications',
-      badge: '2'
+    {
+      icon: <TrendingUp className="w-5 h-5" />,
+      label: "Clarifications & Q&A",
+      path: "/clarifications",
+      badge: "2",
     },
-    { 
-      icon: <HeadphonesIcon className="w-5 h-5" />, 
-      label: 'Support & Helpdesk', 
-      path: '/support'
-    }
+    {
+      icon: <HeadphonesIcon className="w-5 h-5" />,
+      label: "Support & Helpdesk",
+      path: "/support",
+    },
   ];
 
   return (
-    <DashboardLayout 
-      title="eTender Portal" 
+    <DashboardLayout
+      title="eTender Portal"
       subtitle="Secure Procurement Platform"
       userInfo={userInfo}
       userType="vendor"
@@ -76,7 +89,10 @@ const VendorDashboard = () => {
       <Sidebar items={sidebarItems} basePath="/vendor" />
       <main className="flex-1 p-6">
         <Routes>
-          <Route path="/" element={<Navigate to="/vendor/dashboard" replace />} />
+          <Route
+            path="/"
+            element={<Navigate to="/vendor/dashboard" replace />}
+          />
           <Route path="/dashboard" element={<VendorDashboardHome />} />
           <Route path="/tender-listings" element={<TenderListings />} />
           <Route path="/bid-management" element={<BidManagement />} />

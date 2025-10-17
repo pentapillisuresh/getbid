@@ -261,6 +261,17 @@ const VendorDashboardHome = () => {
     })();
   }, []);
 
+  // read logged-in user's display name from localStorage
+  let storedUser = {};
+  try {
+    if (typeof window !== "undefined" && window.localStorage) {
+      const raw = window.localStorage.getItem("user");
+      if (raw) storedUser = JSON.parse(raw) || {};
+    }
+  } catch (e) {
+    storedUser = {};
+  }
+
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
@@ -268,7 +279,8 @@ const VendorDashboardHome = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold mb-2">
-              Welcome back, TechCorp Ltd.
+              Welcome back,{" "}
+              {storedUser.name || storedUser.companyName || "Guest"}
             </h1>
             <p className="text-primary-100 mb-4">
               Manage your tenders and track bid submissions efficiently
