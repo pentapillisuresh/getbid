@@ -8,7 +8,9 @@ const slides = [
     description:
       "Discover private sector opportunities faster with our AI-powered tender search, automated bid management, and comprehensive compliance support designed for modern businesses, companies, and individual contractors.",
     button1: "Login Now",
+    button1Link: "/choose-login-type",
     button2: "Register Now",
+    button2Link: "/register",
     image: "/images/bannerbid1.jpg",
   },
   {
@@ -71,10 +73,11 @@ export default function HeroCarousel() {
             {slides.map((slide, index) => (
               <div
                 key={index}
-                className={`transition-all duration-700 ease-in-out ${index === current
-                  ? "opacity-100 translate-x-0 relative"
-                  : "opacity-0 translate-x-10 absolute top-0 left-0 pointer-events-none"
-                  }`}
+                className={`transition-all duration-700 ease-in-out ${
+                  index === current
+                    ? "opacity-100 translate-x-0 relative"
+                    : "opacity-0 translate-x-10 absolute top-0 left-0 pointer-events-none"
+                }`}
               >
                 <p className="text-purple-600 font-semibold mb-4 text-lg">
                   {slide.subtitle}
@@ -86,10 +89,16 @@ export default function HeroCarousel() {
                   {slide.description}
                 </p>
                 <div className="flex gap-4">
-                  <button className="bg-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl">
+                  <button
+                    className="bg-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+                    onClick={() => (window.location.href = slide.button1Link)}
+                  >
                     {slide.button1}
                   </button>
-                  <button className="bg-white text-green-600 px-8 py-3 rounded-lg font-semibold border-2 border-green-600 hover:bg-green-50 transition-all duration-300 shadow-md hover:shadow-lg">
+                  <button
+                    className="bg-white text-green-600 px-8 py-3 rounded-lg font-semibold border-2 border-green-600 hover:bg-green-50 transition-all duration-300 shadow-md hover:shadow-lg"
+                    onClick={() => (window.location.href = slide.button2Link)}
+                  >
                     {slide.button2}
                   </button>
                 </div>
@@ -102,10 +111,11 @@ export default function HeroCarousel() {
             {slides.map((slide, index) => (
               <div
                 key={index}
-                className={`absolute inset-0 flex justify-center items-center transition-all duration-700 ease-in-out ${index === current
-                  ? "opacity-100 scale-100"
-                  : "opacity-0 scale-95 pointer-events-none"
-                  }`}
+                className={`absolute inset-0 flex justify-center items-center transition-all duration-700 ease-in-out ${
+                  index === current
+                    ? "opacity-100 scale-100"
+                    : "opacity-0 scale-95 pointer-events-none"
+                }`}
               >
                 <div className="w-full h-[500px]   flex items-center justify-center">
                   <img
@@ -125,10 +135,11 @@ export default function HeroCarousel() {
             <button
               key={index}
               onClick={() => setCurrent(index)}
-              className={`transition-all duration-300 rounded-full ${current === index
-                ? "bg-purple-600 w-8 h-3"
-                : "bg-gray-400 w-3 h-3 hover:bg-gray-500"
-                }`}
+              className={`transition-all duration-300 rounded-full ${
+                current === index
+                  ? "bg-purple-600 w-8 h-3"
+                  : "bg-gray-400 w-3 h-3 hover:bg-gray-500"
+              }`}
               aria-label={`Go to slide ${index + 1}`}
             ></button>
           ))}

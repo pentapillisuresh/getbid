@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   Eye,
   Download,
@@ -13,164 +13,136 @@ import {
   Award,
   AlertTriangle,
   Filter,
-  Search
-} from 'lucide-react';
-import EvaluationModal from '../popup/EvaluationModal';
+  Search,
+} from "lucide-react";
+import EvaluationModal from "../popup/EvaluationModal";
+import api from "../../../services/apiService";
+import toastService from "../../../services/toastService";
 
 const BidEvaluation = () => {
-  const [activeTab, setActiveTab] = useState('pending');
-  const [selectedTender, setSelectedTender] = useState('all');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState("all");
+  const [selectedTender, setSelectedTender] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBid, setSelectedBid] = useState(null);
 
   const tabs = [
-    { id: 'pending', label: 'Pending Evaluation', count: 8 },
-    { id: 'technical', label: 'Technical Review', count: 5 },
-    { id: 'financial', label: 'Financial Review', count: 3 },
-    { id: 'completed', label: 'Completed', count: 12 }
+    { id: "pending", label: "Pending Evaluation", count: 8 },
+    { id: "technical", label: "Technical Review", count: 5 },
+    { id: "financial", label: "Financial Review", count: 3 },
+    { id: "completed", label: "Completed", count: 12 },
   ];
 
   const tenders = [
-    'All Tenders',
-    'Highway Construction Project Phase II',
-    'Government Office IT Infrastructure',
-    'Medical Equipment Procurement',
-    'Smart City Infrastructure Development'
+    "All Tenders",
+    "Highway Construction Project Phase II",
+    "Government Office IT Infrastructure",
+    "Medical Equipment Procurement",
+    "Smart City Infrastructure Development",
   ];
 
-  const bids = [
-    {
-      id: 'BID-2024-001',
-      tenderTitle: 'Highway Construction Project Phase II',
-      tenderId: 'TND2024001',
-      vendorName: 'TechCorp Ltd.',
-      contactPerson: 'Amit Patel',
-      vendorRating: 4.8,
-      bidAmount: '₹8,25,00,000',
-      technicalScore: 85,
-      financialScore: 92,
-      submissionDate: '2024-04-12 14:30',
-      status: 'pending',
-      evaluationStage: 'technical',
-      completionPercentage: 35,
-      documents: [
-        { name: 'Technical Proposal', size: '5.2 MB', type: 'technical' },
-        { name: 'Financial Proposal', size: '2.1 MB', type: 'financial' },
-        { name: 'Company Profile', size: '8.5 MB', type: 'company' },
-        { name: 'Experience Certificates', size: '12.3 MB', type: 'experience' }
-      ],
-      experience: '15+ years',
-      previousProjects: 42,
-      complianceStatus: 'compliant',
-      notes: 'Strong technical proposal with innovative approach. Good financial standing.',
-      evaluationCriteria: {
-        technical: {
-          experience: { score: 0, maxScore: 20 },
-          expertise: { score: 0, maxScore: 25 },
-          resources: { score: 0, maxScore: 20 },
-          timeline: { score: 0, maxScore: 15 },
-          quality: { score: 0, maxScore: 20 }
-        },
-        financial: {
-          costEffectiveness: { score: 0, maxScore: 30 },
-          paymentTerms: { score: 0, maxScore: 20 },
-          totalCost: { score: 0, maxScore: 25 },
-          valueForMoney: { score: 0, maxScore: 25 }
+  // remote bids state (bids submitted to my tenders)
+  const [bids, setBids] = useState([]);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [hasMore, setHasMore] = useState(true);
+  const sentinelRef = useRef(null);
+
+  // normalize API bid item to the structure expected by the UI
+  const normalize = (item) => {
+    return {
+      id: item._id,
+      tenderTitle: item.tender?.title || "Untitled Tender",
+      tenderId: item.tender?._id || "",
+      vendorName:
+        item.user?.name || item.user?.company?.name || "Unknown Vendor",
+      contactPerson: item.user?.name || "",
+      vendorRating: item.user?.rating || 0,
+      bidAmount:
+        item.amount != null ? `₹${Number(item.amount).toLocaleString()}` : "-",
+      technicalScore: item.technicalScore || 0,
+      financialScore: item.financialScore || 0,
+      submissionDate: item.createdAt
+        ? new Date(item.createdAt).toLocaleString()
+        : "-",
+      status: item.status || "submitted",
+      evaluationStage: item.evaluationStage || "technical",
+      completionPercentage: item.completionPercentage || 0,
+      documents: item.documents || [],
+      experience: item.user?.experience || "-",
+      previousProjects: item.user?.previousProjects || 0,
+      complianceStatus: item.complianceStatus || "compliant",
+      notes: item.summary || item.notes || "",
+      evaluationCriteria: item.evaluationCriteria || {},
+      raw: item,
+    };
+  };
+
+  const fetchBids = useCallback(
+    async (p = 1, replace = false) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const resp = await api.get("/v1/bids/for-my-tenders", {
+          queryParams: { page: p, limit },
+        });
+        const data = resp && resp.data ? resp.data : [];
+        const tp =
+          resp && typeof resp.totalPages === "number" ? resp.totalPages : 1;
+        setTotalPages(tp);
+        setHasMore(p < tp);
+        setPage(p);
+        const norm = data.map(normalize);
+        setBids((prev) => (replace ? norm : [...prev, ...norm]));
+      } catch (err) {
+        setError(err?.message || "Failed to load bids");
+        if (toastService && typeof toastService.showError === "function") {
+          toastService.showError(err?.message || "Failed to load bids");
         }
+      } finally {
+        setLoading(false);
       }
     },
-    {
-      id: 'BID-2024-002',
-      tenderTitle: 'Government Office IT Infrastructure',
-      tenderId: 'TND2024002',
-      vendorName: 'InfoTech Solutions',
-      contactPerson: 'Priya Singh',
-      vendorRating: 4.6,
-      bidAmount: '₹6,15,00,000',
-      technicalScore: 78,
-      financialScore: 88,
-      submissionDate: '2024-04-10 16:45',
-      status: 'technical',
-      evaluationStage: 'technical',
-      completionPercentage: 65,
-      documents: [
-        { name: 'Technical Specs', size: '6.8 MB', type: 'technical' },
-        { name: 'Implementation Plan', size: '1.9 MB', type: 'technical' },
-        { name: 'Support Structure', size: '7.2 MB', type: 'company' },
-        { name: 'Financial Proposal', size: '1.5 MB', type: 'financial' }
-      ],
-      experience: '12+ years',
-      previousProjects: 28,
-      complianceStatus: 'compliant',
-      notes: 'Comprehensive technical solution. Competitive pricing with good value proposition.',
-      evaluationCriteria: {
-        technical: {
-          experience: { score: 0, maxScore: 20 },
-          expertise: { score: 0, maxScore: 25 },
-          resources: { score: 0, maxScore: 20 },
-          timeline: { score: 0, maxScore: 15 },
-          quality: { score: 0, maxScore: 20 }
-        },
-        financial: {
-          costEffectiveness: { score: 0, maxScore: 30 },
-          paymentTerms: { score: 0, maxScore: 20 },
-          totalCost: { score: 0, maxScore: 25 },
-          valueForMoney: { score: 0, maxScore: 25 }
-        }
-      }
-    },
-    {
-      id: 'BID-2024-003',
-      tenderTitle: 'Medical Equipment Procurement',
-      tenderId: 'TND2024003',
-      vendorName: 'MedEquip Industries',
-      contactPerson: 'Dr. Rajesh Kumar',
-      vendorRating: 4.9,
-      bidAmount: '₹11,75,00,000',
-      technicalScore: 94,
-      financialScore: 85,
-      submissionDate: '2024-04-08 11:20',
-      status: 'financial',
-      evaluationStage: 'financial',
-      completionPercentage: 85,
-      documents: [
-        { name: 'Equipment Specifications', size: '12.4 MB', type: 'technical' },
-        { name: 'Warranty Terms', size: '2.8 MB', type: 'technical' },
-        { name: 'Training Program', size: '5.1 MB', type: 'company' },
-        { name: 'Financial Proposal', size: '3.2 MB', type: 'financial' }
-      ],
-      experience: '20+ years',
-      previousProjects: 156,
-      complianceStatus: 'compliant',
-      notes: 'Excellent technical specifications. Premium equipment with extended warranty.',
-      evaluationCriteria: {
-        technical: {
-          experience: { score: 0, maxScore: 20 },
-          expertise: { score: 0, maxScore: 25 },
-          resources: { score: 0, maxScore: 20 },
-          timeline: { score: 0, maxScore: 15 },
-          quality: { score: 0, maxScore: 20 }
-        },
-        financial: {
-          costEffectiveness: { score: 0, maxScore: 30 },
-          paymentTerms: { score: 0, maxScore: 20 },
-          totalCost: { score: 0, maxScore: 25 },
-          valueForMoney: { score: 0, maxScore: 25 }
-        }
-      }
-    }
-  ];
+    [limit]
+  );
+
+  // initial load
+  useEffect(() => {
+    setBids([]);
+    setPage(1);
+    fetchBids(1, true);
+  }, [fetchBids]);
+
+  // infinite scroll observer
+  useEffect(() => {
+    if (!sentinelRef.current) return;
+    const node = sentinelRef.current;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && hasMore && !loading) {
+            fetchBids(page + 1, false);
+          }
+        });
+      },
+      { root: null, rootMargin: "200px", threshold: 0.1 }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [sentinelRef, hasMore, loading, page, fetchBids]);
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'pending':
+      case "pending":
         return <Clock className="w-5 h-5 text-orange-600" />;
-      case 'technical':
+      case "technical":
         return <FileText className="w-5 h-5 text-blue-600" />;
-      case 'financial':
+      case "financial":
         return <IndianRupee className="w-5 h-5 text-green-600" />;
-      case 'completed':
+      case "completed":
         return <CheckCircle className="w-5 h-5 text-purple-600" />;
       default:
         return <AlertTriangle className="w-5 h-5 text-gray-600" />;
@@ -178,16 +150,17 @@ const BidEvaluation = () => {
   };
 
   const getStatusBadge = (status) => {
-    const baseClasses = "inline-block px-3 py-1 rounded-full text-xs font-medium";
+    const baseClasses =
+      "inline-block px-3 py-1 rounded-full text-xs font-medium";
 
     switch (status) {
-      case 'pending':
+      case "pending":
         return `${baseClasses} bg-orange-100 text-orange-600`;
-      case 'technical':
+      case "technical":
         return `${baseClasses} bg-blue-100 text-blue-600`;
-      case 'financial':
+      case "financial":
         return `${baseClasses} bg-green-100 text-green-600`;
-      case 'completed':
+      case "completed":
         return `${baseClasses} bg-purple-100 text-purple-600`;
       default:
         return `${baseClasses} bg-gray-100 text-gray-600`;
@@ -196,11 +169,11 @@ const BidEvaluation = () => {
 
   const getComplianceIcon = (status) => {
     switch (status) {
-      case 'compliant':
+      case "compliant":
         return <CheckCircle className="w-4 h-4 text-green-600" />;
-      case 'non-compliant':
+      case "non-compliant":
         return <XCircle className="w-4 h-4 text-red-600" />;
-      case 'under-review':
+      case "under-review":
         return <Clock className="w-4 h-4 text-yellow-600" />;
       default:
         return <AlertTriangle className="w-4 h-4 text-gray-600" />;
@@ -208,20 +181,21 @@ const BidEvaluation = () => {
   };
 
   const getScoreColor = (score) => {
-    if (score >= 90) return 'text-green-600';
-    if (score >= 75) return 'text-blue-600';
-    if (score >= 60) return 'text-yellow-600';
-    return 'text-red-600';
+    if (score >= 90) return "text-green-600";
+    if (score >= 75) return "text-blue-600";
+    if (score >= 60) return "text-yellow-600";
+    return "text-red-600";
   };
 
   const getRatingStars = (rating) => {
     return Array.from({ length: 5 }, (_, i) => (
       <Star
         key={i}
-        className={`w-4 h-4 ${i < Math.floor(rating)
-          ? 'text-yellow-400 fill-current'
-          : 'text-gray-300'
-          }`}
+        className={`w-4 h-4 ${
+          i < Math.floor(rating)
+            ? "text-yellow-400 fill-current"
+            : "text-gray-300"
+        }`}
       />
     ));
   };
@@ -231,19 +205,39 @@ const BidEvaluation = () => {
     setIsModalOpen(true);
   };
 
-  const filteredBids = bids.filter(bid => {
-    const matchesTab = activeTab === 'all' || bid.status === activeTab;
-    const matchesTender = selectedTender === 'all' || selectedTender === 'All Tenders' || bid.tenderTitle === selectedTender;
-    const matchesSearch = bid.vendorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  const filteredBids = bids.filter((bid) => {
+    const matchesTab = activeTab === "all" || bid.status === activeTab;
+    const matchesTender =
+      selectedTender === "all" ||
+      selectedTender === "All Tenders" ||
+      bid.tenderTitle === selectedTender;
+    const matchesSearch =
+      bid.vendorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       bid.tenderTitle.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesTab && matchesTender && matchesSearch;
   });
 
   const stats = [
-    { label: 'Total Bids', value: '28', icon: <FileText className="w-6 h-6 text-blue-600" /> },
-    { label: 'Pending Review', value: '8', icon: <Clock className="w-6 h-6 text-orange-600" /> },
-    { label: 'Avg. Evaluation Time', value: '4.2 days', icon: <Calendar className="w-6 h-6 text-purple-600" /> },
-    { label: 'Completion Rate', value: '89%', icon: <CheckCircle className="w-6 h-6 text-green-600" /> }
+    {
+      label: "Total Bids",
+      value: "28",
+      icon: <FileText className="w-6 h-6 text-blue-600" />,
+    },
+    {
+      label: "Pending Review",
+      value: "8",
+      icon: <Clock className="w-6 h-6 text-orange-600" />,
+    },
+    {
+      label: "Avg. Evaluation Time",
+      value: "4.2 days",
+      icon: <Calendar className="w-6 h-6 text-purple-600" />,
+    },
+    {
+      label: "Completion Rate",
+      value: "89%",
+      icon: <CheckCircle className="w-6 h-6 text-green-600" />,
+    },
   ];
 
   return (
@@ -259,7 +253,10 @@ const BidEvaluation = () => {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {stats.map((stat, index) => (
-          <div key={index} className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+          <div
+            key={index}
+            className="bg-white rounded-lg shadow-md p-6 border border-gray-200"
+          >
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">{stat.label}</p>
@@ -289,8 +286,10 @@ const BidEvaluation = () => {
             onChange={(e) => setSelectedTender(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
-            {tenders.map(tender => (
-              <option key={tender} value={tender}>{tender}</option>
+            {tenders.map((tender) => (
+              <option key={tender} value={tender}>
+                {tender}
+              </option>
             ))}
           </select>
           <button className="flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
@@ -307,10 +306,11 @@ const BidEvaluation = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === tab.id
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
-                }`}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === tab.id
+                  ? "border-blue-500 text-blue-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
+              }`}
             >
               {tab.label}
               <span className="ml-2 bg-gray-100 text-gray-600 py-1 px-2 rounded-full text-xs">
@@ -324,7 +324,10 @@ const BidEvaluation = () => {
       {/* Bid Cards */}
       <div className="space-y-4">
         {filteredBids.map((bid) => (
-          <div key={bid.id} className="bg-white rounded-lg shadow-md p-6 border border-gray-200 border-l-4 border-l-blue-500 hover:shadow-lg transition-shadow duration-200">
+          <div
+            key={bid.id}
+            className="bg-white rounded-lg shadow-md p-6 border border-gray-200 border-l-4 border-l-blue-500 hover:shadow-lg transition-shadow duration-200"
+          >
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-start gap-4 flex-1">
                 <div className="p-3 rounded-full bg-gray-50">
@@ -332,7 +335,9 @@ const BidEvaluation = () => {
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-lg font-semibold text-gray-900">{bid.tenderTitle}</h3>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {bid.tenderTitle}
+                    </h3>
                     <span className="px-2 py-1 bg-blue-100 text-blue-600 rounded-full text-xs font-medium">
                       ID: {bid.id}
                     </span>
@@ -341,39 +346,63 @@ const BidEvaluation = () => {
                   <div className="flex items-center gap-4 mb-4">
                     <div className="flex items-center gap-2">
                       <User className="w-4 h-4 text-gray-500" />
-                      <span className="font-medium text-gray-900">{bid.vendorName}</span>
+                      <span className="font-medium text-gray-900">
+                        {bid.vendorName}
+                      </span>
                     </div>
                     <div className="flex items-center gap-1">
                       {getRatingStars(bid.vendorRating)}
-                      <span className="text-sm text-gray-600 ml-1">({bid.vendorRating})</span>
+                      <span className="text-sm text-gray-600 ml-1">
+                        ({bid.vendorRating})
+                      </span>
                     </div>
                     <div className="flex items-center gap-1">
                       {getComplianceIcon(bid.complianceStatus)}
-                      <span className="text-sm text-gray-600 capitalize">{bid.complianceStatus.replace('-', ' ')}</span>
+                      <span className="text-sm text-gray-600 capitalize">
+                        {bid.complianceStatus.replace("-", " ")}
+                      </span>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                     <div>
                       <span className="text-sm text-gray-500">Bid Amount</span>
-                      <div className="font-semibold text-green-600 text-lg">{bid.bidAmount}</div>
+                      <div className="font-semibold text-green-600 text-lg">
+                        {bid.bidAmount}
+                      </div>
                     </div>
                     <div>
-                      <span className="text-sm text-gray-500">Technical Score</span>
-                      <div className={`font-semibold text-lg ${getScoreColor(bid.technicalScore)}`}>
+                      <span className="text-sm text-gray-500">
+                        Technical Score
+                      </span>
+                      <div
+                        className={`font-semibold text-lg ${getScoreColor(
+                          bid.technicalScore
+                        )}`}
+                      >
                         {bid.technicalScore}/100
                       </div>
                     </div>
                     <div>
-                      <span className="text-sm text-gray-500">Financial Score</span>
-                      <div className={`font-semibold text-lg ${getScoreColor(bid.financialScore)}`}>
+                      <span className="text-sm text-gray-500">
+                        Financial Score
+                      </span>
+                      <div
+                        className={`font-semibold text-lg ${getScoreColor(
+                          bid.financialScore
+                        )}`}
+                      >
                         {bid.financialScore}/100
                       </div>
                     </div>
                     <div>
                       <span className="text-sm text-gray-500">Experience</span>
-                      <div className="font-semibold text-gray-900">{bid.experience}</div>
-                      <div className="text-sm text-gray-500">{bid.previousProjects} projects</div>
+                      <div className="font-semibold text-gray-900">
+                        {bid.experience}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {bid.previousProjects} projects
+                      </div>
                     </div>
                   </div>
 
@@ -381,7 +410,9 @@ const BidEvaluation = () => {
                   <div className="mb-4">
                     <div className="flex items-center justify-between text-sm mb-1">
                       <span className="text-gray-600">Evaluation Progress</span>
-                      <span className="font-medium">{bid.completionPercentage}%</span>
+                      <span className="font-medium">
+                        {bid.completionPercentage}%
+                      </span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div
@@ -393,10 +424,15 @@ const BidEvaluation = () => {
 
                   {/* Documents */}
                   <div className="mb-4">
-                    <span className="text-sm text-gray-500 block mb-2">Documents:</span>
+                    <span className="text-sm text-gray-500 block mb-2">
+                      Documents:
+                    </span>
                     <div className="flex flex-wrap gap-2">
                       {bid.documents.map((doc, index) => (
-                        <span key={index} className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs">
+                        <span
+                          key={index}
+                          className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs"
+                        >
                           {doc.name}
                         </span>
                       ))}
@@ -404,7 +440,9 @@ const BidEvaluation = () => {
                   </div>
 
                   <div className="bg-gray-50 p-3 rounded-lg">
-                    <h4 className="font-medium text-gray-900 mb-1">Evaluation Notes:</h4>
+                    <h4 className="font-medium text-gray-900 mb-1">
+                      Evaluation Notes:
+                    </h4>
                     <p className="text-sm text-gray-700">{bid.notes}</p>
                   </div>
                 </div>
@@ -412,7 +450,8 @@ const BidEvaluation = () => {
 
               <div className="text-right">
                 <span className={getStatusBadge(bid.status)}>
-                  {bid.evaluationStage.charAt(0).toUpperCase() + bid.evaluationStage.slice(1)}
+                  {bid.evaluationStage.charAt(0).toUpperCase() +
+                    bid.evaluationStage.slice(1)}
                 </span>
                 <div className="text-sm text-gray-500 mt-1">
                   {bid.submissionDate}
@@ -433,7 +472,8 @@ const BidEvaluation = () => {
               </div>
 
               <div className="flex items-center gap-2">
-                {bid.status === 'completed' && bid.evaluationStage === 'awarded' ? (
+                {bid.status === "completed" &&
+                bid.evaluationStage === "awarded" ? (
                   <span className="flex items-center gap-1 text-green-600 font-medium text-sm">
                     <Award className="w-4 h-4" />
                     Awarded
@@ -447,10 +487,13 @@ const BidEvaluation = () => {
                       onClick={() => handleEvaluateBid(bid)}
                       className="bg-primary-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors"
                     >
-                      {bid.status === 'pending' ? 'Start Evaluation' :
-                        bid.status === 'technical' ? 'Continue Technical' :
-                          bid.status === 'financial' ? 'Continue Financial' :
-                            'Review Completed'}
+                      {bid.status === "pending"
+                        ? "Start Evaluation"
+                        : bid.status === "technical"
+                        ? "Continue Technical"
+                        : bid.status === "financial"
+                        ? "Continue Financial"
+                        : "Review Completed"}
                     </button>
                   </>
                 )}
@@ -460,17 +503,28 @@ const BidEvaluation = () => {
         ))}
       </div>
 
+      {/* Infinite scroll sentinel and status */}
+      <div className="mt-6 text-center">
+        {loading && <div className="text-sm text-gray-500">Loading...</div>}
+        {!loading && !hasMore && filteredBids.length > 0 && (
+          <div className="text-sm text-gray-500">No more bids</div>
+        )}
+        <div ref={sentinelRef} style={{ height: 1 }} />
+      </div>
+
       {/* Empty State */}
       {filteredBids.length === 0 && (
         <div className="text-center py-12">
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <FileText className="w-8 h-8 text-gray-400" />
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No bids found</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            No bids found
+          </h3>
           <p className="text-gray-500">
-            {searchTerm || selectedTender !== 'All Tenders'
-              ? 'Try adjusting your search criteria or filters'
-              : 'No bids available for evaluation at this time'}
+            {searchTerm || selectedTender !== "All Tenders"
+              ? "Try adjusting your search criteria or filters"
+              : "No bids available for evaluation at this time"}
           </p>
         </div>
       )}
