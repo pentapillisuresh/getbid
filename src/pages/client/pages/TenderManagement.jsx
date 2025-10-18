@@ -391,7 +391,7 @@ const TenderManagement = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search tenders..."
+                placeholder="Search by title, category, or department..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
@@ -504,6 +504,11 @@ const TenderManagement = () => {
                       </span>
                       <div className="font-semibold text-purple-600">
                         {tender.bidsReceived}
+                        {tender.isBidSubmitted && (
+                          <span className="ml-2 text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">
+                            ✓ Bid Submitted
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>

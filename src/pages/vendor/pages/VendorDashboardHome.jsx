@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "../../../services/apiService";
 import toastService from "../../../services/toastService";
+import { useNavigate } from "react-router-dom";
 
 import {
   FileText,
@@ -17,9 +18,13 @@ import {
   XCircle,
 } from "lucide-react";
 import TopupModal from "../../../components/shared/TopupModal";
+import ViewDetailsPopup from "../popups/ViewDetailsPopup";
 
 const VendorDashboardHome = () => {
   const [showTopupModal, setShowTopupModal] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedTender, setSelectedTender] = useState(null);
+  const navigate = useNavigate();
   const stats = [
     {
       title: "Active Tenders",
@@ -55,41 +60,93 @@ const VendorDashboardHome = () => {
     },
   ];
 
-  const recentTenders = [
-    {
-      id: 1,
-      title: "Highway Construction Project Phase II",
-      department: "Department of Public Works",
-      category: "Construction",
-      estimatedValue: "₹85,50,000",
-      deadline: "2024-05-15",
-      status: "Open",
-      daysLeft: 15,
-      statusColor: "green",
-    },
-    {
-      id: 2,
-      title: "Government Office IT Infrastructure",
-      department: "Ministry of Electronics & IT Services",
-      category: "IT Services",
-      estimatedValue: "₹65,75,000",
-      deadline: "2024-05-10",
-      status: "Closing Soon",
-      daysLeft: 5,
-      statusColor: "yellow",
-    },
-    {
-      id: 3,
-      title: "Medical Equipment Procurement",
-      department: "State Health Department",
-      category: "Healthcare",
-      estimatedValue: "₹1,25,50,000",
-      deadline: "2024-05-08",
-      status: "Open",
-      daysLeft: 12,
-      statusColor: "green",
-    },
-  ];
+  const [recentTenders, setRecentTenders] = useState([]);
+  const [tendersLoading, setTendersLoading] = useState(false);
+  const [tendersError, setTendersError] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        setTendersLoading(true);
+        setTendersError(null);
+        const resp = await api.get("/v1/tenders?page=1&limit=3");
+
+        const items = (resp && resp.data) || [];
+        const mapped = items.map((t) => {
+          const deadline = t.bidDeadline || t.deadline || null;
+          const daysLeft = deadline
+            ? Math.max(
+                Math.ceil(
+                  (new Date(deadline) - new Date()) / (1000 * 60 * 60 * 24)
+                ),
+                0
+              )
+            : null;
+          const status = t.isActive
+            ? daysLeft === 0
+              ? "Closing"
+              : "Open"
+            : "Closed";
+          const statusColor =
+            status === "Open"
+              ? "green"
+              : status === "Closing"
+              ? "yellow"
+              : "gray";
+
+          // Format location string
+          const locationParts = [t.district, t.state].filter(Boolean);
+          const location = locationParts.join(", ") || "Not specified";
+
+          // Format meeting date
+          const meetingDate = t.meetingDate
+            ? new Date(t.meetingDate).toLocaleDateString()
+            : null;
+
+          return {
+            id: t._id,
+            title: t.title || "Untitled Tender",
+            department: t.department || t.state || "",
+            category: t.category || "General",
+            estimatedValue: formatCurrency(t.value || t.estimatedValue || 0),
+            deadline: deadline ? new Date(deadline).toLocaleDateString() : "-",
+            status,
+            daysLeft: daysLeft === null ? "-" : daysLeft,
+            statusColor,
+            bidsCount: t.bidsCount || 0,
+            isBidSubmitted: !!t.isBidSubmitted,
+
+            // Additional fields for ViewDetailsPopup
+            description: t.description || "No description available",
+            eligibilityCriteria: t.eligibilityCriteria || [],
+            technicalSpecifications: t.technicalSpecifications || "",
+            documents: t.documents || [],
+            meetingDate: meetingDate,
+            meetingVenue: t.meetingVenue || "",
+            location: location,
+            address: t.address || "",
+            contactPerson: t.contactPerson || "",
+            contactNumber: t.contactNumber || "",
+            contactEmail: t.contactEmail || "",
+            publishedDate: t.createdAt
+              ? new Date(t.createdAt).toLocaleDateString()
+              : "",
+            documentFee: "Not specified",
+            emd: "Not specified",
+            originalData: t, // Keep original data for reference
+          };
+        });
+        setRecentTenders(mapped);
+      } catch (err) {
+        console.error("Failed to load recent tenders", err);
+        setTendersError(
+          (err && err.message) || "Failed to load recent tenders"
+        );
+      } finally {
+        setTendersLoading(false);
+      }
+    })();
+  }, []);
 
   const recentActivity = [
     {
@@ -128,24 +185,28 @@ const VendorDashboardHome = () => {
       description: "Find new opportunities",
       icon: <FileText className="w-6 h-6 text-blue-600" />,
       color: "blue",
+      route: "/vendor/tender-listings",
     },
     {
       title: "Submit Bid",
       description: "Upload your proposal",
       icon: <Clock className="w-6 h-6 text-green-600" />,
       color: "green",
+      route: "/vendor/tender-listings",
     },
     {
       title: "Track Bids",
       description: "Monitor submission status",
       icon: <TrendingUp className="w-6 h-6 text-purple-600" />,
       color: "purple",
+      route: "/vendor/bid-management",
     },
     {
       title: "Top-up Plan",
       description: "Add more tender credits",
       icon: <Award className="w-6 h-6 text-orange-600" />,
       color: "orange",
+      action: "topup",
     },
   ];
 
@@ -241,6 +302,18 @@ const VendorDashboardHome = () => {
     } catch (err) {
       console.error("Failed to refresh subscriptions", err);
     }
+  };
+
+  // handle showing tender details modal
+  const handleShowTenderDetails = (tender) => {
+    setSelectedTender(tender);
+    setShowDetailsModal(true);
+  };
+
+  // handle closing tender details modal
+  const handleCloseDetailsModal = () => {
+    setShowDetailsModal(false);
+    setSelectedTender(null);
   };
 
   // fetch subscriptions
@@ -476,6 +549,10 @@ const VendorDashboardHome = () => {
           {quickActions.map((action, index) => (
             <button
               key={index}
+              onClick={() => {
+                if (action.route) return navigate(action.route);
+                if (action.action === "topup") return setShowTopupModal(true);
+              }}
               className="p-4 rounded-lg border-2 border-dashed border-gray-200 hover:border-primary-300 hover:bg-primary-50 transition-all duration-200 text-left group"
             >
               <div className="flex flex-col items-center text-center">
@@ -503,7 +580,10 @@ const VendorDashboardHome = () => {
               <h2 className="text-xl font-bold text-gray-900">
                 Latest Tender Opportunities
               </h2>
-              <button className="text-primary-600 hover:text-primary-700 font-medium text-sm">
+              <button
+                onClick={() => navigate("/vendor/tender-listings")}
+                className="text-primary-600 hover:text-primary-700 font-medium text-sm"
+              >
                 View All Tender Listings →
               </button>
             </div>
@@ -558,7 +638,10 @@ const VendorDashboardHome = () => {
                   </div>
 
                   <div className="flex items-center gap-2 pt-3 border-t border-gray-100">
-                    <button className="flex items-center gap-2 text-primary-600 hover:text-primary-700 text-sm font-medium">
+                    <button
+                      onClick={() => handleShowTenderDetails(tender)}
+                      className="flex items-center gap-2 text-primary-600 hover:text-primary-700 text-sm font-medium"
+                    >
                       <Eye className="w-4 h-4" />
                       View Details
                     </button>
@@ -576,7 +659,10 @@ const VendorDashboardHome = () => {
             </div>
 
             <div className="mt-6 text-center">
-              <button className="text-primary-600 hover:text-primary-700 font-medium">
+              <button
+                onClick={() => navigate("/vendor/bid-management")}
+                className="text-primary-600 hover:text-primary-700 font-medium"
+              >
                 View All Bid Submissions →
               </button>
             </div>
@@ -728,6 +814,13 @@ const VendorDashboardHome = () => {
         onSuccess={handleTopupSuccess}
         formatCurrency={formatCurrency}
       />
+
+      {showDetailsModal && selectedTender && (
+        <ViewDetailsPopup
+          tender={selectedTender}
+          onClose={handleCloseDetailsModal}
+        />
+      )}
     </div>
   );
 };

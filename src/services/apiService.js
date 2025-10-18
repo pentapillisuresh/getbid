@@ -115,20 +115,27 @@ const createApiClient = (config = {}) => {
     };
 
     if (body !== undefined && body !== null) {
-      // If body is a plain object and content-type is json, stringify it
-      const contentType = (
-        mergedHeaders["Content-Type"] ||
-        mergedHeaders["content-type"] ||
-        ""
-      ).toLowerCase();
-      if (
-        typeof body === "object" &&
-        !(body instanceof FormData) &&
-        contentType.includes("application/json")
-      ) {
-        fetchOpts.body = JSON.stringify(body);
-      } else {
+      // If body is FormData, let the browser set Content-Type with boundary
+      if (body instanceof FormData) {
+        // Remove Content-Type header to let browser set it with proper boundary
+        delete mergedHeaders["Content-Type"];
+        delete mergedHeaders["content-type"];
         fetchOpts.body = body;
+      } else {
+        // If body is a plain object and content-type is json, stringify it
+        const contentType = (
+          mergedHeaders["Content-Type"] ||
+          mergedHeaders["content-type"] ||
+          ""
+        ).toLowerCase();
+        if (
+          typeof body === "object" &&
+          contentType.includes("application/json")
+        ) {
+          fetchOpts.body = JSON.stringify(body);
+        } else {
+          fetchOpts.body = body;
+        }
       }
     }
 
