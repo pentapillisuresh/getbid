@@ -160,11 +160,11 @@ const TenderDetailsModal = ({ show, onClose, tender }) => {
           )}
 
           {/* Tender Documents */}
-          {tender.documents && tender.documents.length > 0 && (
-            <div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                Tender Documents
-              </h3>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">
+              Tender Documents
+            </h3>
+            {tender.documents && tender.documents.length > 0 ? (
               <div className="space-y-3">
                 {tender.documents.map((doc, index) => (
                   <div
@@ -175,7 +175,7 @@ const TenderDetailsModal = ({ show, onClose, tender }) => {
                       <span className="text-gray-700 font-medium">
                         {doc.fileName}
                       </span>
-                      <p className="text-sm text-gray-500">{doc.mimeType}</p>
+                      {/* <p className="text-sm text-gray-500">{doc.mimeType}</p> */}
                     </div>
                     <button
                       onClick={() => window.open(doc.url, "_blank")}
@@ -187,8 +187,12 @@ const TenderDetailsModal = ({ show, onClose, tender }) => {
                   </div>
                 ))}
               </div>
-            </div>
-          )}
+            ) : (
+              <div className="text-gray-500 p-3 bg-gray-50 rounded-lg">
+                No documents available for this tender.
+              </div>
+            )}
+          </div>
 
           {/* Pre-bid Meeting */}
           {tender.meetingDate && (

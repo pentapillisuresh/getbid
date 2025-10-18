@@ -26,21 +26,6 @@ const BidEvaluation = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBid, setSelectedBid] = useState(null);
 
-  const tabs = [
-    { id: "pending", label: "Pending Evaluation", count: 8 },
-    { id: "technical", label: "Technical Review", count: 5 },
-    { id: "financial", label: "Financial Review", count: 3 },
-    { id: "completed", label: "Completed", count: 12 },
-  ];
-
-  const tenders = [
-    "All Tenders",
-    "Highway Construction Project Phase II",
-    "Government Office IT Infrastructure",
-    "Medical Equipment Procurement",
-    "Smart City Infrastructure Development",
-  ];
-
   // remote bids state (bids submitted to my tenders)
   const [bids, setBids] = useState([]);
   const [page, setPage] = useState(1);
@@ -51,32 +36,91 @@ const BidEvaluation = () => {
   const [hasMore, setHasMore] = useState(true);
   const sentinelRef = useRef(null);
 
+  // Dynamic tabs that update based on bids data
+  const tabs = [
+    { id: "all", label: "All Bids", count: bids.length },
+    {
+      id: "pending",
+      label: "Pending Evaluation",
+      count: bids.filter((b) => b.status === "pending").length,
+    },
+    {
+      id: "technical",
+      label: "Technical Review",
+      count: bids.filter((b) => b.status === "technical").length,
+    },
+    {
+      id: "financial",
+      label: "Financial Review",
+      count: bids.filter((b) => b.status === "financial").length,
+    },
+    {
+      id: "completed",
+      label: "Completed",
+      count: bids.filter((b) => b.status === "completed").length,
+    },
+  ];
+
+  const tenders = [
+    "All Tenders",
+    "Highway Construction Project Phase II",
+    "Government Office IT Infrastructure",
+    "Medical Equipment Procurement",
+    "Smart City Infrastructure Development",
+  ];
+
   // normalize API bid item to the structure expected by the UI
   const normalize = (item) => {
+    // Calculate technical score from technicalEvaluation
+    const technicalScore = item.technicalEvaluation?.totalRating || 0;
+
+    // Calculate financial score from financialEvaluation
+    const financialScore = item.financialEvaluation?.totalRating || 0;
+
+    // Calculate completion percentage based on evaluation status
+    let completionPercentage = 0;
+    if (item.status === "pending") {
+      completionPercentage = 0;
+    } else if (item.status === "technical") {
+      completionPercentage = technicalScore > 0 ? 50 : 25;
+    } else if (item.status === "financial") {
+      completionPercentage = financialScore > 0 ? 100 : 75;
+    } else if (item.status === "completed") {
+      completionPercentage = 100;
+    }
+
     return {
       id: item._id,
       tenderTitle: item.tender?.title || "Untitled Tender",
       tenderId: item.tender?._id || "",
-      vendorName:
-        item.user?.name || item.user?.company?.name || "Unknown Vendor",
+      vendorName: item.user?.name || "Unknown Vendor",
       contactPerson: item.user?.name || "",
+      vendorEmail: item.user?.email || "",
+      vendorPhone: item.user?.phoneNumber || "",
       vendorRating: item.user?.rating || 0,
       bidAmount:
         item.amount != null ? `₹${Number(item.amount).toLocaleString()}` : "-",
-      technicalScore: item.technicalScore || 0,
-      financialScore: item.financialScore || 0,
+      timeline: item.timeline || "-",
+      technicalScore,
+      financialScore,
       submissionDate: item.createdAt
         ? new Date(item.createdAt).toLocaleString()
         : "-",
-      status: item.status || "submitted",
-      evaluationStage: item.evaluationStage || "technical",
-      completionPercentage: item.completionPercentage || 0,
+      status: item.status || "pending",
+      evaluationStage: item.status || "technical",
+      completionPercentage,
       documents: item.documents || [],
-      experience: item.user?.experience || "-",
-      previousProjects: item.user?.previousProjects || 0,
-      complianceStatus: item.complianceStatus || "compliant",
-      notes: item.summary || item.notes || "",
-      evaluationCriteria: item.evaluationCriteria || {},
+      quotation: item.quotation || null,
+      experience: "-", // Not provided in new response
+      previousProjects: 0, // Not provided in new response
+      complianceStatus: "compliant", // Default value, can be enhanced based on requirements
+      notes: item.summary || "",
+      evaluationCriteria: {
+        technical: item.technicalEvaluation || {},
+        financial: item.financialEvaluation || {},
+      },
+      technicalEvaluation: item.technicalEvaluation || null,
+      financialEvaluation: item.financialEvaluation || null,
       raw: item,
     };
   };
@@ -200,10 +244,56 @@ const BidEvaluation = () => {
     ));
   };
 
-  const handleEvaluateBid = (bid) => {
-    setSelectedBid(bid);
+  const handleEvaluateBid = async (bid) => {
+    try {
+      // Fetch the latest bid data before opening modal
+      const response = await api.get(`/v1/bids/${bid.id}`);
+      if (response && response.data) {
+        const updatedBid = normalize(response.data);
+        setSelectedBid(updatedBid);
+      } else {
+        setSelectedBid(bid);
+      }
+    } catch (error) {
+      console.error("Failed to fetch latest bid data:", error);
+      // Fallback to current bid data if API call fails
+      setSelectedBid(bid);
+    }
     setIsModalOpen(true);
   };
+
+  // Function to update bid data after evaluation is completed
+  const updateBidEvaluation = useCallback((updatedBid) => {
+    setBids((prevBids) =>
+      prevBids.map((bid) => {
+        if (bid.id === updatedBid.id) {
+          // Normalize the updated bid data
+          const normalized = normalize(updatedBid.raw);
+          return normalized;
+        }
+        return bid;
+      })
+    );
+  }, []);
+
+  // Function to refresh a specific bid from the server
+  const refreshBid = useCallback(async (bidId) => {
+    try {
+      const response = await api.get(`/v1/bids/${bidId}`);
+      if (response && response.data) {
+        setBids((prevBids) =>
+          prevBids.map((bid) => {
+            if (bid.id === bidId) {
+              return normalize(response.data);
+            }
+            return bid;
+          })
+        );
+      }
+    } catch (error) {
+      console.error("Failed to refresh bid:", error);
+    }
+  }, []);
 
   const filteredBids = bids.filter((bid) => {
     const matchesTab = activeTab === "all" || bid.status === activeTab;
@@ -220,22 +310,26 @@ const BidEvaluation = () => {
   const stats = [
     {
       label: "Total Bids",
-      value: "28",
+      value: bids.length.toString(),
       icon: <FileText className="w-6 h-6 text-blue-600" />,
     },
     {
       label: "Pending Review",
-      value: "8",
+      value: bids.filter((bid) => bid.status === "pending").length.toString(),
       icon: <Clock className="w-6 h-6 text-orange-600" />,
     },
     {
-      label: "Avg. Evaluation Time",
-      value: "4.2 days",
+      label: "Under Evaluation",
+      value: bids
+        .filter(
+          (bid) => bid.status === "technical" || bid.status === "financial"
+        )
+        .length.toString(),
       icon: <Calendar className="w-6 h-6 text-purple-600" />,
     },
     {
-      label: "Completion Rate",
-      value: "89%",
+      label: "Completed",
+      value: bids.filter((bid) => bid.status === "completed").length.toString(),
       icon: <CheckCircle className="w-6 h-6 text-green-600" />,
     },
   ];
@@ -372,6 +466,12 @@ const BidEvaluation = () => {
                       </div>
                     </div>
                     <div>
+                      <span className="text-sm text-gray-500">Timeline</span>
+                      <div className="font-semibold text-gray-900">
+                        {bid.timeline}
+                      </div>
+                    </div>
+                    <div>
                       <span className="text-sm text-gray-500">
                         Technical Score
                       </span>
@@ -380,7 +480,9 @@ const BidEvaluation = () => {
                           bid.technicalScore
                         )}`}
                       >
-                        {bid.technicalScore}/100
+                        {bid.technicalScore > 0
+                          ? `${bid.technicalScore}/100`
+                          : "Pending"}
                       </div>
                     </div>
                     <div>
@@ -392,16 +494,9 @@ const BidEvaluation = () => {
                           bid.financialScore
                         )}`}
                       >
-                        {bid.financialScore}/100
-                      </div>
-                    </div>
-                    <div>
-                      <span className="text-sm text-gray-500">Experience</span>
-                      <div className="font-semibold text-gray-900">
-                        {bid.experience}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {bid.previousProjects} projects
+                        {bid.financialScore > 0
+                          ? `${bid.financialScore}/100`
+                          : "Pending"}
                       </div>
                     </div>
                   </div>
@@ -430,12 +525,20 @@ const BidEvaluation = () => {
                     <div className="flex flex-wrap gap-2">
                       {bid.documents.map((doc, index) => (
                         <span
-                          key={index}
+                          key={doc._id || index}
                           className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs"
+                          title={doc.description || ""}
                         >
-                          {doc.name}
+                          {doc.name ||
+                            doc.file?.fileName ||
+                            `Document ${index + 1}`}
                         </span>
                       ))}
+                      {bid.quotation && (
+                        <span className="px-3 py-1 bg-green-50 text-green-600 rounded-full text-xs">
+                          Quotation
+                        </span>
+                      )}
                     </div>
                   </div>
 
@@ -483,18 +586,21 @@ const BidEvaluation = () => {
                     <button className="text-red-600 hover:text-red-700 text-sm font-medium">
                       Reject
                     </button>
-                    <button
-                      onClick={() => handleEvaluateBid(bid)}
-                      className="bg-primary-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors"
-                    >
-                      {bid.status === "pending"
-                        ? "Start Evaluation"
-                        : bid.status === "technical"
-                        ? "Continue Technical"
-                        : bid.status === "financial"
-                        ? "Continue Financial"
-                        : "Review Completed"}
-                    </button>
+                    {bid.status !== "accepted" && bid.status !== "rejected" && (
+                      <button
+                        onClick={() => handleEvaluateBid(bid)}
+                        className="bg-primary-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors"
+                      >
+                        {bid.status === "pending"
+                          ? "Start Evaluation"
+                          : bid.status === "technical"
+                          ? // ? "Continue Technical"
+                            "Continue Financial"
+                          : bid.status === "financial"
+                          ? "Update Evaluation"
+                          : ""}
+                      </button>
+                    )}
                   </>
                 )}
               </div>
@@ -533,7 +639,12 @@ const BidEvaluation = () => {
       {isModalOpen && selectedBid && (
         <EvaluationModal
           bid={selectedBid}
-          onClose={() => setIsModalOpen(false)}
+          onClose={() => {
+            setIsModalOpen(false);
+            // Refresh the bid data after closing the modal
+            refreshBid(selectedBid.id);
+          }}
+          onEvaluationUpdate={updateBidEvaluation}
         />
       )}
     </div>

@@ -193,9 +193,9 @@ const ViewDetailsPopup = ({ tender, onClose }) => {
                             <span className="text-gray-900">
                               {doc.fileName}
                             </span>
-                            <p className="text-xs text-gray-500">
+                            {/* <p className="text-xs text-gray-500">
                               {doc.mimeType}
-                            </p>
+                            </p> */}
                           </div>
                         </div>
                         <button

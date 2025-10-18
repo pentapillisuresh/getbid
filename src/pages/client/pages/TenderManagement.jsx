@@ -317,6 +317,11 @@ const TenderManagement = () => {
       : 0;
     tender.status = status;
 
+    // Ensure documents array is preserved from API response
+    if (!tender.documents) {
+      tender.documents = [];
+    }
+
     return matchesTab && matchesSearch;
   });
 
@@ -527,6 +532,8 @@ const TenderManagement = () => {
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => {
+                    console.log("Tender data for modal:", tender);
+                    console.log("Documents:", tender.documents);
                     setSelectedTender(tender);
                     setShowDetails(true);
                   }}
@@ -631,7 +638,14 @@ const TenderManagement = () => {
                   .find((t) => t.id === activeTab)
                   ?.label.toLowerCase()} status`}
           </p>
-          <button className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+          <button
+            className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+            onClick={() => {
+              setModalMode("create");
+              setModalInitialData(null);
+              setShowModal(true);
+            }}
+          >
             Create Your First Tender
           </button>
         </div>

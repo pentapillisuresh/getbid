@@ -26,15 +26,6 @@ const BidManagement = () => {
   const [showParticipants, setShowParticipants] = useState(false);
   const [showRebid, setShowRebid] = useState(false);
 
-  const tabs = [
-    { id: "all", label: "All Bids", count: 12 },
-    { id: "draft", label: "Draft", count: 2 },
-    { id: "submitted", label: "Submitted", count: 5 },
-    { id: "under-evaluation", label: "Under Evaluation", count: 3 },
-    { id: "awarded", label: "Awarded", count: 1 },
-    { id: "rejected", label: "Rejected", count: 2 },
-  ];
-
   // remote bids loaded from API
   const [bids, setBids] = useState([]);
   const [page, setPage] = useState(1);
@@ -45,12 +36,64 @@ const BidManagement = () => {
   const [hasMore, setHasMore] = useState(true);
   const sentinelRef = useRef(null);
 
+  // Dynamic tabs that update based on bids data
+  const tabs = [
+    { id: "all", label: "All Bids", count: bids.length },
+    {
+      id: "draft",
+      label: "Draft",
+      count: bids.filter((b) => b.status === "draft").length,
+    },
+    {
+      id: "submitted",
+      label: "Submitted",
+      count: bids.filter((b) => b.status === "submitted").length,
+    },
+    {
+      id: "pending",
+      label: "Pending Review",
+      count: bids.filter((b) => b.status === "pending").length,
+    },
+    {
+      id: "technical",
+      label: "Technical Review",
+      count: bids.filter((b) => b.status === "technical").length,
+    },
+    {
+      id: "financial",
+      label: "Financial Review",
+      count: bids.filter((b) => b.status === "financial").length,
+    },
+    {
+      id: "completed",
+      label: "Under Evaluation",
+      count: bids.filter((b) => b.status === "completed").length,
+    },
+    {
+      id: "awarded",
+      label: "Awarded",
+      count: bids.filter((b) => b.status === "awarded").length,
+    },
+    {
+      id: "rejected",
+      label: "Rejected",
+      count: bids.filter((b) => b.status === "rejected").length,
+    },
+  ];
+
   const getStatusBadge = (status) => {
     const baseClasses =
       "inline-flex items-center px-3 py-1 rounded-full text-xs font-medium";
     switch (status) {
+      case "pending":
+        return `${baseClasses} bg-yellow-100 text-yellow-700`;
       case "submitted":
         return `${baseClasses} bg-blue-100 text-blue-700`;
+      case "technical":
+        return `${baseClasses} bg-purple-100 text-purple-700`;
+      case "financial":
+        return `${baseClasses} bg-indigo-100 text-indigo-700`;
+      case "completed":
       case "under-evaluation":
         return `${baseClasses} bg-orange-100 text-orange-700`;
       case "awarded":
@@ -66,26 +109,88 @@ const BidManagement = () => {
 
   // normalize API bid item to the structure expected by the UI
   const normalize = (item) => {
+    // Determine evaluation status
+    const hasPartialEvaluation =
+      item.technicalEvaluation || item.financialEvaluation;
+    const hasCompleteEvaluation =
+      item.technicalEvaluation && item.financialEvaluation;
+
+    // Map status more accurately based on evaluation data
+    let displayStatus = item.status || "submitted";
+    let canRebid = false;
+    let evaluated = hasCompleteEvaluation;
+
+    // Determine if rebid is available (typically when tender is still open)
+    const deadline = item.tender?.bidDeadline
+      ? new Date(item.tender.bidDeadline)
+      : null;
+    const isBeforeDeadline = deadline ? new Date() < deadline : false;
+    canRebid =
+      isBeforeDeadline &&
+      (displayStatus === "submitted" || displayStatus === "pending");
+
+    // Format bid amount with currency
+    const formattedAmount =
+      item.amount != null ? `₹${Number(item.amount).toLocaleString()}` : "-";
+
     return {
       id: item._id,
       tenderId: item.tender?._id || "",
-      title: item.tender?.title || item.summary || "Untitled Bid",
+      title: item.tender?.title || "Untitled Tender",
       department: item.tender?.category || "",
-      bidAmount: item.amount != null ? String(item.amount) : "-",
+      bidAmount: formattedAmount,
+      timeline: item.timeline || "-",
       submittedDate: item.createdAt
         ? new Date(item.createdAt).toLocaleDateString()
         : "-",
       deadline: item.tender?.bidDeadline
         ? new Date(item.tender.bidDeadline).toLocaleDateString()
         : "-",
-      status: item.status || "submitted",
-      statusText: item.status || "Submitted",
-      canRebid: !!item.canRebid,
-      evaluated: !!item.evaluated,
+      status: displayStatus,
+      statusText: getStatusDisplayText(
+        displayStatus,
+        hasPartialEvaluation,
+        hasCompleteEvaluation
+      ),
+      canRebid,
+      evaluated,
       lastActivity: item.summary || "",
       documents: item.documents || [],
+      quotation: item.quotation || null,
+      technicalEvaluation: item.technicalEvaluation || null,
+      financialEvaluation: item.financialEvaluation || null,
+      // Additional tender information
+      tenderValue: item.tender?.value || 0,
+      tenderDescription: item.tender?.description || "",
+      contactPerson: item.tender?.contactPerson || "",
+      contactNumber: item.tender?.contactNumber || "",
+      location: `${item.tender?.district || ""}, ${
+        item.tender?.state || ""
+      }`.replace(/^, |, $/, ""),
       raw: item,
     };
+  };
+
+  // Helper function to get display text for status
+  const getStatusDisplayText = (status, hasPartialEval, hasCompleteEval) => {
+    switch (status) {
+      case "pending":
+        return "Pending Review";
+      case "technical":
+        return "Technical Evaluation";
+      case "financial":
+        return "Financial Evaluation";
+      case "completed":
+        return hasCompleteEval ? "Evaluation Complete" : "Under Review";
+      case "awarded":
+        return "Awarded";
+      case "rejected":
+        return "Rejected";
+      case "draft":
+        return "Draft";
+      default:
+        return "Submitted";
+    }
   };
 
   // try to read stored user id from localStorage (robust to several id field names)
@@ -183,22 +288,30 @@ const BidManagement = () => {
   const stats = [
     {
       label: "Total Bids",
-      value: "12",
+      value: bids.length.toString(),
       icon: <FileText className="w-6 h-6 text-blue-600" />,
     },
     {
-      label: "Success Rate",
-      value: "68%",
+      label: "Awarded",
+      value: bids.filter((bid) => bid.status === "awarded").length.toString(),
       icon: <CheckCircle className="w-6 h-6 text-green-600" />,
     },
     {
       label: "Under Review",
-      value: "3",
+      value: bids
+        .filter((bid) =>
+          ["technical", "financial", "completed", "pending"].includes(
+            bid.status
+          )
+        )
+        .length.toString(),
       icon: <Clock className="w-6 h-6 text-orange-600" />,
     },
     {
       label: "Total Value",
-      value: "1.2M",
+      value: `₹${(
+        bids.reduce((sum, bid) => sum + (bid.raw?.amount || 0), 0) / 100000
+      ).toFixed(1)}L`,
       icon: <IndianRupee className="w-6 h-6 text-purple-600" />,
     },
   ];
@@ -339,7 +452,8 @@ const BidManagement = () => {
                       {bid.title}
                     </h3>
                     <p className="text-gray-600 mb-3">
-                      Tender ID: {bid.tenderId} • Bid ID: {bid.id}
+                      Tender ID: {bid.tenderId} • Bid ID: {bid.id} • Category:{" "}
+                      {bid.department}
                     </p>
 
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-4">
@@ -353,6 +467,14 @@ const BidManagement = () => {
                       </div>
                       <div>
                         <span className="text-sm text-gray-500 block">
+                          Timeline
+                        </span>
+                        <div className="font-semibold text-gray-900">
+                          {bid.timeline}
+                        </div>
+                      </div>
+                      <div>
+                        <span className="text-sm text-gray-500 block">
                           Submitted Date
                         </span>
                         <div className="font-semibold text-gray-900">
@@ -361,21 +483,71 @@ const BidManagement = () => {
                       </div>
                       <div>
                         <span className="text-sm text-gray-500 block">
-                          Tender Deadline
+                          Deadline
                         </span>
                         <div className="font-semibold text-gray-900">
                           {bid.deadline}
                         </div>
                       </div>
-                      <div>
-                        <span className="text-sm text-gray-500 block">
-                          Category
-                        </span>
-                        <div className="font-semibold text-gray-900">
-                          {bid.category}
+                    </div>
+
+                    {/* Evaluation Scores */}
+                    {(bid.technicalEvaluation || bid.financialEvaluation) && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
+                        <div>
+                          <span className="text-sm text-gray-500 block">
+                            Technical Score
+                          </span>
+                          <div className="font-semibold text-blue-600 text-lg">
+                            {bid.technicalEvaluation?.totalRating || 0}/100
+                          </div>
+                          {bid.technicalEvaluation?.notes && (
+                            <div className="text-xs text-gray-600 mt-1">
+                              {bid.technicalEvaluation.notes}
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <span className="text-sm text-gray-500 block">
+                            Financial Score
+                          </span>
+                          <div className="font-semibold text-green-600 text-lg">
+                            {bid.financialEvaluation?.totalRating || 0}/100
+                          </div>
+                          {bid.financialEvaluation?.notes && (
+                            <div className="text-xs text-gray-600 mt-1">
+                              {bid.financialEvaluation.notes}
+                            </div>
+                          )}
                         </div>
                       </div>
-                    </div>
+                    )}
+
+                    {/* Documents */}
+                    {bid.documents && bid.documents.length > 0 && (
+                      <div className="mb-4">
+                        <span className="text-sm text-gray-500 block mb-2">
+                          Submitted Documents:
+                        </span>
+                        <div className="flex flex-wrap gap-2">
+                          {bid.documents.map((doc, index) => (
+                            <span
+                              key={doc._id || index}
+                              className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs"
+                              title={doc.description || ""}
+                            >
+                              {doc.name || `Document ${index + 1}`}
+                              {doc.category && ` (${doc.category})`}
+                            </span>
+                          ))}
+                          {bid.quotation && (
+                            <span className="px-3 py-1 bg-green-50 text-green-600 rounded-full text-xs">
+                              Quotation
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
 
                     <div className="mb-4">
                       <p className="text-sm text-gray-600">
