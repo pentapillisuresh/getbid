@@ -12,6 +12,7 @@ import {
   Send,
   Phone,
   Check,
+  Edit2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/apiService";
@@ -29,7 +30,19 @@ const Registration = () => {
   const [showMobileOtp, setShowMobileOtp] = useState(false);
   const [emailVerified, setEmailVerified] = useState(false);
   const [mobileVerified, setMobileVerified] = useState(false);
-  const [captchaCode] = useState("8K2M");
+
+  // Generate a random 4-character captcha: uppercase letters + digits
+  const generateCaptcha = () => {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let code = "";
+    for (let i = 0; i < 4; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+  };
+
+  const [captchaCode, setCaptchaCode] = useState(() => generateCaptcha());
+  const [captchaError, setCaptchaError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -75,9 +88,46 @@ const Registration = () => {
       return;
     }
 
+    // Handle captcha input: keep uppercase and limited to 4 chars
+    let newValue = value;
+    if (name === "captcha") {
+      newValue = value
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, "")
+        .slice(0, 4);
+      // Clear captcha error while user types
+      if (captchaError) setCaptchaError("");
+    }
+
+    // Reset verification status when email or mobile is changed
+    if (name === "email" && value !== formData.email) {
+      setEmailVerified(false);
+      setShowEmailOtp(false);
+      setFormData((prev) => ({ ...prev, emailOtp: "" }));
+    }
+
+    if (name === "mobile" && value !== formData.mobile) {
+      setMobileVerified(false);
+      setShowMobileOtp(false);
+      setFormData((prev) => ({ ...prev, mobileOtp: "" }));
+    }
+
+    // Reset verification status when PAN or GST is changed
+    if (name === "panNumber" && value !== formData.panNumber) {
+      setPanVerified(false);
+      setShowPanOtp(false);
+      setFormData((prev) => ({ ...prev, panOtp: "" }));
+    }
+
+    if (name === "gstNumber" && value !== formData.gstNumber) {
+      setGstVerified(false);
+      setShowGstOtp(false);
+      setFormData((prev) => ({ ...prev, gstOtp: "" }));
+    }
+
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: type === "checkbox" ? checked : newValue,
     }));
   };
 
@@ -119,42 +169,172 @@ const Registration = () => {
     }
   };
 
-  const sendEmailOtp = () => {
-    if (formData.email) {
-      setShowEmailOtp(true);
-      alert("OTP sent to your email address");
-    } else {
-      alert("Please enter your email address");
+  const sendEmailOtp = async () => {
+    if (!formData.email) {
+      toastService.showError("Please enter your email address");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await api.post("/auth/send-otp", {
+        body: {
+          type: "email",
+          contact: formData.email,
+        },
+      });
+
+      if (response.success) {
+        setShowEmailOtp(true);
+        toastService.showSuccess(
+          response.message || "OTP sent to your email address"
+        );
+      }
+    } catch (error) {
+      const message =
+        error?.data?.message || error.message || "Failed to send OTP";
+      toastService.showError(message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const verifyEmailOtp = () => {
-    if (formData.emailOtp === "123456") {
-      setEmailVerified(true);
-      setShowEmailOtp(false);
-      alert("Email verified successfully!");
-    } else {
-      alert("Invalid OTP. Please try again.");
+  const verifyEmailOtp = async () => {
+    if (!formData.emailOtp || formData.emailOtp.length !== 6) {
+      toastService.showError("Please enter a valid 6-digit OTP");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await api.post("/auth/verify-otp", {
+        body: {
+          type: "email",
+          contact: formData.email,
+          otp: formData.emailOtp,
+          deviceDetails: {
+            deviceType: "web",
+            deviceName: navigator.userAgent || "web-client",
+          },
+        },
+      });
+
+      if (response.success) {
+        setEmailVerified(true);
+        setShowEmailOtp(false);
+        toastService.showSuccess("Email verified successfully!");
+      }
+    } catch (error) {
+      const message =
+        error?.data?.message ||
+        error.message ||
+        "Invalid OTP. Please try again.";
+      toastService.showError(message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const sendMobileOtp = () => {
-    if (formData.mobile.length === 10) {
-      setShowMobileOtp(true);
-      alert("OTP sent to your mobile number");
-    } else {
-      alert("Please enter a valid 10-digit mobile number");
+  const sendMobileOtp = async () => {
+    if (!formData.mobile || formData.mobile.length !== 10) {
+      toastService.showError("Please enter a valid 10-digit mobile number");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await api.post("/auth/send-otp", {
+        body: {
+          type: "phone",
+          contact: formData.mobile,
+        },
+      });
+
+      if (response.success) {
+        setShowMobileOtp(true);
+        toastService.showSuccess(
+          response.message || "OTP sent to your mobile number"
+        );
+      }
+    } catch (error) {
+      const message =
+        error?.data?.message || error.message || "Failed to send OTP";
+      toastService.showError(message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const verifyMobileOtp = () => {
-    if (formData.mobileOtp === "123456") {
-      setMobileVerified(true);
-      setShowMobileOtp(false);
-      alert("Mobile number verified successfully!");
-    } else {
-      alert("Invalid OTP. Please try again.");
+  const verifyMobileOtp = async () => {
+    if (!formData.mobileOtp || formData.mobileOtp.length !== 6) {
+      toastService.showError("Please enter a valid 6-digit OTP");
+      return;
     }
+
+    try {
+      setLoading(true);
+      const response = await api.post("/auth/verify-otp", {
+        body: {
+          type: "phone",
+          contact: formData.mobile,
+          otp: formData.mobileOtp,
+          deviceDetails: {
+            deviceType: "web",
+            deviceName: navigator.userAgent || "web-client",
+          },
+        },
+      });
+
+      if (response.success) {
+        setMobileVerified(true);
+        setShowMobileOtp(false);
+        toastService.showSuccess("Mobile number verified successfully!");
+      }
+    } catch (error) {
+      const message =
+        error?.data?.message ||
+        error.message ||
+        "Invalid OTP. Please try again.";
+      toastService.showError(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditEmail = () => {
+    setEmailVerified(false);
+    setShowEmailOtp(false);
+    setFormData((prev) => ({ ...prev, emailOtp: "" }));
+    toastService.showSuccess(
+      "Email field is now editable. Please verify again after making changes."
+    );
+  };
+
+  const handleEditMobile = () => {
+    setMobileVerified(false);
+    setShowMobileOtp(false);
+    setFormData((prev) => ({ ...prev, mobileOtp: "" }));
+    toastService.showSuccess(
+      "Mobile field is now editable. Please verify again after making changes."
+    );
+  };
+
+  const handleEditPan = () => {
+    setPanVerified(false);
+    setShowPanOtp(false);
+    setFormData((prev) => ({ ...prev, panOtp: "" }));
+    toastService.showSuccess(
+      "PAN field is now editable. Please verify again after making changes."
+    );
+  };
+
+  const handleEditGst = () => {
+    setGstVerified(false);
+    setShowGstOtp(false);
+    setFormData((prev) => ({ ...prev, gstOtp: "" }));
+    toastService.showSuccess(
+      "GST field is now editable. Please verify again after making changes."
+    );
   };
 
   const handleNext = () => {
@@ -202,10 +382,15 @@ const Registration = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (formData.captcha !== captchaCode) {
-      toastService.showError("Invalid captcha code");
+    if (formData.captcha.trim().toUpperCase() !== captchaCode) {
+      setCaptchaError("Invalid captcha. Please try again.");
+      // Regenerate captcha after a failed attempt
+      setCaptchaCode(generateCaptcha());
+      // Clear the entered captcha
+      setFormData((prev) => ({ ...prev, captcha: "" }));
       return;
     }
+
     if (!formData.agreeTerms || !formData.agreePrivacy) {
       toastService.showError("Please accept the terms and conditions");
       return;
@@ -480,11 +665,25 @@ const Registration = () => {
 
                     {panVerified && (
                       <div className="mt-3 bg-blue-50 border-2 border-blue-200 rounded-lg p-3">
-                        <div className="flex items-center gap-2 text-blue-700">
-                          <CheckCircle className="w-5 h-5" />
-                          <span className="font-semibold">
-                            PAN verified successfully!
-                          </span>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 text-blue-700">
+                            <CheckCircle className="w-5 h-5" />
+                            <span className="font-semibold">
+                              PAN verified successfully!
+                            </span>
+                          </div>
+                          <div className="relative group">
+                            <div
+                              className="p-2 bg-blue-500 text-white rounded-lg cursor-pointer transition-all group-hover:bg-blue-600"
+                              onClick={handleEditPan}
+                            >
+                              <Check className="w-4 h-4 group-hover:hidden" />
+                              <Edit2 className="w-4 h-4 hidden group-hover:block" />
+                            </div>
+                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                              Click to edit PAN
+                            </div>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -547,11 +746,25 @@ const Registration = () => {
 
                     {gstVerified && (
                       <div className="mt-3 bg-blue-50 border-2 border-blue-200 rounded-lg p-3">
-                        <div className="flex items-center gap-2 text-blue-700">
-                          <CheckCircle className="w-5 h-5" />
-                          <span className="font-semibold">
-                            GST verified successfully!
-                          </span>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 text-blue-700">
+                            <CheckCircle className="w-5 h-5" />
+                            <span className="font-semibold">
+                              GST verified successfully!
+                            </span>
+                          </div>
+                          <div className="relative group">
+                            <div
+                              className="p-2 bg-blue-500 text-white rounded-lg cursor-pointer transition-all group-hover:bg-blue-600"
+                              onClick={handleEditGst}
+                            >
+                              <Check className="w-4 h-4 group-hover:hidden" />
+                              <Edit2 className="w-4 h-4 hidden group-hover:block" />
+                            </div>
+                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                              Click to edit GST
+                            </div>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -695,17 +908,37 @@ const Registration = () => {
                           <button
                             type="button"
                             onClick={sendEmailOtp}
-                            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm font-medium whitespace-nowrap"
+                            disabled={loading}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-gray-700 text-sm font-medium whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            <Send className="w-4 h-4" />
+                            {loading ? (
+                              <RefreshCw className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Send className="w-4 h-4" />
+                            )}
                           </button>
                         )}
                         {emailVerified && (
-                          <div className="px-4 py-2 bg-blue-500 text-white rounded-lg flex items-center gap-2">
-                            <Check className="w-4 h-4" />
+                          <div className="relative group">
+                            <div
+                              className="px-4 py-2 bg-blue-500 text-white rounded-lg flex items-center gap-2 cursor-pointer transition-all group-hover:bg-blue-600"
+                              onClick={handleEditEmail}
+                            >
+                              <Check className="w-4 h-4 group-hover:hidden" />
+                              <Edit2 className="w-4 h-4 hidden group-hover:block" />
+                            </div>
+                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                              Click to edit email
+                            </div>
                           </div>
                         )}
                       </div>
+
+                      {!emailVerified && !showEmailOtp && formData.email && (
+                        <div className="text-xs text-orange-600 mb-3">
+                          Please verify your email address
+                        </div>
+                      )}
 
                       {showEmailOtp && !emailVerified && (
                         <div className="space-y-2">
@@ -722,16 +955,18 @@ const Registration = () => {
                             <button
                               type="button"
                               onClick={verifyEmailOtp}
-                              className="flex-1 bg-blue-500 text-white py-2 px-3 rounded-lg font-semibold hover:bg-blue-600 text-sm"
+                              disabled={loading}
+                              className="flex-1 bg-blue-500 text-white py-2 px-3 rounded-lg font-semibold hover:bg-blue-600 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              Verify
+                              {loading ? "Verifying..." : "Verify"}
                             </button>
                             <button
                               type="button"
                               onClick={sendEmailOtp}
-                              className="px-4 py-2 text-blue-600 bg-white border-2 border-blue-300 rounded-lg hover:bg-blue-50 text-sm"
+                              disabled={loading}
+                              className="px-4 py-2 text-blue-600 bg-white border-2 border-blue-300 rounded-lg hover:bg-blue-50 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              Resend
+                              {loading ? "Sending..." : "Resend"}
                             </button>
                           </div>
                         </div>
@@ -763,17 +998,37 @@ const Registration = () => {
                           <button
                             type="button"
                             onClick={sendMobileOtp}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium whitespace-nowrap"
+                            disabled={loading}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            <Phone className="w-4 h-4" />
+                            {loading ? (
+                              <RefreshCw className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Send className="w-4 h-4" />
+                            )}
                           </button>
                         )}
                         {mobileVerified && (
-                          <div className="px-4 py-2 bg-blue-500 text-white rounded-lg flex items-center gap-2">
-                            <Check className="w-4 h-4" />
+                          <div className="relative group">
+                            <div
+                              className="px-4 py-2 bg-blue-500 text-white rounded-lg flex items-center gap-2 cursor-pointer transition-all group-hover:bg-blue-600"
+                              onClick={handleEditMobile}
+                            >
+                              <Check className="w-4 h-4 group-hover:hidden" />
+                              <Edit2 className="w-4 h-4 hidden group-hover:block" />
+                            </div>
+                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                              Click to edit mobile
+                            </div>
                           </div>
                         )}
                       </div>
+
+                      {!mobileVerified && !showMobileOtp && formData.mobile && (
+                        <div className="text-xs text-orange-600 mb-3">
+                          Please verify your mobile number
+                        </div>
+                      )}
 
                       {showMobileOtp && !mobileVerified && (
                         <div className="space-y-2">
@@ -790,16 +1045,18 @@ const Registration = () => {
                             <button
                               type="button"
                               onClick={verifyMobileOtp}
-                              className="flex-1 bg-blue-600 text-white py-2 px-3 rounded-lg font-semibold hover:bg-blue-700 text-sm"
+                              disabled={loading}
+                              className="flex-1 bg-blue-600 text-white py-2 px-3 rounded-lg font-semibold hover:bg-blue-700 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              Verify
+                              {loading ? "Verifying..." : "Verify"}
                             </button>
                             <button
                               type="button"
                               onClick={sendMobileOtp}
-                              className="px-4 py-2 text-blue-600 bg-white border-2 border-blue-300 rounded-lg hover:bg-blue-50 text-sm"
+                              disabled={loading}
+                              className="px-4 py-2 text-blue-600 bg-white border-2 border-blue-300 rounded-lg hover:bg-blue-50 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              Resend
+                              {loading ? "Sending..." : "Resend"}
                             </button>
                           </div>
                         </div>
@@ -957,19 +1214,32 @@ const Registration = () => {
                         placeholder="Enter captcha"
                         className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                         required
+                        maxLength="4"
                       />
                       <div className="flex items-center gap-2">
-                        <div className="bg-gray-200 px-4 py-3 rounded-lg font-mono font-bold text-gray-700 text-lg tracking-wider">
+                        <div className="bg-gray-100 px-4 py-3 rounded-lg font-mono font-bold text-gray-700 text-lg tracking-wider border-2 border-gray-200 select-all">
                           {captchaCode}
                         </div>
                         <button
                           type="button"
-                          className="p-3 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg"
+                          onClick={() => {
+                            setCaptchaCode(generateCaptcha());
+                            setFormData((prev) => ({ ...prev, captcha: "" }));
+                            setCaptchaError("");
+                          }}
+                          aria-label="Refresh captcha"
+                          title="Refresh captcha"
+                          className="p-3 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                         >
                           <RefreshCw className="w-5 h-5" />
                         </button>
                       </div>
                     </div>
+                    {captchaError && (
+                      <p className="mt-2 text-sm text-red-600">
+                        {captchaError}
+                      </p>
+                    )}
                   </div>
 
                   <div className="space-y-4">

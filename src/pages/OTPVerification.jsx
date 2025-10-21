@@ -1,15 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { ShieldCheck } from 'lucide-react';
-import Header from '../components/shared/Header';
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { ShieldCheck, RefreshCw } from "lucide-react";
+import Header from "../components/shared/Header";
+import api from "../services/apiService";
+import toastService from "../services/toastService";
 
 const OTPVerification = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { loginType, email } = location.state || { loginType: 'vendor', email: 'user@example.com' };
+  const { loginType, email, contact, type } = location.state || {
+    loginType: "vendor",
+    email: "user@example.com",
+    contact: "user@example.com",
+    type: "email",
+  };
 
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -27,38 +35,97 @@ const OTPVerification = () => {
 
       // Auto-focus next input
       if (value && index < 5) {
-        const nextInput = document.querySelector(`input[name="otp-${index + 1}"]`);
+        const nextInput = document.querySelector(
+          `input[name="otp-${index + 1}"]`
+        );
         if (nextInput) nextInput.focus();
       }
     }
   };
 
   const handleKeyDown = (index, e) => {
-    if (e.key === 'Backspace' && !otp[index] && index > 0) {
-      const prevInput = document.querySelector(`input[name="otp-${index - 1}"]`);
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+      const prevInput = document.querySelector(
+        `input[name="otp-${index - 1}"]`
+      );
       if (prevInput) prevInput.focus();
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const otpValue = otp.join('');
-    if (otpValue.length === 6) {
-      // Navigate to respective dashboard
-      if (loginType === 'vendor') {
-        navigate('/vendor/dashboard');
-      } else {
-        navigate('/client/dashboard');
+    const otpValue = otp.join("");
+
+    if (otpValue.length !== 6) {
+      toastService.showError("Please enter complete 6-digit OTP");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await api.post("/auth/verify-otp", {
+        body: {
+          type: type || "email",
+          contact: contact || email,
+          otp: otpValue,
+          deviceDetails: {
+            deviceType: "web",
+            deviceName: navigator.userAgent || "web-client",
+          },
+        },
+      });
+
+      if (response.success) {
+        toastService.showSuccess("OTP verified successfully!");
+
+        // Navigate to respective dashboard after a short delay
+        setTimeout(() => {
+          if (loginType === "vendor") {
+            navigate("/vendor/dashboard");
+          } else {
+            navigate("/client/dashboard");
+          }
+        }, 800);
       }
-    } else {
-      alert('Please enter complete OTP');
+    } catch (error) {
+      const message =
+        error?.data?.message ||
+        error.message ||
+        "Invalid OTP. Please try again.";
+      toastService.showError(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    try {
+      setLoading(true);
+      const response = await api.post("/auth/send-otp", {
+        body: {
+          type: type || "email",
+          contact: contact || email,
+        },
+      });
+
+      if (response.success) {
+        toastService.showSuccess(response.message || "OTP sent successfully!");
+        setTimeLeft(300); // Reset timer to 5 minutes
+        setOtp(["", "", "", "", "", ""]); // Clear current OTP
+      }
+    } catch (error) {
+      const message =
+        error?.data?.message || error.message || "Failed to send OTP";
+      toastService.showError(message);
+    } finally {
+      setLoading(false);
     }
   };
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${minutes}:${secs.toString().padStart(2, '0')}`;
+    return `${minutes}:${secs.toString().padStart(2, "0")}`;
   };
 
   return (
@@ -73,11 +140,16 @@ const OTPVerification = () => {
               <ShieldCheck className="w-10 h-10 text-primary-600" />
             </div>
 
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Two-Factor Authentication</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Two-Factor Authentication
+            </h2>
             <p className="text-gray-600 mb-2">
-              We've sent a verification code to your registered email address
+              We've sent a verification code to your registered{" "}
+              {type === "phone" ? "mobile number" : "email address"}
             </p>
-            <p className="text-primary-600 font-medium mb-8">{email}</p>
+            <p className="text-primary-600 font-medium mb-8">
+              {contact || email}
+            </p>
 
             <form onSubmit={handleSubmit}>
               <div className="mb-6">
@@ -102,17 +174,29 @@ const OTPVerification = () => {
 
               <button
                 type="submit"
-                className="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 mb-6"
+                disabled={loading}
+                className="w-full bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 mb-6 flex items-center justify-center gap-2"
               >
-                Verify & Continue
+                {loading ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    Verifying...
+                  </>
+                ) : (
+                  "Verify & Continue"
+                )}
               </button>
             </form>
 
             <div className="text-center">
               <p className="text-sm text-gray-600 mb-2">
-                Didn't receive the code?{' '}
-                <button className="text-primary-600 hover:text-primary-700 font-medium">
-                  Resend code
+                Didn't receive the code?{" "}
+                <button
+                  onClick={handleResendOtp}
+                  disabled={loading}
+                  className="text-primary-600 hover:text-primary-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? "Sending..." : "Resend code"}
                 </button>
               </p>
               {timeLeft > 0 && (
@@ -130,9 +214,12 @@ const OTPVerification = () => {
                 <div className="w-2 h-2 bg-white rounded-full"></div>
               </div>
               <div>
-                <h4 className="font-medium text-blue-900 mb-1">Security Notice</h4>
+                <h4 className="font-medium text-blue-900 mb-1">
+                  Security Notice
+                </h4>
                 <p className="text-sm text-blue-700">
-                  Your session will automatically timeout after 30 minutes of inactivity. Always logout when using shared computers.
+                  Your session will automatically timeout after 30 minutes of
+                  inactivity. Always logout when using shared computers.
                 </p>
               </div>
             </div>
