@@ -1,18 +1,15 @@
 import React, { useState } from 'react';
 import { FileText, Award, CheckCircle } from 'lucide-react';
-import TenderDetails from '../popup/BidTenderDetails';
 import EvaluationModal from '../popup/EvaluationModal';
 import TechnicalReportModal from '../popup/TechnicalReportModal';
 import FinancialReportModal from '../popup/FinancialReportModal';
 
 const BidEvaluation = () => {
-  const [selectedView, setSelectedView] = useState('list');
-  const [selectedTender, setSelectedTender] = useState(null);
   const [evaluationModalOpen, setEvaluationModalOpen] = useState(false);
   const [technicalModalOpen, setTechnicalModalOpen] = useState(false);
   const [financialModalOpen, setFinancialModalOpen] = useState(false);
   const [currentEvaluation, setCurrentEvaluation] = useState(null);
-  const [evaluationType, setEvaluationType] = useState('technical'); // 'technical' or 'financial'
+  const [evaluationType, setEvaluationType] = useState('technical');
 
   const tenders = [
     {
@@ -147,16 +144,6 @@ const BidEvaluation = () => {
     }
   ];
 
-  const handleViewDetails = (tender) => {
-    setSelectedTender(tender);
-    setSelectedView('details');
-  };
-
-  const handleBackToList = () => {
-    setSelectedView('list');
-    setSelectedTender(null);
-  };
-
   const handleEvaluateBids = (tender, type = 'technical') => {
     setCurrentEvaluation(tender);
     setEvaluationType(type);
@@ -172,10 +159,6 @@ const BidEvaluation = () => {
     setCurrentEvaluation(tender);
     setFinancialModalOpen(true);
   };
-
-  if (selectedView === 'details' && selectedTender) {
-    return <TenderDetails tender={selectedTender} onBack={handleBackToList} />;
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -222,15 +205,6 @@ const BidEvaluation = () => {
                     <span className={`px-3 py-1 rounded-md text-sm font-medium ${tender.statusColor}`}>
                       {tender.status}
                     </span>
-                    <button
-                      onClick={() => handleViewDetails(tender)}
-                      className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
-                      View Details
-                    </button>
                   </div>
 
                   <div className="flex items-center gap-6 text-sm text-gray-600 mb-4">
@@ -275,13 +249,13 @@ const BidEvaluation = () => {
                   </div>
 
                   <div className="flex gap-2 mt-4">
-                    <button 
+                    <button
                       onClick={() => handleTechnicalReport(tender)}
                       className="px-4 py-1.5 bg-orange-50 text-orange-700 rounded text-sm font-medium hover:bg-orange-100"
                     >
                       Technical Report
                     </button>
-                    <button 
+                    <button
                       onClick={() => handleFinancialReport(tender)}
                       className="px-4 py-1.5 bg-blue-50 text-blue-700 rounded text-sm font-medium hover:bg-blue-100"
                     >
