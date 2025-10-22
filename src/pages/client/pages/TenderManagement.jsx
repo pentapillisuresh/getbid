@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import {
   Plus,
   Search,
@@ -14,125 +14,33 @@ import {
   AlertTriangle,
   FileText,
   Download,
+  MessageCircle,
+  Link,
+  Award,
 } from "lucide-react";
 import TenderFormModal from "../popup/TenderFormModal";
 import TenderDetailsModal from "../popup/TenderDetailsModal";
-import api from "../../../services/apiService";
-import toastService from "../../../services/toastService";
+import CancelTenderModal from "../popup/CancelTenderModal";
+import EditTenderModal from "../popup/EditTenderModal";
 
 const TenderManagement = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [selectedTender, setSelectedTender] = useState(null);
-  // modal mode: 'create' | 'edit' | 'duplicate'
-  const [modalMode, setModalMode] = useState("create");
-  const [modalInitialData, setModalInitialData] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
 
-  // server-driven tenders state
-  const [tendersData, setTendersData] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
-  const [totalCount, setTotalCount] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const sentinelRef = useRef(null);
-
-  const handleTenderSaved = (data, mode = "create") => {
-    // mode === 'create' or 'duplicate' -> prepend
-    // mode === 'edit' -> replace existing item in list
-    if (!data) return;
-    if (mode === "edit") {
-      setTendersData((prev) => prev.map((t) => (t.id === data.id ? data : t)));
-    } else {
-      setTendersData((prev) => [data, ...prev]);
-      setTotalCount((c) => (typeof c === "number" ? c + 1 : 1));
-    }
+  const handleNewTender = (data) => {
+    console.log("New Tender Data:", data);
+    // TODO: Save to backend
   };
 
-  // try to read stored user id from localStorage (robust to several id field names)
-  const getStoredUserId = () => {
-    try {
-      if (typeof window === "undefined" || !window.localStorage) return null;
-      const raw = window.localStorage.getItem("user");
-      if (!raw) return null;
-      const parsed = JSON.parse(raw);
-      if (!parsed || typeof parsed !== "object") return null;
-      return parsed._id || parsed.id || parsed.userId || null;
-    } catch (e) {
-      return null;
-    }
+  const handleEditTender = (data) => {
+    console.log("Updated Tender Data:", data);
+    // TODO: Update tender in backend
   };
-
-  // fetch tenders. If replace=true, replace current list (used on initial load / refresh)
-  const fetchTenders = async (pg = page, lim = limit, replace = false) => {
-    setLoading(true);
-    try {
-      const token =
-        typeof localStorage !== "undefined"
-          ? localStorage.getItem("accessToken")
-          : null;
-      const opts = { queryParams: { page: pg, limit: lim } };
-      if (token) opts.headers = { Authorization: `Bearer ${token}` };
-
-      const userId = getStoredUserId();
-      if (userId) opts.queryParams.postedBy = userId;
-
-      const resp = await api.get("/v1/tenders", opts);
-      if (resp && resp.success) {
-        // API may now include bidsCount on each tender item; map it to bidsReceived used in UI
-        const items = (resp.data || []).map((t) => ({
-          ...t,
-          bidsReceived: t.bidsCount != null ? t.bidsCount : t.bidsReceived || 0,
-        }));
-
-        setTendersData((prev) => (replace ? items : [...prev, ...items]));
-        setTotalCount(resp.totalCount || 0);
-        setPage(resp.currentPage || pg);
-        const tp = resp.totalPages || 1;
-        setTotalPages(tp);
-        setHasMore((resp.currentPage || pg) < tp);
-      } else {
-        toastService.showError(
-          (resp && resp.message) || "Failed to load tenders"
-        );
-      }
-    } catch (err) {
-      const msg =
-        (err && err.data && err.data.message) ||
-        err.message ||
-        "Failed to load tenders";
-      toastService.showError(msg);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    // initial load (replace current data)
-    fetchTenders(1, limit, true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // infinite scroll observer
-  useEffect(() => {
-    if (!sentinelRef.current) return;
-    const node = sentinelRef.current;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && hasMore && !loading) {
-            fetchTenders(page + 1, limit, false);
-          }
-        });
-      },
-      { root: null, rootMargin: "200px", threshold: 0.1 }
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [sentinelRef, hasMore, loading, page, limit]);
 
   const tabs = [
     { id: "all", label: "All Tenders", count: 25 },
@@ -144,93 +52,61 @@ const TenderManagement = () => {
 
   const tenders = [
     {
-      id: "TNR-2024-001",
-      title: "Highway Construction Project Phase II",
-      department: "Department of Public Works",
-      category: "Construction",
-      estimatedValue: "₹8,50,00,000",
-      publishedDate: "2024-04-10",
-      submissionDeadline: "2024-05-15",
-      status: "published",
-      bidsReceived: 24,
-      daysLeft: 15,
-      priority: "high",
-      description:
-        "Construction of 25km highway with modern infrastructure and safety measures.",
-    },
-    {
-      id: "TNR-2024-002",
-      title: "Government Office IT Infrastructure",
-      department: "Ministry of Electronics & IT",
-      category: "IT Services",
-      estimatedValue: "₹6,50,00,000",
-      publishedDate: "2024-04-08",
-      submissionDeadline: "2024-05-10",
-      status: "evaluation",
-      bidsReceived: 18,
-      daysLeft: -2,
-      priority: "high",
-      description:
-        "Complete IT infrastructure setup including networking, servers, and security systems.",
-    },
-    {
-      id: "TNR-2024-003",
-      title: "Medical Equipment Procurement",
-      department: "State Health Department",
-      category: "Healthcare",
-      estimatedValue: "₹12,50,00,000",
-      publishedDate: "2024-04-05",
-      submissionDeadline: "2024-05-20",
-      status: "published",
-      bidsReceived: 31,
-      daysLeft: 20,
-      priority: "medium",
-      description:
-        "Procurement of advanced medical equipment for district hospitals.",
-    },
-    {
-      id: "TNR-2024-004",
-      title: "Smart City Infrastructure Development",
-      department: "Smart City Mission",
+      id: "TND2024001",
+      title: "Highway Construction Project Phase 2",
+      department: "Active Infrastructure",
       category: "Infrastructure",
-      estimatedValue: "₹25,00,00,000",
-      publishedDate: "2024-04-01",
-      submissionDeadline: "2024-05-25",
+      estimatedValue: "₹25.0 Cr",
+      publishedDate: "15/03/2024",
+      submissionDeadline: "15/04/2024",
       status: "published",
-      bidsReceived: 42,
-      daysLeft: 25,
+      bidsReceived: 12,
+      daysLeft: -554,
       priority: "high",
-      description:
-        "Development of smart city infrastructure with IoT integration.",
+      description: "Construction of 4-lane highway connecting major cities",
+      createdBy: "Dr. Rajesh Kumar",
+      clarifications: 5,
+      preBidMeeting: true,
+      linkedAccount: false,
+      awardedTo: "",
     },
     {
-      id: "TNR-2024-005",
+      id: "TND2024002",
       title: "School Building Construction",
-      department: "Education Department",
+      department: "Building",
       category: "Construction",
-      estimatedValue: "₹4,25,00,000",
-      publishedDate: "2024-03-28",
-      submissionDeadline: "2024-04-30",
-      status: "awarded",
-      bidsReceived: 15,
+      estimatedValue: "₹8.5 Cr",
+      publishedDate: "20/02/2024",
+      submissionDeadline: "20/03/2024",
+      status: "evaluation",
+      bidsReceived: 8,
       daysLeft: -15,
       priority: "medium",
-      description: "Construction of new school buildings in rural areas.",
+      description: "Construction of modern educational facility",
+      createdBy: "Priya Sharma",
+      clarifications: 3,
+      preBidMeeting: true,
+      linkedAccount: true,
+      awardedTo: "",
     },
     {
-      id: "TNR-2024-006",
+      id: "TND2024003",
       title: "Water Treatment Plant Upgrade",
-      department: "Water Resources Department",
+      department: "Water Supply",
       category: "Infrastructure",
-      estimatedValue: "₹15,75,00,000",
-      publishedDate: null,
-      submissionDeadline: "2024-06-15",
-      status: "draft",
-      bidsReceived: 0,
-      daysLeft: 65,
+      estimatedValue: "₹12.0 Cr",
+      publishedDate: "10/01/2024",
+      submissionDeadline: "10/02/2024",
+      status: "awarded",
+      bidsReceived: 6,
+      daysLeft: -45,
       priority: "high",
-      description:
-        "Upgrading existing water treatment facilities with modern technology.",
+      description: "Modernization of existing water treatment facility",
+      createdBy: "Amit Patel",
+      clarifications: 2,
+      preBidMeeting: false,
+      linkedAccount: true,
+      awardedTo: "AquaTech Solutions Pvt Ltd",
     },
   ];
 
@@ -241,7 +117,7 @@ const TenderManagement = () => {
       case "evaluation":
         return <Clock className="w-5 h-5 text-blue-600" />;
       case "awarded":
-        return <CheckCircle className="w-5 h-5 text-purple-600" />;
+        return <Award className="w-5 h-5 text-purple-600" />;
       case "draft":
         return <FileText className="w-5 h-5 text-gray-600" />;
       default:
@@ -251,77 +127,28 @@ const TenderManagement = () => {
 
   const getStatusBadge = (status) => {
     const baseClasses =
-      "inline-block px-3 py-1 rounded-full text-xs font-medium";
+      "inline-flex items-center px-3 py-1 rounded-full text-xs font-medium";
 
     switch (status) {
       case "published":
-        return `${baseClasses} bg-green-100 text-green-600`;
+        return `${baseClasses} bg-green-100 text-green-800`;
       case "evaluation":
-        return `${baseClasses} bg-blue-100 text-blue-600`;
+        return `${baseClasses} bg-blue-100 text-blue-800`;
       case "awarded":
-        return `${baseClasses} bg-purple-100 text-purple-600`;
+        return `${baseClasses} bg-purple-100 text-purple-800`;
       case "draft":
-        return `${baseClasses} bg-gray-100 text-gray-600`;
+        return `${baseClasses} bg-gray-100 text-gray-800`;
       default:
-        return `${baseClasses} bg-orange-100 text-orange-600`;
+        return `${baseClasses} bg-orange-100 text-orange-800`;
     }
   };
 
-  const getPriorityBadge = (priority) => {
-    const baseClasses =
-      "inline-block px-2 py-1 rounded-full text-xs font-medium";
-
-    switch (priority) {
-      case "high":
-        return `${baseClasses} bg-red-100 text-red-600`;
-      case "medium":
-        return `${baseClasses} bg-yellow-100 text-yellow-600`;
-      case "low":
-        return `${baseClasses} bg-blue-100 text-blue-600`;
-      default:
-        return `${baseClasses} bg-gray-100 text-gray-600`;
-    }
-  };
-
-  const filteredTenders = tendersData.filter((tender) => {
-    // adapt server tender fields to local UI expectations where possible
-    const status = tender.status || tender.isActive ? "published" : "draft";
-    const title = tender.title || "";
-    const category = tender.category || "";
-    const department = tender.postedBy?.name || "";
-
-    const matchesTab = activeTab === "all" || status === activeTab;
+  const filteredTenders = tenders.filter((tender) => {
+    const matchesTab = activeTab === "all" || tender.status === activeTab;
     const matchesSearch =
-      title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      department.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      category.toLowerCase().includes(searchTerm.toLowerCase());
-
-    // attach derived fields used in UI for convenience
-    tender.title = title;
-    tender.category = category;
-    tender.department = department;
-    tender.estimatedValue = tender.value
-      ? `₹${Number(tender.value).toLocaleString()}`
-      : "—";
-    tender.publishedDate = tender.createdAt
-      ? tender.createdAt.split("T")[0]
-      : null;
-    tender.submissionDeadline = tender.bidDeadline
-      ? tender.bidDeadline.split("T")[0]
-      : "";
-    tender.bidsReceived = tender.bidsReceived || 0;
-    tender.daysLeft = tender.bidDeadline
-      ? Math.ceil(
-          (new Date(tender.bidDeadline) - new Date()) / (1000 * 60 * 60 * 24)
-        )
-      : 0;
-    tender.status = status;
-
-    // Ensure documents array is preserved from API response
-    if (!tender.documents) {
-      tender.documents = [];
-    }
-
+      tender.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      tender.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      tender.category.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesTab && matchesSearch;
   });
 
@@ -348,6 +175,21 @@ const TenderManagement = () => {
     },
   ];
 
+  const handleViewDetails = (tender) => {
+    setSelectedTender(tender);
+    setShowDetails(true);
+  };
+
+  const handleEditTenderClick = (tender) => {
+    setSelectedTender(tender);
+    setShowEditModal(true);
+  };
+
+  const handleCancelTender = () => {
+    setShowCancelModal(true);
+    setShowDetails(false);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -361,11 +203,7 @@ const TenderManagement = () => {
           </p>
         </div>
         <button
-          onClick={() => {
-            setModalMode("create");
-            setModalInitialData(null);
-            setShowModal(true);
-          }}
+          onClick={() => setShowModal(true)}
           className="flex items-center gap-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors"
         >
           <Plus className="w-4 h-4" />
@@ -376,7 +214,10 @@ const TenderManagement = () => {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {stats.map((stat, index) => (
-          <div key={index} className="card">
+          <div
+            key={index}
+            className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+          >
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">{stat.label}</p>
@@ -389,14 +230,14 @@ const TenderManagement = () => {
       </div>
 
       {/* Search and Filters */}
-      <div className="card">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
         <div className="flex items-center gap-4">
           <div className="flex-1">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search by title, category, or department..."
+                placeholder="Search tenders..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
@@ -437,187 +278,150 @@ const TenderManagement = () => {
         {filteredTenders.map((tender) => (
           <div
             key={tender.id}
-            className="card border-l-4 border-primary-500 hover:shadow-lg transition-shadow duration-200"
+            className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200"
           >
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-start gap-4">
-                <div className="p-3 rounded-full bg-gray-50">
-                  {getStatusIcon(tender.status)}
+            <div className="p-6">
+              {/* Header */}
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-gray-50">
+                    {getStatusIcon(tender.status)}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        {tender.title}
+                      </h3>
+                      <span className={getStatusBadge(tender.status)}>
+                        {tender.status === "evaluation"
+                          ? "Evaluation"
+                          : tender.status.charAt(0).toUpperCase() +
+                            tender.status.slice(1)}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600">{tender.department}</p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      {tender.title}
-                    </h3>
-                    <span className={getPriorityBadge(tender.priority)}>
-                      {tender.priority}
-                    </span>
-                    <span className="px-2 py-1 bg-blue-100 text-blue-600 rounded-full text-xs font-medium">
-                      {tender.category}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
-                    <span>ID: {tender.id}</span>
-                    <span>•</span>
-                    <span>{tender.department}</span>
-                  </div>
-
-                  <p className="text-gray-600 mb-4">{tender.description}</p>
-
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                    <div>
-                      <span className="text-sm text-gray-500">
-                        Estimated Value
-                      </span>
-                      <div className="font-semibold text-green-600">
-                        {tender.estimatedValue}
-                      </div>
-                    </div>
-                    <div>
-                      <span className="text-sm text-gray-500">
-                        {tender.publishedDate
-                          ? "Published Date"
-                          : "Draft Created"}
-                      </span>
-                      <div className="font-semibold text-gray-900">
-                        {tender.publishedDate || "Not Published"}
-                      </div>
-                    </div>
-                    <div>
-                      <span className="text-sm text-gray-500">
-                        Submission Deadline
-                      </span>
-                      <div className="font-semibold text-gray-900">
-                        {tender.submissionDeadline}
-                      </div>
-                      {tender.daysLeft > 0 ? (
-                        <div className="text-sm text-blue-600">
-                          {tender.daysLeft} days left
-                        </div>
-                      ) : tender.daysLeft === 0 ? (
-                        <div className="text-sm text-red-600">Due today</div>
-                      ) : (
-                        <div className="text-sm text-red-600">
-                          Overdue by {Math.abs(tender.daysLeft)} days
-                        </div>
-                      )}
-                    </div>
-                    <div>
-                      <span className="text-sm text-gray-500">
-                        Bids Received
-                      </span>
-                      <div className="font-semibold text-purple-600">
-                        {tender.bidsReceived}
-                        {tender.isBidSubmitted && (
-                          <span className="ml-2 text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">
-                            ✓ Bid Submitted
-                          </span>
-                        )}
-                      </div>
-                    </div>
+                <div className="text-right">
+                  <div
+                    className={`text-sm font-medium ${
+                      tender.daysLeft > 0 ? "text-blue-600" : "text-gray-500"
+                    }`}
+                  >
+                    {tender.daysLeft > 0
+                      ? `${tender.daysLeft} days left`
+                      : `${Math.abs(tender.daysLeft)} days ago`}
                   </div>
                 </div>
               </div>
 
-              <div className="text-right">
-                <span className={getStatusBadge(tender.status)}>
-                  {tender.status.charAt(0).toUpperCase() +
-                    tender.status.slice(1)}
-                </span>
+              {/* Description and ID */}
+              <p className="text-gray-700 mb-3">{tender.description}</p>
+
+              <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
+                <span>ID: {tender.id}</span>
+                <span>•</span>
+                <span>Est. Value: {tender.estimatedValue}</span>
+                <span>•</span>
+                <span>Bids: {tender.bidsReceived}</span>
+                <span>•</span>
+                <span>Published: {tender.publishedDate}</span>
               </div>
-            </div>
 
-            <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => {
-                    console.log("Tender data for modal:", tender);
-                    console.log("Documents:", tender.documents);
-                    setSelectedTender(tender);
-                    setShowDetails(true);
-                  }}
-                  className="flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium text-sm"
-                >
-                  <Eye className="w-4 h-4" />
-                  View Details
-                </button>
+              {/* Details Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
+                <div>
+                  <span className="text-sm text-gray-500">Deadline:</span>
+                  <div className="font-semibold text-gray-900">
+                    {tender.submissionDeadline}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-sm text-gray-500">Clarifications:</span>
+                  <div className="font-semibold text-gray-900">
+                    {tender.clarifications}
+                  </div>
+                </div>
+                <div className="md:col-span-2">
+                  <span className="text-sm text-gray-500">Created by:</span>
+                  <div className="font-semibold text-gray-900">
+                    {tender.createdBy}
+                  </div>
+                </div>
+              </div>
 
-                {tender.status === "draft" ? (
-                  <button className="flex items-center gap-2 text-green-600 hover:text-green-700 font-medium text-sm">
-                    <Edit className="w-4 h-4" />
-                    Continue Editing
-                  </button>
-                ) : (
+              {/* Action Buttons */}
+              <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                <div className="flex items-center gap-4">
+                  {tender.preBidMeeting && (
+                    <div className="flex items-center gap-2 text-blue-600 text-sm">
+                      <MessageCircle className="w-4 h-4" />
+                      Pre-bid meeting scheduled
+                    </div>
+                  )}
+                  {tender.linkedAccount && (
+                    <div className="flex items-center gap-2 text-green-600 text-sm">
+                      <Link className="w-4 h-4" />
+                      Linked to main account
+                    </div>
+                  )}
+                  {tender.awardedTo && (
+                    <div className="flex items-center gap-2 text-purple-600 text-sm">
+                      <Award className="w-4 h-4" />
+                      Awarded to {tender.awardedTo}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-3">
                   <button
-                    onClick={() => {
-                      // open modal in edit mode with this tender's data
-                      setModalMode("edit");
-                      setModalInitialData(tender);
-                      setShowModal(true);
-                    }}
+                    onClick={() => handleViewDetails(tender)}
+                    className="flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium text-sm"
+                  >
+                    <Eye className="w-4 h-4" />
+                    View Details
+                  </button>
+
+                  {/* Edit Button */}
+                  <button
+                    onClick={() => handleEditTenderClick(tender)}
                     className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm"
                   >
                     <Edit className="w-4 h-4" />
-                    Edit Tender
+                    Edit
                   </button>
-                )}
-                <button
-                  onClick={() => {
-                    // open modal in duplicate mode with this tender's data
-                    setModalMode("duplicate");
-                    // for duplication we remove id so the modal creates a new tender
-                    const dup = { ...tender };
-                    delete dup.id;
-                    setModalInitialData(dup);
-                    setShowModal(true);
-                  }}
-                  className="flex items-center gap-2 text-gray-600 hover:text-gray-700 font-medium text-sm"
-                >
-                  <Copy className="w-4 h-4" />
-                  Duplicate
-                </button>
-                <button className="flex items-center gap-2 text-gray-600 hover:text-gray-700 font-medium text-sm">
-                  <Download className="w-4 h-4" />
-                  Download
-                </button>
-              </div>
 
-              <div className="flex items-center gap-2">
-                {tender.status === "draft" && (
-                  <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors">
-                    Publish Tender
-                  </button>
-                )}
-                {tender.status === "published" && tender.bidsReceived > 0 && (
-                  <button className="bg-primary-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors">
-                    View Bids ({tender.bidsReceived})
-                  </button>
-                )}
-                {tender.status === "evaluation" && (
-                  <button className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors">
-                    Continue Evaluation
-                  </button>
-                )}
-                {tender.status === "awarded" && (
-                  <button className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors">
-                    View Contract
-                  </button>
-                )}
+                  {tender.status === "published" && (
+                    <>
+                      <button className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm">
+                        <MessageCircle className="w-4 h-4" />
+                        Manage Q&A
+                      </button>
+                      <button className="flex items-center gap-2 text-green-600 hover:text-green-700 font-medium text-sm">
+                        <Edit className="w-4 h-4" />
+                        Amend Tender
+                      </button>
+                      <button className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors">
+                        Start Evaluation
+                      </button>
+                    </>
+                  )}
+
+                  {tender.status === "evaluation" && (
+                    <>
+                      <button className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors">
+                        Evaluate Bids
+                      </button>
+                      <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors">
+                        Award Tender
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         ))}
-      </div>
-
-      {/* Infinite scroll sentinel and status */}
-      <div className="mt-6 text-center">
-        {loading && <div className="text-sm text-gray-500">Loading...</div>}
-        {!loading && !hasMore && filteredTenders.length > 0 && (
-          <div className="text-sm text-gray-500">No more tenders</div>
-        )}
-        {/* sentinel for intersection observer */}
-        <div ref={sentinelRef} style={{ height: 1 }} />
       </div>
 
       {/* Empty State */}
@@ -639,36 +443,39 @@ const TenderManagement = () => {
                   ?.label.toLowerCase()} status`}
           </p>
           <button
+            onClick={() => setShowModal(true)}
             className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
-            onClick={() => {
-              setModalMode("create");
-              setModalInitialData(null);
-              setShowModal(true);
-            }}
           >
             Create Your First Tender
           </button>
         </div>
       )}
 
+      {/* Modals */}
       <TenderFormModal
         show={showModal}
-        onClose={() => {
-          setShowModal(false);
-          // reset modal mode/data
-          setModalMode("create");
-          setModalInitialData(null);
-        }}
-        onSubmit={(data, mode) => {
-          handleTenderSaved(data, mode);
-        }}
-        mode={modalMode}
-        initialData={modalInitialData}
+        onClose={() => setShowModal(false)}
+        onSubmit={handleNewTender}
       />
+
       <TenderDetailsModal
         show={showDetails}
         onClose={() => setShowDetails(false)}
         tender={selectedTender}
+        onCancelTender={handleCancelTender}
+      />
+
+      <CancelTenderModal
+        show={showCancelModal}
+        onClose={() => setShowCancelModal(false)}
+        tender={selectedTender}
+      />
+
+      <EditTenderModal
+        show={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        tender={selectedTender}
+        onSave={handleEditTender}
       />
     </div>
   );
