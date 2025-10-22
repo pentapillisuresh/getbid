@@ -46,7 +46,7 @@ const ChooseLoginType = () => {
         <div className="hidden lg:flex w-1/2 fixed top-15 left-0 h-full bg-white items-start justify-center p-8">
           <div className="max-w-lg w-full">
             <video
-              src="https://cdnl.iconscout.com/lottie/premium/preview-watermark/login-animation-gif-download-12835554.mp4"
+              src="./images/loginvideo.mp4"
               autoPlay
               loop
               muted

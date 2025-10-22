@@ -10,6 +10,7 @@ const TenderFormModal = ({ show, onClose, onSubmit, user }) => {
     description: "",
     eligibility: [""],
     specifications: "",
+    locationScope: "",
     preBidMeeting: false,
     meetingDate: "",
     venue: "",
@@ -310,6 +311,26 @@ const TenderFormModal = ({ show, onClose, onSubmit, user }) => {
               rows="3"
               placeholder="Enter technical specifications"
             />
+          </div>
+
+          {/* Preferred Location Scope */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">
+              Preferred Location Scope *
+            </label>
+            <select
+              name="locationScope"
+              value={formData.locationScope}
+              onChange={handleChange}
+              className="mt-1 w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500"
+              required
+            >
+              <option value="">Select Location Scope</option>
+              <option value="Select Location Scope">Select Location Scope</option>
+              <option value="Inter District">Inter District</option>
+              <option value="Inter State">Inter State</option>
+              <option value="Pan India">Pan India</option>
+            </select>
           </div>
 
           {/* Pre-bid Meeting */}

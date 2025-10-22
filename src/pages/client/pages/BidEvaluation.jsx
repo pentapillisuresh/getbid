@@ -1,485 +1,346 @@
 import React, { useState } from 'react';
-import {
-  Eye,
-  Download,
-  CheckCircle,
-  XCircle,
-  Clock,
-  Star,
-  FileText,
-  User,
-  IndianRupee,
-  Calendar,
-  Award,
-  AlertTriangle,
-  Filter,
-  Search
-} from 'lucide-react';
+import { FileText, Award, CheckCircle } from 'lucide-react';
+import TenderDetails from '../popup/BidTenderDetails';
 import EvaluationModal from '../popup/EvaluationModal';
+import TechnicalReportModal from '../popup/TechnicalReportModal';
+import FinancialReportModal from '../popup/FinancialReportModal';
 
 const BidEvaluation = () => {
-  const [activeTab, setActiveTab] = useState('pending');
-  const [selectedTender, setSelectedTender] = useState('all');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedBid, setSelectedBid] = useState(null);
-
-  const tabs = [
-    { id: 'pending', label: 'Pending Evaluation', count: 8 },
-    { id: 'technical', label: 'Technical Review', count: 5 },
-    { id: 'financial', label: 'Financial Review', count: 3 },
-    { id: 'completed', label: 'Completed', count: 12 }
-  ];
+  const [selectedView, setSelectedView] = useState('list');
+  const [selectedTender, setSelectedTender] = useState(null);
+  const [evaluationModalOpen, setEvaluationModalOpen] = useState(false);
+  const [technicalModalOpen, setTechnicalModalOpen] = useState(false);
+  const [financialModalOpen, setFinancialModalOpen] = useState(false);
+  const [currentEvaluation, setCurrentEvaluation] = useState(null);
+  const [evaluationType, setEvaluationType] = useState('technical'); // 'technical' or 'financial'
 
   const tenders = [
-    'All Tenders',
-    'Highway Construction Project Phase II',
-    'Government Office IT Infrastructure',
-    'Medical Equipment Procurement',
-    'Smart City Infrastructure Development'
-  ];
-
-  const bids = [
     {
-      id: 'BID-2024-001',
-      tenderTitle: 'Highway Construction Project Phase II',
-      tenderId: 'TND2024001',
-      vendorName: 'TechCorp Ltd.',
-      contactPerson: 'Amit Patel',
-      vendorRating: 4.8,
-      bidAmount: '₹8,25,00,000',
-      technicalScore: 85,
-      financialScore: 92,
-      submissionDate: '2024-04-12 14:30',
-      status: 'pending',
-      evaluationStage: 'technical',
-      completionPercentage: 35,
-      documents: [
-        { name: 'Technical Proposal', size: '5.2 MB', type: 'technical' },
-        { name: 'Financial Proposal', size: '2.1 MB', type: 'financial' },
-        { name: 'Company Profile', size: '8.5 MB', type: 'company' },
-        { name: 'Experience Certificates', size: '12.3 MB', type: 'experience' }
-      ],
-      experience: '15+ years',
-      previousProjects: 42,
-      complianceStatus: 'compliant',
-      notes: 'Strong technical proposal with innovative approach. Good financial standing.',
-      evaluationCriteria: {
-        technical: {
-          experience: { score: 0, maxScore: 20 },
-          expertise: { score: 0, maxScore: 25 },
-          resources: { score: 0, maxScore: 20 },
-          timeline: { score: 0, maxScore: 15 },
-          quality: { score: 0, maxScore: 20 }
+      id: 'TND2024001',
+      title: 'Highway Construction Project Phase 2',
+      status: 'Technical Evaluation',
+      statusColor: 'bg-orange-100 text-orange-700',
+      bidsReceived: 12,
+      closedDate: '15/04/2024',
+      estValue: '₹25.0 Cr',
+      technicalStatus: 'in-progress',
+      financialStatus: 'pending',
+      approved: 0,
+      disqualified: 0,
+      awarded: 0,
+      pending: 2,
+      bids: [
+        {
+          id: 'BID001',
+          vendorName: 'BuildMax Infrastructure Ltd',
+          contactPerson: 'Amit Patel',
+          bidAmount: '₹24.5 Cr',
+          technicalScore: 0,
+          financialScore: 0,
+          submittedDate: '10/04/2024',
+          status: 'pending',
+          documents: ['Technical Proposal', 'Financial Proposal', 'Company Profile']
         },
-        financial: {
-          costEffectiveness: { score: 0, maxScore: 30 },
-          paymentTerms: { score: 0, maxScore: 20 },
-          totalCost: { score: 0, maxScore: 25 },
-          valueForMoney: { score: 0, maxScore: 25 }
+        {
+          id: 'BID002',
+          vendorName: 'Steel & Concrete Solutions',
+          contactPerson: 'Priya Singh',
+          bidAmount: '₹23.8 Cr',
+          technicalScore: 0,
+          financialScore: 0,
+          submittedDate: '12/04/2024',
+          status: 'pending',
+          documents: ['Technical Proposal', 'Financial Proposal', 'Company Profile']
         }
-      }
+      ]
     },
     {
-      id: 'BID-2024-002',
-      tenderTitle: 'Government Office IT Infrastructure',
-      tenderId: 'TND2024002',
-      vendorName: 'InfoTech Solutions',
-      contactPerson: 'Priya Singh',
-      vendorRating: 4.6,
-      bidAmount: '₹6,15,00,000',
-      technicalScore: 78,
-      financialScore: 88,
-      submissionDate: '2024-04-10 16:45',
-      status: 'technical',
-      evaluationStage: 'technical',
-      completionPercentage: 65,
-      documents: [
-        { name: 'Technical Specs', size: '6.8 MB', type: 'technical' },
-        { name: 'Implementation Plan', size: '1.9 MB', type: 'technical' },
-        { name: 'Support Structure', size: '7.2 MB', type: 'company' },
-        { name: 'Financial Proposal', size: '1.5 MB', type: 'financial' }
-      ],
-      experience: '12+ years',
-      previousProjects: 28,
-      complianceStatus: 'compliant',
-      notes: 'Comprehensive technical solution. Competitive pricing with good value proposition.',
-      evaluationCriteria: {
-        technical: {
-          experience: { score: 0, maxScore: 20 },
-          expertise: { score: 0, maxScore: 25 },
-          resources: { score: 0, maxScore: 20 },
-          timeline: { score: 0, maxScore: 15 },
-          quality: { score: 0, maxScore: 20 }
+      id: 'TND2024002',
+      title: 'School Building Construction',
+      status: 'Financial Evaluation',
+      statusColor: 'bg-blue-100 text-blue-700',
+      bidsReceived: 8,
+      closedDate: '20/03/2024',
+      estValue: '₹8.5 Cr',
+      technicalStatus: 'completed',
+      financialStatus: 'in-progress',
+      approved: 2,
+      disqualified: 1,
+      awarded: 0,
+      pending: 0,
+      bids: [
+        {
+          id: 'BID003',
+          vendorName: 'Modern Constructions',
+          bidAmount: '₹8.2 Cr',
+          technicalScore: 85,
+          financialScore: 0,
+          submittedDate: '15/03/2024',
+          status: 'technical-approved',
+          documents: ['Technical Proposal', 'Financial Proposal', 'Company Profile']
         },
-        financial: {
-          costEffectiveness: { score: 0, maxScore: 30 },
-          paymentTerms: { score: 0, maxScore: 20 },
-          totalCost: { score: 0, maxScore: 25 },
-          valueForMoney: { score: 0, maxScore: 25 }
+        {
+          id: 'BID004',
+          vendorName: 'BuildTech Solutions',
+          bidAmount: '₹8.0 Cr',
+          technicalScore: 82,
+          financialScore: 0,
+          submittedDate: '18/03/2024',
+          status: 'technical-approved',
+          documents: ['Technical Proposal', 'Financial Proposal', 'Company Profile']
         }
-      }
+      ]
     },
     {
-      id: 'BID-2024-003',
-      tenderTitle: 'Medical Equipment Procurement',
-      tenderId: 'TND2024003',
-      vendorName: 'MedEquip Industries',
-      contactPerson: 'Dr. Rajesh Kumar',
-      vendorRating: 4.9,
-      bidAmount: '₹11,75,00,000',
-      technicalScore: 94,
-      financialScore: 85,
-      submissionDate: '2024-04-08 11:20',
-      status: 'financial',
-      evaluationStage: 'financial',
-      completionPercentage: 85,
-      documents: [
-        { name: 'Equipment Specifications', size: '12.4 MB', type: 'technical' },
-        { name: 'Warranty Terms', size: '2.8 MB', type: 'technical' },
-        { name: 'Training Program', size: '5.1 MB', type: 'company' },
-        { name: 'Financial Proposal', size: '3.2 MB', type: 'financial' }
-      ],
-      experience: '20+ years',
-      previousProjects: 156,
-      complianceStatus: 'compliant',
-      notes: 'Excellent technical specifications. Premium equipment with extended warranty.',
-      evaluationCriteria: {
-        technical: {
-          experience: { score: 0, maxScore: 20 },
-          expertise: { score: 0, maxScore: 25 },
-          resources: { score: 0, maxScore: 20 },
-          timeline: { score: 0, maxScore: 15 },
-          quality: { score: 0, maxScore: 20 }
-        },
-        financial: {
-          costEffectiveness: { score: 0, maxScore: 30 },
-          paymentTerms: { score: 0, maxScore: 20 },
-          totalCost: { score: 0, maxScore: 25 },
-          valueForMoney: { score: 0, maxScore: 25 }
+      id: 'TND2024003',
+      title: 'Water Treatment Plant Upgrade',
+      status: 'Completed',
+      statusColor: 'bg-green-100 text-green-700',
+      bidsReceived: 6,
+      closedDate: '10/02/2024',
+      estValue: '₹12.0 Cr',
+      technicalStatus: 'completed',
+      financialStatus: 'completed',
+      approved: 1,
+      disqualified: 0,
+      awarded: 1,
+      pending: 0,
+      bids: [
+        {
+          id: 'BID005',
+          vendorName: 'AquaTech Industries',
+          bidAmount: '₹11.5 Cr',
+          technicalScore: 92,
+          financialScore: 88,
+          submittedDate: '05/02/2024',
+          status: 'awarded',
+          documents: ['Technical Proposal', 'Financial Proposal', 'Company Profile']
         }
-      }
+      ]
     }
   ];
-
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'pending':
-        return <Clock className="w-5 h-5 text-orange-600" />;
-      case 'technical':
-        return <FileText className="w-5 h-5 text-blue-600" />;
-      case 'financial':
-        return <IndianRupee className="w-5 h-5 text-green-600" />;
-      case 'completed':
-        return <CheckCircle className="w-5 h-5 text-purple-600" />;
-      default:
-        return <AlertTriangle className="w-5 h-5 text-gray-600" />;
-    }
-  };
-
-  const getStatusBadge = (status) => {
-    const baseClasses = "inline-block px-3 py-1 rounded-full text-xs font-medium";
-
-    switch (status) {
-      case 'pending':
-        return `${baseClasses} bg-orange-100 text-orange-600`;
-      case 'technical':
-        return `${baseClasses} bg-blue-100 text-blue-600`;
-      case 'financial':
-        return `${baseClasses} bg-green-100 text-green-600`;
-      case 'completed':
-        return `${baseClasses} bg-purple-100 text-purple-600`;
-      default:
-        return `${baseClasses} bg-gray-100 text-gray-600`;
-    }
-  };
-
-  const getComplianceIcon = (status) => {
-    switch (status) {
-      case 'compliant':
-        return <CheckCircle className="w-4 h-4 text-green-600" />;
-      case 'non-compliant':
-        return <XCircle className="w-4 h-4 text-red-600" />;
-      case 'under-review':
-        return <Clock className="w-4 h-4 text-yellow-600" />;
-      default:
-        return <AlertTriangle className="w-4 h-4 text-gray-600" />;
-    }
-  };
-
-  const getScoreColor = (score) => {
-    if (score >= 90) return 'text-green-600';
-    if (score >= 75) return 'text-blue-600';
-    if (score >= 60) return 'text-yellow-600';
-    return 'text-red-600';
-  };
-
-  const getRatingStars = (rating) => {
-    return Array.from({ length: 5 }, (_, i) => (
-      <Star
-        key={i}
-        className={`w-4 h-4 ${i < Math.floor(rating)
-          ? 'text-yellow-400 fill-current'
-          : 'text-gray-300'
-          }`}
-      />
-    ));
-  };
-
-  const handleEvaluateBid = (bid) => {
-    setSelectedBid(bid);
-    setIsModalOpen(true);
-  };
-
-  const filteredBids = bids.filter(bid => {
-    const matchesTab = activeTab === 'all' || bid.status === activeTab;
-    const matchesTender = selectedTender === 'all' || selectedTender === 'All Tenders' || bid.tenderTitle === selectedTender;
-    const matchesSearch = bid.vendorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      bid.tenderTitle.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesTab && matchesTender && matchesSearch;
-  });
 
   const stats = [
-    { label: 'Total Bids', value: '28', icon: <FileText className="w-6 h-6 text-blue-600" /> },
-    { label: 'Pending Review', value: '8', icon: <Clock className="w-6 h-6 text-orange-600" /> },
-    { label: 'Avg. Evaluation Time', value: '4.2 days', icon: <Calendar className="w-6 h-6 text-purple-600" /> },
-    { label: 'Completion Rate', value: '89%', icon: <CheckCircle className="w-6 h-6 text-green-600" /> }
+    {
+      label: 'Total Evaluations',
+      value: '3',
+      icon: <FileText className="w-6 h-6 text-blue-600" />,
+      bgColor: 'bg-blue-50'
+    },
+    {
+      label: 'Technical Phase',
+      value: '1',
+      icon: <FileText className="w-6 h-6 text-orange-600" />,
+      bgColor: 'bg-orange-50'
+    },
+    {
+      label: 'Financial Phase',
+      value: '1',
+      icon: <FileText className="w-6 h-6 text-blue-600" />,
+      bgColor: 'bg-blue-50'
+    },
+    {
+      label: 'Completed',
+      value: '1',
+      icon: <CheckCircle className="w-6 h-6 text-green-600" />,
+      bgColor: 'bg-green-50'
+    }
   ];
 
+  const handleViewDetails = (tender) => {
+    setSelectedTender(tender);
+    setSelectedView('details');
+  };
+
+  const handleBackToList = () => {
+    setSelectedView('list');
+    setSelectedTender(null);
+  };
+
+  const handleEvaluateBids = (tender, type = 'technical') => {
+    setCurrentEvaluation(tender);
+    setEvaluationType(type);
+    setEvaluationModalOpen(true);
+  };
+
+  const handleTechnicalReport = (tender) => {
+    setCurrentEvaluation(tender);
+    setTechnicalModalOpen(true);
+  };
+
+  const handleFinancialReport = (tender) => {
+    setCurrentEvaluation(tender);
+    setFinancialModalOpen(true);
+  };
+
+  if (selectedView === 'details' && selectedTender) {
+    return <TenderDetails tender={selectedTender} onBack={handleBackToList} />;
+  }
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-gray-900">Bid Evaluation</h1>
-          <p className="text-gray-600">Review and evaluate submitted bids</p>
-        </div>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {stats.map((stat, index) => (
-          <div key={index} className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">{stat.label}</p>
-                <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-              </div>
-              {stat.icon}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Filters */}
-      <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search bids..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          <select
-            value={selectedTender}
-            onChange={(e) => setSelectedTender(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            {tenders.map(tender => (
-              <option key={tender} value={tender}>{tender}</option>
-            ))}
-          </select>
-          <button className="flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-            <Filter className="w-4 h-4" />
-            More Filters
-          </button>
-        </div>
-      </div>
-
-      {/* Tabs */}
-      <div className="border-b border-gray-200">
-        <nav className="flex space-x-8">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${activeTab === tab.id
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
-                }`}
-            >
-              {tab.label}
-              <span className="ml-2 bg-gray-100 text-gray-600 py-1 px-2 rounded-full text-xs">
-                {tab.count}
-              </span>
+          <div className="flex items-center gap-3">
+            <select className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              <option>All Evaluations</option>
+              <option>Technical Phase</option>
+              <option>Financial Phase</option>
+              <option>Completed</option>
+            </select>
+            <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+              <FileText className="w-4 h-4" />
+              Export Report
             </button>
-          ))}
-        </nav>
-      </div>
+          </div>
+        </div>
 
-      {/* Bid Cards */}
-      <div className="space-y-4">
-        {filteredBids.map((bid) => (
-          <div key={bid.id} className="bg-white rounded-lg shadow-md p-6 border border-gray-200 border-l-4 border-l-blue-500 hover:shadow-lg transition-shadow duration-200">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-start gap-4 flex-1">
-                <div className="p-3 rounded-full bg-gray-50">
-                  {getStatusIcon(bid.status)}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          {stats.map((stat, index) => (
+            <div key={index} className="bg-white rounded-lg shadow p-6 border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">{stat.label}</p>
+                  <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
                 </div>
+                <div className={`p-3 rounded-lg ${stat.bgColor}`}>
+                  {stat.icon}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="space-y-4">
+          {tenders.map((tender) => (
+            <div key={tender.id} className="bg-white rounded-lg shadow border border-gray-200 p-6">
+              <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-lg font-semibold text-gray-900">{bid.tenderTitle}</h3>
-                    <span className="px-2 py-1 bg-blue-100 text-blue-600 rounded-full text-xs font-medium">
-                      ID: {bid.id}
+                    <h2 className="text-lg font-semibold text-gray-900">{tender.title}</h2>
+                    <span className={`px-3 py-1 rounded-md text-sm font-medium ${tender.statusColor}`}>
+                      {tender.status}
                     </span>
+                    <button
+                      onClick={() => handleViewDetails(tender)}
+                      className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                      View Details
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-6 text-sm text-gray-600 mb-4">
+                    <span>ID: {tender.id}</span>
+                    <span>Bids Received: {tender.bidsReceived}</span>
+                    <span>Closed: {tender.closedDate}</span>
+                    <span>Est. Value: {tender.estValue}</span>
                   </div>
 
                   <div className="flex items-center gap-4 mb-4">
                     <div className="flex items-center gap-2">
-                      <User className="w-4 h-4 text-gray-500" />
-                      <span className="font-medium text-gray-900">{bid.vendorName}</span>
+                      <span className={`w-3 h-3 rounded-full ${tender.technicalStatus === 'completed' ? 'bg-green-500' : tender.technicalStatus === 'in-progress' ? 'bg-orange-500' : 'bg-gray-300'}`}></span>
+                      <span className="text-sm text-gray-700">Technical Evaluation</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      {getRatingStars(bid.vendorRating)}
-                      <span className="text-sm text-gray-600 ml-1">({bid.vendorRating})</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      {getComplianceIcon(bid.complianceStatus)}
-                      <span className="text-sm text-gray-600 capitalize">{bid.complianceStatus.replace('-', ' ')}</span>
+                    <div className="flex items-center gap-2">
+                      <span className={`w-3 h-3 rounded-full ${tender.financialStatus === 'completed' ? 'bg-green-500' : tender.financialStatus === 'in-progress' ? 'bg-orange-500' : 'bg-gray-300'}`}></span>
+                      <span className="text-sm text-gray-700">Financial Evaluation</span>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                    <div>
-                      <span className="text-sm text-gray-500">Bid Amount</span>
-                      <div className="font-semibold text-green-600 text-lg">{bid.bidAmount}</div>
-                    </div>
-                    <div>
-                      <span className="text-sm text-gray-500">Technical Score</span>
-                      <div className={`font-semibold text-lg ${getScoreColor(bid.technicalScore)}`}>
-                        {bid.technicalScore}/100
-                      </div>
-                    </div>
-                    <div>
-                      <span className="text-sm text-gray-500">Financial Score</span>
-                      <div className={`font-semibold text-lg ${getScoreColor(bid.financialScore)}`}>
-                        {bid.financialScore}/100
-                      </div>
-                    </div>
-                    <div>
-                      <span className="text-sm text-gray-500">Experience</span>
-                      <div className="font-semibold text-gray-900">{bid.experience}</div>
-                      <div className="text-sm text-gray-500">{bid.previousProjects} projects</div>
-                    </div>
+                  <div className="flex items-center gap-6 text-sm">
+                    <span className="text-green-600 flex items-center gap-1">
+                      <CheckCircle className="w-4 h-4" />
+                      Approved: {tender.approved}
+                    </span>
+                    <span className="text-red-600 flex items-center gap-1">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                      Disqualified: {tender.disqualified}
+                    </span>
+                    <span className="text-blue-600 flex items-center gap-1">
+                      <Award className="w-4 h-4" />
+                      Awarded: {tender.awarded}
+                    </span>
+                    <span className="text-orange-600 flex items-center gap-1">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Pending: {tender.pending}
+                    </span>
                   </div>
 
-                  {/* Progress Bar */}
-                  <div className="mb-4">
-                    <div className="flex items-center justify-between text-sm mb-1">
-                      <span className="text-gray-600">Evaluation Progress</span>
-                      <span className="font-medium">{bid.completionPercentage}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-primary-500 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${bid.completionPercentage}%` }}
-                      ></div>
-                    </div>
-                  </div>
-
-                  {/* Documents */}
-                  <div className="mb-4">
-                    <span className="text-sm text-gray-500 block mb-2">Documents:</span>
-                    <div className="flex flex-wrap gap-2">
-                      {bid.documents.map((doc, index) => (
-                        <span key={index} className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs">
-                          {doc.name}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="bg-gray-50 p-3 rounded-lg">
-                    <h4 className="font-medium text-gray-900 mb-1">Evaluation Notes:</h4>
-                    <p className="text-sm text-gray-700">{bid.notes}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="text-right">
-                <span className={getStatusBadge(bid.status)}>
-                  {bid.evaluationStage.charAt(0).toUpperCase() + bid.evaluationStage.slice(1)}
-                </span>
-                <div className="text-sm text-gray-500 mt-1">
-                  {bid.submissionDate}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-              <div className="flex items-center gap-3">
-                <button className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm">
-                  <Eye className="w-4 h-4" />
-                  View Full Proposal
-                </button>
-                <button className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm">
-                  <Download className="w-4 h-4" />
-                  Download Documents
-                </button>
-              </div>
-
-              <div className="flex items-center gap-2">
-                {bid.status === 'completed' && bid.evaluationStage === 'awarded' ? (
-                  <span className="flex items-center gap-1 text-green-600 font-medium text-sm">
-                    <Award className="w-4 h-4" />
-                    Awarded
-                  </span>
-                ) : (
-                  <>
-                    <button className="text-red-600 hover:text-red-700 text-sm font-medium">
-                      Reject
-                    </button>
-                    <button
-                      onClick={() => handleEvaluateBid(bid)}
-                      className="bg-primary-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors"
+                  <div className="flex gap-2 mt-4">
+                    <button 
+                      onClick={() => handleTechnicalReport(tender)}
+                      className="px-4 py-1.5 bg-orange-50 text-orange-700 rounded text-sm font-medium hover:bg-orange-100"
                     >
-                      {bid.status === 'pending' ? 'Start Evaluation' :
-                        bid.status === 'technical' ? 'Continue Technical' :
-                          bid.status === 'financial' ? 'Continue Financial' :
-                            'Review Completed'}
+                      Technical Report
                     </button>
-                  </>
-                )}
+                    <button 
+                      onClick={() => handleFinancialReport(tender)}
+                      className="px-4 py-1.5 bg-blue-50 text-blue-700 rounded text-sm font-medium hover:bg-blue-100"
+                    >
+                      Financial Report
+                    </button>
+                    <button className="px-4 py-1.5 bg-green-50 text-green-700 rounded text-sm font-medium hover:bg-green-100">
+                      Full Report
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2 ml-4">
+                  <button
+                    onClick={() => {
+                      if (tender.title === 'Highway Construction Project Phase 2') {
+                        handleEvaluateBids(tender, 'technical');
+                      } else if (tender.technicalStatus === 'completed') {
+                        handleEvaluateBids(tender, 'financial');
+                      } else {
+                        handleEvaluateBids(tender, 'technical');
+                      }
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap"
+                  >
+                    <FileText className="w-4 h-4" />
+                    Evaluate Bids
+                  </button>
+                  <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 whitespace-nowrap">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Manage Q&A
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
-      {/* Empty State */}
-      {filteredBids.length === 0 && (
-        <div className="text-center py-12">
-          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <FileText className="w-8 h-8 text-gray-400" />
-          </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No bids found</h3>
-          <p className="text-gray-500">
-            {searchTerm || selectedTender !== 'All Tenders'
-              ? 'Try adjusting your search criteria or filters'
-              : 'No bids available for evaluation at this time'}
-          </p>
-        </div>
+      {evaluationModalOpen && currentEvaluation && (
+        <EvaluationModal
+          tender={currentEvaluation}
+          evaluationType={evaluationType}
+          onClose={() => setEvaluationModalOpen(false)}
+        />
       )}
 
-      {/* Evaluation Modal */}
-      {isModalOpen && selectedBid && (
-        <EvaluationModal
-          bid={selectedBid}
-          onClose={() => setIsModalOpen(false)}
+      {technicalModalOpen && currentEvaluation && (
+        <TechnicalReportModal
+          tender={currentEvaluation}
+          onClose={() => setTechnicalModalOpen(false)}
+        />
+      )}
+
+      {financialModalOpen && currentEvaluation && (
+        <FinancialReportModal
+          tender={currentEvaluation}
+          onClose={() => setFinancialModalOpen(false)}
         />
       )}
     </div>
