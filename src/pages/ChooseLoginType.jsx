@@ -351,11 +351,11 @@ const ChooseLoginType = () => {
                   <button
                     type="submit"
                     disabled={loading}
-                    className={`w-full ${
+                    className={`w-full text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-300 ${
                       loading
-                        ? "opacity-70 cursor-not-allowed"
-                        : "bg-primary-500 hover:bg-gray-700"
-                    } text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200`}
+                        ? "opacity-70 cursor-not-allowed bg-gray-400"
+                        : "bg-primary-500 hover:!bg-primary-600 active:!bg-primary-700 focus:!bg-primary-600"
+                    }`}
                   >
                     {loading
                       ? "Signing in…"

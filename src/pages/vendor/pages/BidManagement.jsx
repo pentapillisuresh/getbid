@@ -337,6 +337,28 @@ const BidManagement = () => {
     setShowRebid(true);
   };
 
+  const handleDeleteBid = async (bid) => {
+    // if (
+    //   window.confirm(
+    //     `Are you sure you want to delete the bid for "${bid.title}"? This action cannot be undone.`
+    //   )
+    // ) {
+    //   try {
+    //     setLoading(true);
+    //     await api.delete(`/v1/bids/${bid.id}`);
+    //     // Remove the deleted bid from the local state
+    //     setBids((prevBids) => prevBids.filter((b) => b._id !== bid.id));
+    //     // Show success message (you can customize this based on your toast service)
+    //     alert("Bid deleted successfully");
+    //   } catch (error) {
+    //     console.error("Error deleting bid:", error);
+    //     alert("Failed to delete bid. Please try again.");
+    //   } finally {
+    //     setLoading(false);
+    //   }
+    // }
+  };
+
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
       {currentView === "bids" && (
@@ -617,6 +639,14 @@ const BidManagement = () => {
                     {bid.status === "awarded" && (
                       <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors">
                         View Contract
+                      </button>
+                    )}
+                    {bid.status === "pending" && (
+                      <button
+                        onClick={() => handleDeleteBid(bid)}
+                        className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors"
+                      >
+                        Delete Bid
                       </button>
                     )}
                     {bid.status === "rejected" && (

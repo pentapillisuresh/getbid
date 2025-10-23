@@ -12,9 +12,9 @@ import {
 const ViewDetailsPopup = ({ tender, onClose }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 sticky top-0 bg-white z-10">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-white flex-shrink-0">
           <div>
             <h2 className="text-xl font-semibold text-gray-900">
               {tender.title}
@@ -30,7 +30,7 @@ const ViewDetailsPopup = ({ tender, onClose }) => {
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-6 overflow-y-auto flex-1">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Left Column */}
             <div className="space-y-6">
@@ -255,7 +255,7 @@ const ViewDetailsPopup = ({ tender, onClose }) => {
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-3 p-6 border-t border-gray-200">
+        <div className="flex justify-end gap-3 p-6 border-t border-gray-200 flex-shrink-0">
           <button
             onClick={onClose}
             className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"

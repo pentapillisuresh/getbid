@@ -1,27 +1,44 @@
-import React, { useState } from 'react';
-import { X, AlertCircle } from 'lucide-react';
+import React, { useState } from "react";
+import { X, AlertCircle } from "lucide-react";
+import { disqualifyBid } from "../../../services/tenderApiService";
+import toast from "../../../services/toastService";
 
 const DisqualifyBidModal = ({ bid, tender, onClose, onConfirm }) => {
-  const [reason, setReason] = useState('');
+  const [reason, setReason] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const commonReasons = [
-    'Insufficient technical experience',
-    'Missing required certifications',
-    'Incomplete documentation',
-    'Does not meet eligibility criteria',
-    'Technical proposal does not comply with specifications',
-    'Financial capacity inadequate',
-    'Past performance issues'
+    "Insufficient technical experience",
+    "Missing required certifications",
+    "Incomplete documentation",
+    "Does not meet eligibility criteria",
+    "Technical proposal does not comply with specifications",
+    "Financial capacity inadequate",
+    "Past performance issues",
   ];
 
   const handleReasonClick = (selectedReason) => {
     setReason(selectedReason);
   };
 
-  const handleSubmit = () => {
-    if (reason.trim()) {
+  const handleSubmit = async () => {
+    if (!reason.trim()) return;
+
+    setSubmitting(true);
+
+    try {
+      await disqualifyBid(bid._id, reason.trim());
+
+      toast.showSuccess("Bid disqualified successfully");
+
+      // Call onConfirm with the reason for parent component
       onConfirm(reason);
       onClose();
+    } catch (error) {
+      console.error("Error disqualifying bid:", error);
+      toast.showError("Failed to disqualify bid. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -37,7 +54,8 @@ const DisqualifyBidModal = ({ bid, tender, onClose, onConfirm }) => {
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            disabled={submitting}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <X className="w-5 h-5 text-gray-500" />
           </button>
@@ -49,34 +67,73 @@ const DisqualifyBidModal = ({ bid, tender, onClose, onConfirm }) => {
               <div className="flex items-center gap-3">
                 <AlertCircle className="w-5 h-5 text-red-600" />
                 <div>
-                  <p className="font-medium text-red-900">Disqualification Notice</p>
-                  <p className="text-sm text-red-700">This action will disqualify the bid from further evaluation</p>
+                  <p className="font-medium text-red-900">
+                    Disqualification Notice
+                  </p>
+                  <p className="text-sm text-red-700">
+                    This action will disqualify the bid from further evaluation
+                  </p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-6 mt-4">
                 <div>
-                  <p className="text-sm text-red-700 font-medium mb-1">Vendor Name</p>
-                  <p className="text-red-900 font-semibold">{bid.vendorName}</p>
+                  <p className="text-sm text-red-700 font-medium mb-1">
+                    Vendor Name
+                  </p>
+                  <p className="text-red-900 font-semibold">
+                    {bid?.user?.name || "N/A"}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-sm text-red-700 font-medium mb-1">Contact Person</p>
-                  <p className="text-red-900 font-semibold">{bid.contactPerson || 'N/A'}</p>
+                  <p className="text-sm text-red-700 font-medium mb-1">
+                    Company
+                  </p>
+                  <p className="text-red-900 font-semibold">
+                    {bid?.user?.company?.name || "N/A"}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-sm text-red-700 font-medium mb-1">Bid Amount</p>
-                  <p className="text-red-900 font-semibold">{bid.bidAmount}</p>
+                  <p className="text-sm text-red-700 font-medium mb-1">
+                    Bid Amount
+                  </p>
+                  <p className="text-red-900 font-semibold">
+                    {bid?.amount ? `₹${bid.amount.toLocaleString()}` : "N/A"}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-sm text-red-700 font-medium mb-1">Submission Date</p>
-                  <p className="text-red-900 font-semibold">{bid.submittedDate}</p>
+                  <p className="text-sm text-red-700 font-medium mb-1">
+                    Submission Date
+                  </p>
+                  <p className="text-red-900 font-semibold">
+                    {bid?.createdAt
+                      ? new Date(bid.createdAt).toLocaleDateString()
+                      : "N/A"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-red-700 font-medium mb-1">
+                    Timeline
+                  </p>
+                  <p className="text-red-900 font-semibold">
+                    {bid?.timeline || "N/A"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-red-700 font-medium mb-1">
+                    Contact Email
+                  </p>
+                  <p className="text-red-900 font-semibold">
+                    {bid?.user?.email || "N/A"}
+                  </p>
                 </div>
               </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Reason for Disqualification <span className="text-red-500">*</span>
+                Reason for Disqualification{" "}
+                <span className="text-red-500">*</span>
               </label>
               <textarea
                 value={reason}
@@ -88,7 +145,9 @@ const DisqualifyBidModal = ({ bid, tender, onClose, onConfirm }) => {
             </div>
 
             <div>
-              <p className="text-sm font-medium text-gray-700 mb-3">Common Reasons (Click to use)</p>
+              <p className="text-sm font-medium text-gray-700 mb-3">
+                Common Reasons (Click to use)
+              </p>
               <div className="space-y-2">
                 {commonReasons.map((commonReason, index) => (
                   <button
@@ -107,16 +166,24 @@ const DisqualifyBidModal = ({ bid, tender, onClose, onConfirm }) => {
         <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium"
+            disabled={submitting}
+            className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
-            disabled={!reason.trim()}
-            className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium disabled:bg-gray-300 disabled:cursor-not-allowed"
+            disabled={!reason.trim() || submitting}
+            className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2"
           >
-            Confirm Disqualification
+            {submitting ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                Disqualifying...
+              </>
+            ) : (
+              "Confirm Disqualification"
+            )}
           </button>
         </div>
       </div>

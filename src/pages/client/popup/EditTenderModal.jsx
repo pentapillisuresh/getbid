@@ -8,7 +8,7 @@ const EditTenderModal = ({ show, onClose, tender, onSave }) => {
     estimatedValue: "",
     submissionDeadline: "",
     category: "",
-    department: ""
+    department: "",
   });
 
   useEffect(() => {
@@ -19,7 +19,7 @@ const EditTenderModal = ({ show, onClose, tender, onSave }) => {
         estimatedValue: tender.estimatedValue || "",
         submissionDeadline: tender.submissionDeadline || "",
         category: tender.category || "",
-        department: tender.department || ""
+        department: tender.department || "",
       });
     }
   }, [tender]);
@@ -30,7 +30,7 @@ const EditTenderModal = ({ show, onClose, tender, onSave }) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: value
+      [name]: value,
     });
   };
 
@@ -42,9 +42,9 @@ const EditTenderModal = ({ show, onClose, tender, onSave }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 sticky top-0 bg-white">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white flex-shrink-0">
           <h2 className="text-xl font-semibold text-gray-800">
             Edit Tender - {tender.id}
           </h2>
@@ -57,138 +57,149 @@ const EditTenderModal = ({ show, onClose, tender, onSave }) => {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Tender Title */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Tender Title *
-            </label>
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              required
-            />
-          </div>
-
-          {/* Category and Department */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col flex-1 overflow-hidden"
+        >
+          <div className="p-6 space-y-6 overflow-y-auto flex-1">
+            {/* Tender Title */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Category *
-              </label>
-              <select
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                required
-              >
-                <option value="">Select Category</option>
-                <option value="Infrastructure">Infrastructure</option>
-                <option value="Construction">Construction</option>
-                <option value="IT Services">IT Services</option>
-                <option value="Healthcare">Healthcare</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Department *
+                Tender Title *
               </label>
               <input
                 type="text"
-                name="department"
-                value={formData.department}
+                name="title"
+                value={formData.title}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 required
               />
             </div>
-          </div>
 
-          {/* Estimated Value and Deadline */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Category and Department */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Category *
+                </label>
+                <select
+                  name="category"
+                  value={formData.category}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  required
+                >
+                  <option value="">Select Category</option>
+                  <option value="Infrastructure">Infrastructure</option>
+                  <option value="Construction">Construction</option>
+                  <option value="IT Services">IT Services</option>
+                  <option value="Healthcare">Healthcare</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Department *
+                </label>
+                <input
+                  type="text"
+                  name="department"
+                  value={formData.department}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Estimated Value and Deadline */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Estimated Value *
+                </label>
+                <input
+                  type="text"
+                  name="estimatedValue"
+                  value={formData.estimatedValue}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  placeholder="₹25.0 Cr"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Submission Deadline *
+                </label>
+                <input
+                  type="date"
+                  name="submissionDeadline"
+                  value={formData.submissionDeadline}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Description */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Estimated Value *
+                Description *
               </label>
-              <input
-                type="text"
-                name="estimatedValue"
-                value={formData.estimatedValue}
+              <textarea
+                name="description"
+                value={formData.description}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                placeholder="₹25.0 Cr"
+                rows="4"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
                 required
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Submission Deadline *
-              </label>
-              <input
-                type="date"
-                name="submissionDeadline"
-                value={formData.submissionDeadline}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                required
-              />
-            </div>
-          </div>
+            {/* Additional Fields Section */}
+            <div className="border-t pt-4">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                Additional Information
+              </h3>
 
-          {/* Description */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Description *
-            </label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              rows="4"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
-              required
-            />
-          </div>
+              {/* Pre-bid Meeting */}
+              <div className="flex items-center mb-4">
+                <input
+                  type="checkbox"
+                  id="preBidMeeting"
+                  className="h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                />
+                <label
+                  htmlFor="preBidMeeting"
+                  className="ml-2 text-sm text-gray-700"
+                >
+                  Schedule Pre-bid Meeting
+                </label>
+              </div>
 
-          {/* Additional Fields Section */}
-          <div className="border-t pt-4">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
-              Additional Information
-            </h3>
-            
-            {/* Pre-bid Meeting */}
-            <div className="flex items-center mb-4">
-              <input
-                type="checkbox"
-                id="preBidMeeting"
-                className="h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-              />
-              <label htmlFor="preBidMeeting" className="ml-2 text-sm text-gray-700">
-                Schedule Pre-bid Meeting
-              </label>
+              {/* Linked Account */}
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="linkedAccount"
+                  className="h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                />
+                <label
+                  htmlFor="linkedAccount"
+                  className="ml-2 text-sm text-gray-700"
+                >
+                  Link to Main Account
+                </label>
+              </div>
             </div>
 
-            {/* Linked Account */}
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="linkedAccount"
-                className="h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-              />
-              <label htmlFor="linkedAccount" className="ml-2 text-sm text-gray-700">
-                Link to Main Account
-              </label>
-            </div>
+            {/* Action Buttons */}
           </div>
-
-          {/* Action Buttons */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 sticky bottom-0 bg-white pb-2">
+          <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50 flex-shrink-0">
             <button
               type="button"
               onClick={onClose}
