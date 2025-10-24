@@ -85,8 +85,9 @@ const VendorDashboard = () => {
       subtitle="Secure Procurement Platform"
       userInfo={userInfo}
       userType="vendor"
+      sidebarItems={sidebarItems}
+      showSidebar={true}
     >
-      <Sidebar items={sidebarItems} basePath="/vendor" />
       <main className="flex-1 p-6">
         <Routes>
           <Route

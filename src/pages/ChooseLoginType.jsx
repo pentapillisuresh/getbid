@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Building2, Users, Eye, EyeOff, RefreshCw } from "lucide-react";
 import Header from "../components/shared/Header";
 import api from "../services/apiService";
 import toastService from "../services/toastService";
+import firebaseMessagingService from "../services/firebaseMessagingService";
 
 const ChooseLoginType = () => {
   const navigate = useNavigate();
@@ -15,6 +16,19 @@ const ChooseLoginType = () => {
     captcha: "",
     rememberMe: false,
   });
+
+  // Initialize Firebase messaging on component mount
+  useEffect(() => {
+    const initializeFirebase = async () => {
+      try {
+        await firebaseMessagingService.initialize();
+      } catch (error) {
+        console.error("Failed to initialize Firebase messaging:", error);
+      }
+    };
+
+    initializeFirebase();
+  }, []);
   // generate a random 4-character captcha: uppercase letters + digits
   const generateCaptcha = () => {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -65,11 +79,7 @@ const ChooseLoginType = () => {
       email: formData.email,
       password: formData.password,
       role: loginType === "vendor" ? "vendor" : "client",
-      deviceDetails: {
-        deviceType: "web",
-        deviceName:
-          (typeof navigator !== "undefined" && navigator.userAgent) || "web",
-      },
+      deviceDetails: firebaseMessagingService.getDeviceDetails(),
     };
 
     setLoading(true);

@@ -1,20 +1,29 @@
-import React, { useState } from 'react';
-import { Building2, Bell, User, LogOut, Menu, UserCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { Building2, Bell, User, LogOut, Menu, UserCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import Sidebar from "./Sidebar";
 
-const DashboardLayout = ({ children, title, subtitle, userInfo, userType }) => {
+const DashboardLayout = ({
+  children,
+  title,
+  subtitle,
+  userInfo,
+  userType,
+  sidebarItems,
+  showSidebar = true,
+}) => {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleLogout = () => {
     // clear auth tokens and any related user data
-    if (typeof localStorage !== 'undefined') {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('sessionId');
-      localStorage.removeItem('user');
+    if (typeof localStorage !== "undefined") {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("sessionId");
+      localStorage.removeItem("user");
       // optionally clear everything: localStorage.clear();
     }
-    navigate('/');
+    navigate("/");
   };
 
   const toggleSidebar = () => {
@@ -34,13 +43,15 @@ const DashboardLayout = ({ children, title, subtitle, userInfo, userType }) => {
           <div className="flex items-center justify-between h-16">
             {/* Mobile Menu Button */}
             <div className="flex items-center gap-4">
-              <button
-                onClick={toggleSidebar}
-                className="lg:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg"
-              >
-                <Menu className="w-6 h-6" />
-              </button>
-              
+              {showSidebar && sidebarItems && (
+                <button
+                  onClick={toggleSidebar}
+                  className="lg:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg"
+                >
+                  <Menu className="w-6 h-6" />
+                </button>
+              )}
+
               {/* Logo and Title */}
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center">
@@ -48,7 +59,9 @@ const DashboardLayout = ({ children, title, subtitle, userInfo, userType }) => {
                 </div>
                 <div>
                   <h1 className="text-xl font-bold text-gray-900">{title}</h1>
-                  <p className="text-sm text-gray-600 hidden sm:block">{subtitle}</p>
+                  <p className="text-sm text-gray-600 hidden sm:block">
+                    {subtitle}
+                  </p>
                 </div>
               </div>
             </div>
@@ -64,7 +77,9 @@ const DashboardLayout = ({ children, title, subtitle, userInfo, userType }) => {
               {/* User Menu */}
               <div className="flex items-center gap-3">
                 <div className="text-right hidden sm:block">
-                  <p className="text-sm font-medium text-gray-900">{userInfo.name}</p>
+                  <p className="text-sm font-medium text-gray-900">
+                    {userInfo.name}
+                  </p>
                   <p className="text-xs text-gray-600">{userInfo.email}</p>
                 </div>
                 <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
@@ -81,7 +96,7 @@ const DashboardLayout = ({ children, title, subtitle, userInfo, userType }) => {
                 </button>
 
                 {/* Logout */}
-                <button 
+                <button
                   onClick={handleLogout}
                   className="p-2 text-gray-500 hover:text-primary-600 rounded-lg hover:bg-primary-50 transition-colors"
                   title="Logout"
@@ -95,15 +110,23 @@ const DashboardLayout = ({ children, title, subtitle, userInfo, userType }) => {
       </header>
 
       {/* Mobile Overlay */}
-      {sidebarOpen && (
-        <div 
-          className="lg:hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-40"
+      {showSidebar && sidebarItems && sidebarOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Main Content */}
       <div className="flex pt-16">
+        {showSidebar && sidebarItems && (
+          <Sidebar
+            items={sidebarItems}
+            basePath={`/${userType}`}
+            sidebarOpen={sidebarOpen}
+            setSidebarOpen={setSidebarOpen}
+          />
+        )}
         {children}
       </div>
     </div>

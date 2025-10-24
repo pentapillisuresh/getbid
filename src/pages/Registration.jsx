@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Building2,
   User,
@@ -17,11 +17,27 @@ import {
 import { useNavigate } from "react-router-dom";
 import api from "../services/apiService";
 import toastService from "../services/toastService";
+import firebaseMessagingService from "../services/firebaseMessagingService";
+
 const Registration = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [registrationType, setRegistrationType] = useState("vendor");
   const [entityType, setEntityType] = useState("individual");
+
+  // Initialize Firebase messaging on component mount
+  useEffect(() => {
+    const initializeFirebase = async () => {
+      try {
+        await firebaseMessagingService.initialize();
+      } catch (error) {
+        console.error("Failed to initialize Firebase messaging:", error);
+      }
+    };
+
+    initializeFirebase();
+  }, []);
+
   const [showPanOtp, setShowPanOtp] = useState(false);
   const [panVerified, setPanVerified] = useState(false);
   const [showGstOtp, setShowGstOtp] = useState(false);
@@ -212,10 +228,7 @@ const Registration = () => {
           type: "email",
           contact: formData.email,
           otp: formData.emailOtp,
-          deviceDetails: {
-            deviceType: "web",
-            deviceName: navigator.userAgent || "web-client",
-          },
+          deviceDetails: firebaseMessagingService.getDeviceDetails(),
         },
       });
 
@@ -278,10 +291,7 @@ const Registration = () => {
           type: "phone",
           contact: formData.mobile,
           otp: formData.mobileOtp,
-          deviceDetails: {
-            deviceType: "web",
-            deviceName: navigator.userAgent || "web-client",
-          },
+          deviceDetails: firebaseMessagingService.getDeviceDetails(),
         },
       });
 
@@ -430,13 +440,7 @@ const Registration = () => {
         annualTurnover: formData.annualTurnover || undefined,
         experience: formData.experience || undefined,
       },
-      deviceDetails: {
-        deviceType: typeof navigator !== "undefined" ? "web" : "web",
-        deviceName:
-          (typeof navigator !== "undefined" &&
-            (navigator.platform || navigator.userAgent)) ||
-          "web-client",
-      },
+      deviceDetails: firebaseMessagingService.getDeviceDetails(),
     };
 
     try {

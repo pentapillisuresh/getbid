@@ -32,8 +32,9 @@ import {
 } from "../../../utils/tenderUtils";
 
 const TenderManagement = () => {
-  const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState("create"); // 'create', 'edit', 'amend'
   const [selectedTender, setSelectedTender] = useState(null);
@@ -48,6 +49,32 @@ const TenderManagement = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [error, setError] = useState(null);
+
+  // Stats state
+  const [statsData, setStatsData] = useState({
+    totalTenders: 0,
+    activeTenders: 0,
+    totalValue: 0,
+    averageResponseRate: 0,
+  });
+  const [statsLoading, setStatsLoading] = useState(false);
+
+  // Track initial load to prevent unnecessary API calls
+  const isInitialLoad = useRef(true);
+
+  // Get stored user ID from localStorage (robust to several id field names)
+  const getStoredUserId = () => {
+    try {
+      if (typeof window === "undefined" || !window.localStorage) return null;
+      const raw = window.localStorage.getItem("user");
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object") return null;
+      return parsed._id || parsed.id || parsed.userId || null;
+    } catch (e) {
+      return null;
+    }
+  };
 
   // Intersection Observer for infinite scroll
   const observer = useRef();
@@ -66,60 +93,95 @@ const TenderManagement = () => {
   );
 
   // API functions
-  const fetchTenders = useCallback(
-    async (page = 1, isNewSearch = false) => {
-      if (loading) return;
+  const fetchTenders = async (page = 1, isNewSearch = false) => {
+    if (loading) return;
 
-      setLoading(true);
-      setError(null);
+    setLoading(true);
+    setError(null);
 
-      try {
-        const queryParams = {
-          page,
-          limit: 10,
-        };
+    try {
+      const queryParams = {
+        page,
+        limit: 10,
+      };
 
-        // Add search parameter if available
-        if (searchTerm) {
-          queryParams.search = searchTerm;
-        }
-
-        // Add status filter if not "all"
-        if (activeTab !== "all") {
-          queryParams.status = activeTab;
-        }
-
-        const response = await api.get("/v1/tenders", {
-          queryParams,
-        });
-
-        if (response.success) {
-          const newTenders = response.data || [];
-
-          if (isNewSearch || page === 1) {
-            setTenders(newTenders);
-          } else {
-            setTenders((prev) => [...prev, ...newTenders]);
-          }
-
-          setTotalCount(response.totalCount || 0);
-          setTotalPages(response.totalPages || 0);
-          setHasMore(page < (response.totalPages || 0));
-        }
-      } catch (err) {
-        console.error("Error fetching tenders:", err);
-        setError("Failed to fetch tenders");
-      } finally {
-        setLoading(false);
+      // Add user ID as postedBy parameter
+      const userId = getStoredUserId();
+      if (userId) {
+        queryParams.postedBy = userId;
       }
-    },
-    [loading, searchTerm, activeTab]
-  );
+
+      // Add search parameter if available
+      if (searchTerm) {
+        queryParams.search = searchTerm;
+      }
+
+      // Add category filter if selected
+      if (categoryFilter) {
+        queryParams.category = categoryFilter;
+      }
+
+      // Add status filter if selected
+      if (statusFilter) {
+        queryParams.status = statusFilter;
+      }
+
+      const response = await api.get("/v1/tenders", {
+        queryParams,
+      });
+
+      if (response.success) {
+        const newTenders = response.data || [];
+
+        if (isNewSearch || page === 1) {
+          setTenders(newTenders);
+        } else {
+          setTenders((prev) => [...prev, ...newTenders]);
+        }
+
+        setTotalCount(response.totalCount || 0);
+        setTotalPages(response.totalPages || 0);
+        setHasMore(page < (response.totalPages || 0));
+      }
+    } catch (err) {
+      console.error("Error fetching tenders:", err);
+      setError("Failed to fetch tenders");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch stats from API
+  const fetchStats = async () => {
+    setStatsLoading(true);
+    try {
+      const response = await api.get("/v1/tenders/stats");
+
+      if (response.success) {
+        setStatsData(response.data);
+      }
+    } catch (err) {
+      console.error("Error fetching stats:", err);
+      // Keep default values on error
+    } finally {
+      setStatsLoading(false);
+    }
+  };
 
   // Map API data to component format
   const mapTenderData = (tender) => {
     const daysLeft = calculateDaysLeft(tender.bidDeadline);
     const status = getTenderStatus(tender);
+
+    // Debug logging
+    console.log(
+      "Original tender status:",
+      tender.status,
+      "Mapped status:",
+      status,
+      "Filter:",
+      statusFilter
+    );
 
     return {
       id: tender._id,
@@ -159,71 +221,91 @@ const TenderManagement = () => {
   // Effects
   useEffect(() => {
     fetchTenders(1, true);
+    fetchStats();
+    isInitialLoad.current = false;
   }, []);
 
   useEffect(() => {
     if (currentPage > 1) {
       fetchTenders(currentPage);
     }
-  }, [currentPage, fetchTenders]);
+  }, [currentPage]);
 
-  // Reset pagination and fetch new data when search term changes
+  // Reset pagination when search term changes (with debounce)
   useEffect(() => {
-    if (searchTerm) {
+    if (!isInitialLoad.current) {
       setCurrentPage(1);
       setTenders([]);
       setHasMore(true);
-      // Add debounced search here if needed
+
       const timeoutId = setTimeout(() => {
         fetchTenders(1, true);
       }, 300);
+
       return () => clearTimeout(timeoutId);
-    } else {
-      fetchTenders(1, true);
     }
   }, [searchTerm]);
 
-  // Reset pagination when active tab changes
+  // Reset pagination when filters change
   useEffect(() => {
-    setCurrentPage(1);
-    setTenders([]);
-    setHasMore(true);
-    fetchTenders(1, true);
-  }, [activeTab]);
+    if (!isInitialLoad.current) {
+      setCurrentPage(1);
+      setTenders([]);
+      setHasMore(true);
+      fetchTenders(1, true);
+    }
+  }, [categoryFilter, statusFilter]);
 
   const handleNewTender = (response) => {
     console.log("New Tender Created:", response);
-    // Refresh the list after successful creation
+    // Refresh the list and stats after successful creation
     fetchTenders(1, true);
+    fetchStats();
   };
 
   const handleEditTender = (response) => {
     console.log("Tender Updated:", response);
-    // Refresh the list after successful update
+    // Refresh the list and stats after successful update
     fetchTenders(1, true);
+    fetchStats();
   };
 
   const handleAmendTender = (response) => {
     console.log("Tender Amended:", response);
-    // Refresh the list after successful amendment
+    // Refresh the list and stats after successful amendment
     fetchTenders(1, true);
+    fetchStats();
   };
 
-  const tabs = [
-    { id: "all", label: "All Tenders", count: totalCount },
-    { id: "draft", label: "Draft", count: 0 },
-    { id: "published", label: "Published", count: totalCount },
-    { id: "evaluation", label: "Under Evaluation", count: 0 },
-    { id: "awarded", label: "Awarded", count: 0 },
+  // Filter options
+  const categoryOptions = [
+    { value: "", label: "All Categories" },
+    { value: "Infrastructure", label: "Infrastructure" },
+    { value: "Construction", label: "Construction" },
+    { value: "IT Services", label: "IT Services" },
+    { value: "Healthcare", label: "Healthcare" },
+  ];
+
+  const statusOptions = [
+    { value: "", label: "All Status" },
+    { value: "in-progress", label: "In Progress" },
+    { value: "technical-evaluation", label: "Technical Evaluated" },
+    { value: "financial-evaluation", label: "Financial Evaluated" },
+    { value: "completed", label: "Completed" },
   ];
 
   const getStatusIcon = (status) => {
     switch (status) {
       case "published":
+      case "in-progress":
         return <CheckCircle className="w-5 h-5 text-green-600" />;
       case "evaluation":
+      case "technical-evaluation":
         return <Clock className="w-5 h-5 text-blue-600" />;
+      case "financial-evaluation":
+        return <IndianRupee className="w-5 h-5 text-purple-600" />;
       case "awarded":
+      case "completed":
         return <Award className="w-5 h-5 text-purple-600" />;
       case "draft":
         return <FileText className="w-5 h-5 text-gray-600" />;
@@ -238,10 +320,15 @@ const TenderManagement = () => {
 
     switch (status) {
       case "published":
+      case "in-progress":
         return `${baseClasses} bg-green-100 text-green-800`;
       case "evaluation":
+      case "technical-evaluation":
         return `${baseClasses} bg-blue-100 text-blue-800`;
+      case "financial-evaluation":
+        return `${baseClasses} bg-purple-100 text-purple-800`;
       case "awarded":
+      case "completed":
         return `${baseClasses} bg-purple-100 text-purple-800`;
       case "draft":
         return `${baseClasses} bg-gray-100 text-gray-800`;
@@ -253,39 +340,34 @@ const TenderManagement = () => {
   const mappedTenders = tenders.map(mapTenderData);
 
   const filteredTenders = mappedTenders.filter((tender) => {
-    const matchesTab = activeTab === "all" || tender.status === activeTab;
     const matchesSearch =
       tender.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       tender.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
       tender.category.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesTab && matchesSearch;
-  });
 
-  const totalValue = tenders.reduce(
-    (sum, tender) => sum + (tender.value || 0),
-    0
-  );
-  const activeTenders = tenders.filter((tender) => tender.isActive).length;
+    // Only client-side filtering for search since server-side filtering handles category and status
+    return matchesSearch;
+  });
 
   const stats = [
     {
       label: "Total Tenders",
-      value: totalCount.toString(),
+      value: statsData.totalTenders.toString(),
       icon: <FileText className="w-6 h-6 text-blue-600" />,
     },
     {
       label: "Active Tenders",
-      value: activeTenders.toString(),
+      value: statsData.activeTenders.toString(),
       icon: <CheckCircle className="w-6 h-6 text-green-600" />,
     },
     {
       label: "Total Value",
-      value: `₹${(totalValue / 10000000).toFixed(1)}Cr`,
+      value: `₹${(statsData.totalValue / 10000000).toFixed(1)}Cr`,
       icon: <IndianRupee className="w-6 h-6 text-purple-600" />,
     },
     {
       label: "Avg Response Rate",
-      value: "78%",
+      value: `${statsData.averageResponseRate}%`,
       icon: <Users className="w-6 h-6 text-orange-600" />,
     },
   ];
@@ -338,11 +420,14 @@ const TenderManagement = () => {
         </div>
         <div className="flex items-center gap-3">
           <button
-            onClick={() => fetchTenders(1, true)}
-            disabled={loading}
+            onClick={() => {
+              fetchTenders(1, true);
+              fetchStats();
+            }}
+            disabled={loading || statsLoading}
             className="flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
           >
-            {loading ? (
+            {loading || statsLoading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
               <Clock className="w-4 h-4" />
@@ -379,7 +464,7 @@ const TenderManagement = () => {
 
       {/* Search and Filters */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4">
           <div className="flex-1">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -392,33 +477,57 @@ const TenderManagement = () => {
               />
             </div>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-            <Filter className="w-4 h-4" />
-            Filter
-          </button>
-        </div>
-      </div>
 
-      {/* Tabs */}
-      <div className="border-b border-gray-200">
-        <nav className="flex space-x-8">
-          {tabs.map((tab) => (
+          <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+            {/* Category Filter */}
+            <div className="min-w-[200px]">
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              >
+                {categoryOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Status Filter */}
+            <div className="min-w-[200px]">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              >
+                {statusOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Clear Filters Button */}
             <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === tab.id
-                  ? "border-primary-500 text-primary-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
+              onClick={() => {
+                setCategoryFilter("");
+                setStatusFilter("");
+                setSearchTerm("");
+              }}
+              disabled={!categoryFilter && !statusFilter && !searchTerm}
+              className={`flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg transition-colors ${
+                categoryFilter || statusFilter || searchTerm
+                  ? "text-gray-700 hover:text-gray-900 hover:bg-gray-50 bg-white"
+                  : "text-gray-400 bg-gray-50 cursor-not-allowed"
               }`}
             >
-              {tab.label}
-              <span className="ml-2 bg-gray-100 text-gray-600 py-1 px-2 rounded-full text-xs">
-                {tab.count}
-              </span>
+              <Filter className="w-4 h-4" />
+              Clear
             </button>
-          ))}
-        </nav>
+          </div>
+        </div>
       </div>
 
       {/* Tender Cards */}
@@ -445,7 +554,15 @@ const TenderManagement = () => {
                           {tender.title}
                         </h3>
                         <span className={getStatusBadge(tender.status)}>
-                          {tender.status === "evaluation"
+                          {tender.status === "in-progress"
+                            ? "In Progress"
+                            : tender.status === "technical-evaluation"
+                            ? "Technical Evaluated"
+                            : tender.status === "financial-evaluation"
+                            ? "Financial Evaluated"
+                            : tender.status === "completed"
+                            ? "Completed"
+                            : tender.status === "evaluation"
                             ? "Evaluation"
                             : tender.status.charAt(0).toUpperCase() +
                               tender.status.slice(1)}
@@ -594,7 +711,7 @@ const TenderManagement = () => {
         )}
 
         {/* No More Data Indicator */}
-        {!hasMore && tenders.length > 0 && (
+        {!hasMore && tenders.length > 0 && filteredTenders.length > 0 && (
           <div className="text-center py-8 text-gray-500">
             <p>No more tenders to load</p>
           </div>
@@ -629,21 +746,7 @@ const TenderManagement = () => {
           <h3 className="text-lg font-medium text-gray-900 mb-2">
             No tenders found
           </h3>
-          <p className="text-gray-500 mb-4">
-            {searchTerm
-              ? "Try adjusting your search criteria"
-              : activeTab === "all"
-              ? "You haven't created any tenders yet"
-              : `No tenders found in ${tabs
-                  .find((t) => t.id === activeTab)
-                  ?.label.toLowerCase()} status`}
-          </p>
-          <button
-            onClick={handleCreateTenderClick}
-            className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
-          >
-            Create Your First Tender
-          </button>
+          <p className="text-gray-500 mb-4">No tenders available</p>
         </div>
       )}
 

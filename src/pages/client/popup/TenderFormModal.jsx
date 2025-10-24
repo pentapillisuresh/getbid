@@ -283,7 +283,10 @@ const TenderFormModal = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+    <div
+      style={{ marginTop: "0px" }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40"
+    >
       <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex justify-between items-center px-6 py-4 border-b flex-shrink-0">
