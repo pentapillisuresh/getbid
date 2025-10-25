@@ -15,6 +15,7 @@ import toastService from "../../../services/toastService";
 
 const SubmitBidPopup = ({ tender, onClose, onSubmitted }) => {
   const [bidAmount, setBidAmount] = useState("");
+  const [bidAmountError, setBidAmountError] = useState("");
   const [deliveryTimeline, setDeliveryTimeline] = useState("");
   const [techProposal, setTechProposal] = useState("");
   const [selectedDocs, setSelectedDocs] = useState([]);
@@ -24,6 +25,73 @@ const SubmitBidPopup = ({ tender, onClose, onSubmitted }) => {
   const [showVerifyPopup, setShowVerifyPopup] = useState(false);
 
   const quotationFileRef = useRef(null);
+
+  // Helper function to parse currency string to number
+  const parseEstimatedValue = (estimatedValue) => {
+    if (!estimatedValue) return 0;
+    // Remove currency symbols, commas, and spaces, then parse
+    const cleanValue = String(estimatedValue)
+      .replace(/[₹,\s]/g, "")
+      .replace(/[^\d.]/g, "");
+    return parseFloat(cleanValue) || 0;
+  };
+
+  // Helper function to parse bid amount
+  const parseBidAmount = (amount) => {
+    if (!amount) return 0;
+    const cleanAmount = String(amount)
+      .replace(/[₹,\s]/g, "")
+      .replace(/[^\d.]/g, "");
+    return parseFloat(cleanAmount) || 0;
+  };
+
+  // Validate bid amount
+  const validateBidAmount = (amount) => {
+    const bidValue = parseBidAmount(amount);
+    const estimatedValue = parseEstimatedValue(tender?.estimatedValue);
+
+    if (!amount || amount.trim() === "") {
+      return "Bid amount is required";
+    }
+
+    if (bidValue <= 0) {
+      return "Bid amount must be greater than zero";
+    }
+
+    if (estimatedValue > 0 && bidValue >= estimatedValue) {
+      return `Bid amount must be below the estimated value of ${tender?.estimatedValue}`;
+    }
+
+    return "";
+  };
+
+  // Helper function to format number with commas
+  const formatNumberWithCommas = (value) => {
+    if (!value) return "";
+    // Remove non-numeric characters except decimal point
+    const numericValue = value.replace(/[^\d.]/g, "");
+    // Split by decimal point
+    const parts = numericValue.split(".");
+    // Add commas to integer part
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    // Join back with decimal point if there was one
+    return parts.length > 1 ? parts.join(".") : parts[0];
+  };
+
+  // Handle bid amount change with validation
+  const handleBidAmountChange = (e) => {
+    const rawValue = e.target.value;
+    // Allow only numbers, decimal point, and commas
+    const filteredValue = rawValue.replace(/[^\d.,]/g, "");
+    // Format with commas
+    const formattedValue = formatNumberWithCommas(filteredValue);
+
+    setBidAmount(formattedValue);
+
+    // Validate on change
+    const error = validateBidAmount(formattedValue);
+    setBidAmountError(error);
+  };
 
   const [documents, setDocuments] = useState([]);
   const [docsLoading, setDocsLoading] = useState(false);
@@ -175,6 +243,7 @@ const SubmitBidPopup = ({ tender, onClose, onSubmitted }) => {
   const selectedDocCount = documents.filter((doc) => doc.selected).length;
   const isFormValid =
     bidAmount &&
+    !bidAmountError &&
     deliveryTimeline &&
     techProposal &&
     quotationFile &&
@@ -300,10 +369,20 @@ const SubmitBidPopup = ({ tender, onClose, onSubmitted }) => {
                   <input
                     type="text"
                     value={bidAmount}
-                    onChange={(e) => setBidAmount(e.target.value)}
+                    onChange={handleBidAmountChange}
                     placeholder="Enter your competitive bid amount"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent ${
+                      bidAmountError
+                        ? "border-red-300 focus:ring-red-500"
+                        : "border-gray-300 focus:ring-blue-500"
+                    }`}
                   />
+                  {bidAmountError && (
+                    <div className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                      <AlertCircle className="w-4 h-4" />
+                      {bidAmountError}
+                    </div>
+                  )}
                 </div>
 
                 {/* Delivery Timeline */}

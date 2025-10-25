@@ -12,19 +12,30 @@ import {
   Search,
   RotateCcw,
   Users,
+  Trash2,
 } from "lucide-react";
 import TenderDetail from "../popups/TenderDetail";
 import ParticipantsList from "../popups/ParticipantsList";
 import RebidConfirmation from "../popups/RebidConfirmation";
+import ContractDetailsModal from "../popups/ContractDetailsModal";
 import api from "../../../services/apiService";
+import bidsService from "../../../services/bidsService";
+import toast from "../../../services/toastService";
 
 const BidManagement = () => {
-  const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentView, setCurrentView] = useState("bids");
   const [selectedTender, setSelectedTender] = useState(null);
   const [showParticipants, setShowParticipants] = useState(false);
   const [showRebid, setShowRebid] = useState(false);
+  const [showContract, setShowContract] = useState(false);
+  const [selectedBidForContract, setSelectedBidForContract] = useState(null);
+
+  // Delete bid modal state
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [bidToDelete, setBidToDelete] = useState(null);
+  const [deleteReason, setDeleteReason] = useState("");
+  const [deletingBid, setDeletingBid] = useState(false);
 
   // remote bids loaded from API
   const [bids, setBids] = useState([]);
@@ -36,51 +47,6 @@ const BidManagement = () => {
   const [hasMore, setHasMore] = useState(true);
   const sentinelRef = useRef(null);
 
-  // Dynamic tabs that update based on bids data
-  const tabs = [
-    { id: "all", label: "All Bids", count: bids.length },
-    {
-      id: "draft",
-      label: "Draft",
-      count: bids.filter((b) => b.status === "draft").length,
-    },
-    {
-      id: "submitted",
-      label: "Submitted",
-      count: bids.filter((b) => b.status === "submitted").length,
-    },
-    {
-      id: "pending",
-      label: "Pending Review",
-      count: bids.filter((b) => b.status === "pending").length,
-    },
-    {
-      id: "technical",
-      label: "Technical Review",
-      count: bids.filter((b) => b.status === "technical").length,
-    },
-    {
-      id: "financial",
-      label: "Financial Review",
-      count: bids.filter((b) => b.status === "financial").length,
-    },
-    {
-      id: "completed",
-      label: "Under Evaluation",
-      count: bids.filter((b) => b.status === "completed").length,
-    },
-    {
-      id: "awarded",
-      label: "Awarded",
-      count: bids.filter((b) => b.status === "awarded").length,
-    },
-    {
-      id: "rejected",
-      label: "Rejected",
-      count: bids.filter((b) => b.status === "rejected").length,
-    },
-  ];
-
   const getStatusBadge = (status) => {
     const baseClasses =
       "inline-flex items-center px-3 py-1 rounded-full text-xs font-medium";
@@ -89,6 +55,8 @@ const BidManagement = () => {
         return `${baseClasses} bg-yellow-100 text-yellow-700`;
       case "submitted":
         return `${baseClasses} bg-blue-100 text-blue-700`;
+      case "approved":
+        return `${baseClasses} bg-green-100 text-green-700`;
       case "technical":
         return `${baseClasses} bg-purple-100 text-purple-700`;
       case "financial":
@@ -99,7 +67,10 @@ const BidManagement = () => {
       case "awarded":
         return `${baseClasses} bg-green-100 text-green-700`;
       case "rejected":
+      case "disqualified":
         return `${baseClasses} bg-red-100 text-red-700`;
+      case "deleted":
+        return `${baseClasses} bg-gray-100 text-gray-700`;
       case "draft":
         return `${baseClasses} bg-gray-100 text-gray-700`;
       default:
@@ -135,7 +106,7 @@ const BidManagement = () => {
 
     return {
       id: item._id,
-      tenderId: item.tender?._id || "",
+      tenderId: item.tender?.tenderId || item.tender?._id || "",
       title: item.tender?.title || "Untitled Tender",
       department: item.tender?.category || "",
       bidAmount: formattedAmount,
@@ -159,7 +130,12 @@ const BidManagement = () => {
       quotation: item.quotation || null,
       technicalEvaluation: item.technicalEvaluation || null,
       financialEvaluation: item.financialEvaluation || null,
-      // Additional tender information
+      disqualifyReason: item.disqualifyReason || null,
+      deleteReason: item.deleteReason || null,
+      contractTerms: item.contractTerms || null,
+      // Include the full tender object for detailed views
+      tender: item.tender || null,
+      // Additional tender information (for backward compatibility)
       tenderValue: item.tender?.value || 0,
       tenderDescription: item.tender?.description || "",
       contactPerson: item.tender?.contactPerson || "",
@@ -176,6 +152,8 @@ const BidManagement = () => {
     switch (status) {
       case "pending":
         return "Pending Review";
+      case "approved":
+        return "Approved";
       case "technical":
         return "Technical Evaluation";
       case "financial":
@@ -186,6 +164,10 @@ const BidManagement = () => {
         return "Awarded";
       case "rejected":
         return "Rejected";
+      case "disqualified":
+        return "Disqualified";
+      case "deleted":
+        return "Deleted";
       case "draft":
         return "Draft";
       default:
@@ -198,27 +180,33 @@ const BidManagement = () => {
     try {
       if (typeof window === "undefined" || !window.localStorage) return null;
       const raw = window.localStorage.getItem("user");
+      console.log("Raw user data from localStorage:", raw);
       if (!raw) return null;
       const parsed = JSON.parse(raw);
+      console.log("Parsed user data:", parsed);
       if (!parsed || typeof parsed !== "object") return null;
-      return parsed._id || parsed.id || parsed.userId || null;
+      const userId = parsed._id || parsed.id || parsed.userId || null;
+      console.log("Extracted user ID:", userId);
+      return userId;
     } catch (e) {
+      console.error("Error getting user ID from localStorage:", e);
       return null;
     }
   };
 
   const filteredBids = bids.map(normalize).filter((bid) => {
-    const matchesTab =
-      activeTab === "all" || (bid.status && bid.status === activeTab);
     const st = searchTerm.trim().toLowerCase();
-    if (!st) return matchesTab;
+    if (!st) return true; // Show all bids when no search term
     const matchesSearch =
       (bid.title || "").toLowerCase().includes(st) ||
       (bid.department || "").toLowerCase().includes(st) ||
       (bid.tenderId || "").toLowerCase().includes(st) ||
       (bid.id || "").toLowerCase().includes(st);
-    return matchesTab && matchesSearch;
+    return matchesSearch;
   });
+
+  console.log("Raw bids from state:", bids);
+  console.log("Normalized and filtered bids:", filteredBids);
 
   const fetchBids = useCallback(
     async (p = 1, replace = false) => {
@@ -227,39 +215,45 @@ const BidManagement = () => {
       try {
         const userId = getStoredUserId();
         const queryParams = { page: p, limit };
+        // Add user ID to query params for filtering user-specific bids
         if (userId) queryParams.user = userId;
+
+        console.log("Fetching bids with params:", queryParams);
+        console.log("User ID available:", userId);
 
         const resp = await api.get("/v1/bids", {
           queryParams,
         });
-        // expected resp.data is array
-        const data = resp && resp.data ? resp.data : [];
-        const tp =
-          resp && typeof resp.totalPages === "number"
-            ? resp.totalPages
-            : resp && typeof resp.totalPages !== "undefined"
-            ? Number(resp.totalPages)
-            : 1;
+
+        console.log("API Response:", resp);
+
+        // Handle new API response structure
+        // The response should have the structure you provided: { success, message, totalCount, currentPage, totalPages, data }
+        const data = resp?.data || [];
+        const tp = resp?.totalPages || 1;
+        const currentPage = resp?.currentPage || p;
+
+        console.log("Parsed data:", { data, totalPages: tp, currentPage });
+
         setTotalPages(tp);
-        setHasMore(p < tp);
-        setPage(p);
+        setHasMore(currentPage < tp);
+        setPage(currentPage);
         setBids((prev) => (replace ? data : [...prev, ...data]));
       } catch (err) {
+        console.error("Error fetching bids:", err);
         setError(err?.message || "Failed to load bids");
       } finally {
         setLoading(false);
       }
     },
     [limit]
-  );
-
-  // initial load
+  ); // initial load
   useEffect(() => {
-    // reset and fetch first page when component mounts or when tab/search changes
+    // reset and fetch first page when component mounts
     setBids([]);
     setPage(1);
     fetchBids(1, true);
-  }, [fetchBids, activeTab]);
+  }, [fetchBids]);
 
   // infinite scroll observer
   useEffect(() => {
@@ -300,9 +294,13 @@ const BidManagement = () => {
       label: "Under Review",
       value: bids
         .filter((bid) =>
-          ["technical", "financial", "completed", "pending"].includes(
-            bid.status
-          )
+          [
+            "technical",
+            "financial",
+            "completed",
+            "pending",
+            "approved",
+          ].includes(bid.status)
         )
         .length.toString(),
       icon: <Clock className="w-6 h-6 text-orange-600" />,
@@ -337,26 +335,65 @@ const BidManagement = () => {
     setShowRebid(true);
   };
 
+  const handleShowContract = (bid) => {
+    console.log("handleShowContract - bid data:", bid);
+    console.log("handleShowContract - tender data:", bid.tender);
+    console.log("handleShowContract - raw item:", bid.raw);
+    setSelectedBidForContract(bid);
+    setShowContract(true);
+  };
+
   const handleDeleteBid = async (bid) => {
-    // if (
-    //   window.confirm(
-    //     `Are you sure you want to delete the bid for "${bid.title}"? This action cannot be undone.`
-    //   )
-    // ) {
-    //   try {
-    //     setLoading(true);
-    //     await api.delete(`/v1/bids/${bid.id}`);
-    //     // Remove the deleted bid from the local state
-    //     setBids((prevBids) => prevBids.filter((b) => b._id !== bid.id));
-    //     // Show success message (you can customize this based on your toast service)
-    //     alert("Bid deleted successfully");
-    //   } catch (error) {
-    //     console.error("Error deleting bid:", error);
-    //     alert("Failed to delete bid. Please try again.");
-    //   } finally {
-    //     setLoading(false);
-    //   }
-    // }
+    setBidToDelete(bid);
+    setShowDeleteModal(true);
+    setDeleteReason(""); // Reset reason
+  };
+
+  const confirmDeleteBid = async () => {
+    if (!bidToDelete || !deleteReason.trim()) {
+      toast.showError("Please provide a reason for deleting the bid.");
+      return;
+    }
+
+    try {
+      setDeletingBid(true);
+
+      // Call the DELETE API using the bids service
+      await bidsService.deleteBid(
+        bidToDelete.id || bidToDelete._id,
+        deleteReason.trim()
+      );
+
+      // Remove the deleted bid from the local state
+      setBids((prevBids) =>
+        prevBids.filter(
+          (b) =>
+            b._id !== (bidToDelete.id || bidToDelete._id) &&
+            b.id !== (bidToDelete.id || bidToDelete._id)
+        )
+      );
+
+      // Close modal and reset state
+      setShowDeleteModal(false);
+      setBidToDelete(null);
+      setDeleteReason("");
+
+      // Show success message
+      toast.showSuccess("Bid deleted successfully");
+    } catch (error) {
+      console.error("Error deleting bid:", error);
+      toast.showError(
+        `Failed to delete bid: ${error.message || "Please try again."}`
+      );
+    } finally {
+      setDeletingBid(false);
+    }
+  };
+
+  const cancelDeleteBid = () => {
+    setShowDeleteModal(false);
+    setBidToDelete(null);
+    setDeleteReason("");
   };
 
   return (
@@ -426,28 +463,6 @@ const BidManagement = () => {
                 Filter
               </button>
             </div>
-          </div>
-
-          {/* Tabs */}
-          <div className="border-b border-gray-200">
-            <nav className="flex space-x-8">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                    activeTab === tab.id
-                      ? "border-blue-500 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700"
-                  }`}
-                >
-                  {tab.label}
-                  <span className="ml-2 bg-gray-100 text-gray-600 py-1 px-2 rounded-full text-xs">
-                    {tab.count}
-                  </span>
-                </button>
-              ))}
-            </nav>
           </div>
 
           {/* Bid Cards */}
@@ -545,6 +560,101 @@ const BidManagement = () => {
                       </div>
                     )}
 
+                    {/* Disqualification Reason */}
+                    {bid.status === "disqualified" && bid.disqualifyReason && (
+                      <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <span className="text-sm text-red-600 font-medium block mb-1">
+                          Disqualification Reason:
+                        </span>
+                        <div className="text-sm text-red-700">
+                          {bid.disqualifyReason}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Delete Reason */}
+                    {bid.status === "deleted" && bid.deleteReason && (
+                      <div className="mb-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                        <span className="text-sm text-gray-600 font-medium block mb-1">
+                          Delete Reason:
+                        </span>
+                        <div className="text-sm text-gray-700">
+                          {bid.deleteReason}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Contract Terms */}
+                    {bid.status === "awarded" && bid.contractTerms && (
+                      <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <span className="text-sm text-green-600 font-medium block mb-2">
+                          Contract Details:
+                        </span>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <span className="text-green-600 font-medium">
+                              Duration:
+                            </span>
+                            <div className="text-green-700">
+                              {bid.contractTerms.duration}
+                            </div>
+                          </div>
+                          <div>
+                            <span className="text-green-600 font-medium">
+                              Bonus:
+                            </span>
+                            <div className="text-green-700">
+                              {bid.contractTerms.bonus}
+                            </div>
+                          </div>
+                          <div>
+                            <span className="text-green-600 font-medium">
+                              Start Date:
+                            </span>
+                            <div className="text-green-700">
+                              {bid.contractTerms.commencementDate
+                                ? new Date(
+                                    bid.contractTerms.commencementDate
+                                  ).toLocaleDateString()
+                                : "-"}
+                            </div>
+                          </div>
+                          <div>
+                            <span className="text-green-600 font-medium">
+                              End Date:
+                            </span>
+                            <div className="text-green-700">
+                              {bid.contractTerms.completionDate
+                                ? new Date(
+                                    bid.contractTerms.completionDate
+                                  ).toLocaleDateString()
+                                : "-"}
+                            </div>
+                          </div>
+                        </div>
+                        {bid.contractTerms.conditions && (
+                          <div className="mt-2">
+                            <span className="text-green-600 font-medium">
+                              Conditions:
+                            </span>
+                            <div className="text-green-700">
+                              {bid.contractTerms.conditions}
+                            </div>
+                          </div>
+                        )}
+                        {bid.contractTerms.remarks && (
+                          <div className="mt-2">
+                            <span className="text-green-600 font-medium">
+                              Remarks:
+                            </span>
+                            <div className="text-green-700">
+                              {bid.contractTerms.remarks}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     {/* Documents */}
                     {bid.documents && bid.documents.length > 0 && (
                       <div className="mb-4">
@@ -577,17 +687,18 @@ const BidManagement = () => {
                       </p>
                     </div>
 
-                    {bid.evaluated && bid.status === "awarded" && (
-                      <div className="flex items-center gap-2 mb-3">
-                        <Users className="w-4 h-4 text-purple-600" />
-                        <button
-                          onClick={() => handleShowParticipants(bid)}
-                          className="text-purple-600 hover:text-purple-700 font-medium text-sm"
-                        >
-                          Participants list is now available for viewing
-                        </button>
-                      </div>
-                    )}
+                    {(bid.evaluated || bid.status === "awarded") &&
+                      bid.status === "awarded" && (
+                        <div className="flex items-center gap-2 mb-3">
+                          <Users className="w-4 h-4 text-purple-600" />
+                          <button
+                            onClick={() => handleShowParticipants(bid)}
+                            className="text-purple-600 hover:text-purple-700 font-medium text-sm"
+                          >
+                            Participants list is now available for viewing
+                          </button>
+                        </div>
+                      )}
 
                     {bid.canRebid && (
                       <div className="flex items-center gap-2 mb-3 text-green-600">
@@ -611,7 +722,7 @@ const BidManagement = () => {
                       View Tender
                     </button>
 
-                    {bid.evaluated && (
+                    {(bid.evaluated || bid.status === "awarded") && (
                       <button
                         onClick={() => handleShowParticipants(bid)}
                         className="flex items-center gap-2 text-purple-600 hover:text-purple-700 font-medium text-sm"
@@ -637,22 +748,37 @@ const BidManagement = () => {
                       </button>
                     )}
                     {bid.status === "awarded" && (
-                      <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors">
+                      <button
+                        onClick={() => handleShowContract(bid)}
+                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors"
+                      >
                         View Contract
                       </button>
                     )}
                     {bid.status === "pending" && (
                       <button
                         onClick={() => handleDeleteBid(bid)}
-                        className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors"
+                        className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center gap-2"
                       >
+                        <Trash2 className="w-4 h-4" />
                         Delete Bid
                       </button>
                     )}
-                    {bid.status === "rejected" && (
+                    {(bid.status === "rejected" ||
+                      bid.status === "disqualified") && (
                       <button className="bg-primary-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors">
                         View Feedback
                       </button>
+                    )}
+                    {bid.status === "approved" && (
+                      <span className="text-green-600 font-medium text-sm">
+                        ✓ Bid Approved
+                      </span>
+                    )}
+                    {bid.status === "deleted" && (
+                      <span className="text-gray-600 font-medium text-sm">
+                        🗑️ Bid Deleted
+                      </span>
                     )}
                   </div>
                 </div>
@@ -661,8 +787,15 @@ const BidManagement = () => {
             {/* sentinel for infinite scroll */}
             <div ref={sentinelRef} />
             {error && (
-              <div className="text-red-600 text-sm text-center py-4">
-                {error}
+              <div className="text-red-600 text-sm text-center py-4 bg-red-50 border border-red-200 rounded-lg">
+                <strong>Error:</strong> {error}
+                <br />
+                <button
+                  onClick={handleRefresh}
+                  className="mt-2 text-red-700 underline hover:no-underline"
+                >
+                  Try again
+                </button>
               </div>
             )}
             {!hasMore && !loading && bids.length > 0 && (
@@ -673,7 +806,7 @@ const BidManagement = () => {
           </div>
 
           {/* Empty State */}
-          {filteredBids.length === 0 && (
+          {!loading && filteredBids.length === 0 && (
             <div className="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-100">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <FileText className="w-8 h-8 text-gray-400" />
@@ -682,15 +815,33 @@ const BidManagement = () => {
                 No bids found
               </h3>
               <p className="text-gray-500 mb-6">
-                {activeTab === "all"
-                  ? "You haven't submitted any bids yet"
-                  : `No bids found in ${tabs
-                      .find((t) => t.id === activeTab)
-                      ?.label.toLowerCase()} status`}
+                {searchTerm.trim()
+                  ? `No bids found matching "${searchTerm}"`
+                  : error
+                  ? `Error loading bids: ${error}`
+                  : "You haven't submitted any bids yet"}
               </p>
               <button className="bg-primary-500 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
                 Browse Tenders
               </button>
+              <div className="mt-4 text-xs text-gray-400">
+                Debug info: Total bids in state: {bids.length}
+              </div>
+            </div>
+          )}
+
+          {/* Loading State */}
+          {loading && bids.length === 0 && (
+            <div className="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-100">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+                <FileText className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                Loading bids...
+              </h3>
+              <p className="text-gray-500">
+                Please wait while we fetch your bid submissions
+              </p>
             </div>
           )}
         </>
@@ -721,6 +872,81 @@ const BidManagement = () => {
             alert("Rebid process initiated");
           }}
         />
+      )}
+
+      {showContract && selectedBidForContract && (
+        <ContractDetailsModal
+          bid={selectedBidForContract}
+          onClose={() => {
+            setShowContract(false);
+            setSelectedBidForContract(null);
+          }}
+        />
+      )}
+
+      {/* Delete Bid Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-red-100 rounded-full">
+                <Trash2 className="w-6 h-6 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Delete Bid
+                </h3>
+                <p className="text-sm text-gray-600">
+                  {bidToDelete?.title ||
+                    bidToDelete?.tenderTitle ||
+                    "Selected bid"}
+                </p>
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <p className="text-sm text-gray-700 mb-3">
+                This action cannot be undone. Please provide a reason for
+                deleting this bid:
+              </p>
+              <textarea
+                value={deleteReason}
+                onChange={(e) => setDeleteReason(e.target.value)}
+                placeholder="e.g., Bid submitted by mistake or needs major revision"
+                className="w-full p-3 border border-gray-300 rounded-lg text-sm resize-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                rows={3}
+                disabled={deletingBid}
+              />
+            </div>
+
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={cancelDeleteBid}
+                disabled={deletingBid}
+                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDeleteBid}
+                disabled={deletingBid || !deleteReason.trim()}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                {deletingBid ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4" />
+                    Delete Bid
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

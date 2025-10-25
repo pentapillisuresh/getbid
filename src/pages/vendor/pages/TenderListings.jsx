@@ -97,6 +97,41 @@ const TenderListings = () => {
     return diff;
   };
 
+  // Helper function to format days left display text
+  const formatDaysLeftText = (daysLeft) => {
+    if (daysLeft === null || daysLeft === undefined) return "";
+
+    if (daysLeft < 0) {
+      return "Expired";
+    } else if (daysLeft === 0) {
+      return "Today";
+    } else if (daysLeft === 1) {
+      return "1 day left";
+    } else {
+      return `${daysLeft} days left`;
+    }
+  };
+
+  // Helper function to check if Submit Bid button should be enabled
+  const isSubmitBidEnabled = (tender) => {
+    if (!tender) return false;
+
+    // Check if status is "in-progress" (from raw API data or mapped status)
+    const status = tender.raw?.status || tender.status;
+    const isStatusValid =
+      status === "in-progress" ||
+      (status === "Open" && tender.raw?.status === "in-progress");
+
+    // Check if bid deadline is greater than current date
+    const bidDeadline = tender.raw?.bidDeadline;
+    const isDeadlineValid = bidDeadline && new Date(bidDeadline) > new Date();
+
+    // Check if bid is not already submitted
+    const isNotSubmitted = !tender.isBidSubmitted;
+
+    return isStatusValid && isDeadlineValid && isNotSubmitted;
+  };
+
   const hasMore = currentPage < totalPages;
 
   const loadPage = useCallback(
@@ -108,7 +143,7 @@ const TenderListings = () => {
       setError(null);
       try {
         const res = await api.get("/v1/tenders", {
-          queryParams: { page, limit },
+          queryParams: { page, limit, isVendorView: true },
         });
         // API shape: { success, message, totalCount, currentPage, totalPages, data: [...] }
         const items = (res.data || []).map((it) => ({
@@ -139,7 +174,7 @@ const TenderListings = () => {
           meetingVenue: it.meetingVenue,
           documentFee: it.documentFee || "-",
           emd: it.emd || "-",
-          status: it.isActive ? "Open" : "Closed",
+          status: it.status || (it.isActive ? "Open" : "Closed"),
           daysLeft: calculateDaysLeft(it.bidDeadline),
           statusColor:
             calculateDaysLeft(it.bidDeadline) <= 7 ? "yellow" : "green",
@@ -493,8 +528,16 @@ const TenderListings = () => {
                         Submission Deadline
                       </div>
                       <div className="font-bold text-red-700">{t.deadline}</div>
-                      <div className="text-sm text-red-600">
-                        {t.daysLeft} days left
+                      <div
+                        className={`text-sm font-medium ${
+                          t.daysLeft < 0
+                            ? "text-gray-500"
+                            : t.daysLeft <= 7
+                            ? "text-red-600"
+                            : "text-red-600"
+                        }`}
+                      >
+                        {formatDaysLeftText(t.daysLeft)}
                       </div>
                     </div>
                     <div className="bg-blue-50 p-4 rounded-lg">
@@ -548,7 +591,17 @@ const TenderListings = () => {
                       ) : (
                         <button
                           onClick={() => handleSubmitClick(t)}
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-transform hover:scale-105"
+                          disabled={!isSubmitBidEnabled(t)}
+                          className={`px-6 py-3 rounded-lg font-medium transition-transform ${
+                            isSubmitBidEnabled(t)
+                              ? "bg-blue-600 hover:bg-blue-700 text-white hover:scale-105"
+                              : "bg-gray-300 text-gray-600 cursor-not-allowed"
+                          }`}
+                          title={
+                            !isSubmitBidEnabled(t)
+                              ? "Tender not available for bidding (status must be in-progress and deadline not passed)"
+                              : "Submit your bid for this tender"
+                          }
                         >
                           Submit Bid
                         </button>

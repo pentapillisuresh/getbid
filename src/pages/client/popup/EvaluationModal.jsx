@@ -45,6 +45,7 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isApproved, setIsApproved] = useState(false);
   const [isDisqualified, setIsDisqualified] = useState(false);
+  const [isDeleted, setIsDeleted] = useState(false);
   const [currentEvaluationType, setCurrentEvaluationType] =
     useState(evaluationType);
 
@@ -129,15 +130,22 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
       if (selectedBid.status === "approved" && !techEval.isDraft) {
         setIsApproved(true);
         setIsDisqualified(false);
+        setIsDeleted(false);
       } else if (
         selectedBid.status === "rejected" ||
         selectedBid.status === "disqualified"
       ) {
         setIsDisqualified(true);
         setIsApproved(false);
+        setIsDeleted(false);
+      } else if (selectedBid.status === "deleted") {
+        setIsDeleted(true);
+        setIsApproved(false);
+        setIsDisqualified(false);
       } else {
         setIsApproved(false);
         setIsDisqualified(false);
+        setIsDeleted(false);
       }
     } else {
       // Reset scores and status if no evaluation exists
@@ -150,7 +158,7 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
       });
       setNotes("");
 
-      // Check if bid is disqualified even without technical evaluation
+      // Check if bid is disqualified or deleted even without technical evaluation
       if (
         selectedBid &&
         (selectedBid.status === "rejected" ||
@@ -158,9 +166,15 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
       ) {
         setIsDisqualified(true);
         setIsApproved(false);
+        setIsDeleted(false);
+      } else if (selectedBid && selectedBid.status === "deleted") {
+        setIsDeleted(true);
+        setIsApproved(false);
+        setIsDisqualified(false);
       } else {
         setIsApproved(false);
         setIsDisqualified(false);
+        setIsDeleted(false);
       }
     }
   }, [selectedBid]);
@@ -555,9 +569,12 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
   };
 
   // Check tender status to determine tab accessibility
-  const canAccessTechnical =
-    tender.status !== "technical-evaluation" && !technicalEvaluationCompleted;
-  const canAccessFinancial = true;
+  const canAccessTechnical = tender.status === "in-progress";
+  // tender.status !== "technical-evaluation" && !technicalEvaluationCompleted;
+  const canAccessFinancial =
+    tender.status === "technical-evaluation" ||
+    tender.status === "financial-evaluation" ||
+    tender.status === "completed";
 
   // If tender status is "technical-evaluation", automatically switch to Financial Evaluation
   useEffect(() => {
@@ -575,8 +592,13 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
 
   const renderFinancialEvaluation = () => {
     // Get approved and awarded bids and sort by amount (lowest first)
+    // Exclude deleted bids from financial evaluation
     const eligibleBids = bids
-      .filter((bid) => bid.status === "approved" || bid.status === "awarded")
+      .filter(
+        (bid) =>
+          (bid.status === "approved" || bid.status === "awarded") &&
+          bid.status !== "deleted"
+      )
       .sort((a, b) => (a.amount || 0) - (b.amount || 0));
 
     return (
@@ -687,10 +709,15 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                             <span className="text-purple-600 font-medium">
                               Contract Awarded
                             </span>
+                          ) : bid.status === "deleted" ? (
+                            <span className="text-gray-500 font-medium">
+                              Bid Deleted
+                            </span>
                           ) : (
                             <button
                               onClick={() => handleAwardBid(bid)}
-                              className="text-green-600 hover:text-green-900 font-medium"
+                              disabled={bid.status === "deleted"}
+                              className="text-green-600 hover:text-green-900 font-medium disabled:text-gray-400 disabled:cursor-not-allowed"
                             >
                               Award
                             </button>
@@ -764,6 +791,8 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                   : selectedBid?.status === "rejected" ||
                     selectedBid?.status === "disqualified"
                   ? "bg-red-100 text-red-800"
+                  : selectedBid?.status === "deleted"
+                  ? "bg-gray-100 text-gray-800"
                   : "bg-gray-100 text-gray-800"
               }`}
             >
@@ -774,6 +803,8 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                 : selectedBid?.status === "rejected" ||
                   selectedBid?.status === "disqualified"
                 ? "Disqualified"
+                : selectedBid?.status === "deleted"
+                ? "Deleted"
                 : "Unknown"}
             </span>
           </div>
@@ -797,6 +828,18 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
               : "N/A"}
           </p>
         </div>
+
+        {/* Delete Reason */}
+        {selectedBid?.status === "deleted" && selectedBid?.deleteReason && (
+          <div className="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+            <span className="text-sm text-gray-600 font-medium block mb-1">
+              Delete Reason:
+            </span>
+            <div className="text-sm text-gray-700">
+              {selectedBid.deleteReason}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="mb-6">
@@ -830,7 +873,8 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                       onChange={(e) =>
                         handleScoreChange(criterion.key, e.target.value)
                       }
-                      className="w-16 px-2 py-1 text-center border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      disabled={isDeleted || submitting || loading}
+                      className="w-16 px-2 py-1 text-center border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                     />
                     <span className="text-gray-500 text-sm">
                       / {criterion.maxScore}
@@ -931,7 +975,8 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Add your evaluation notes and comments here..."
           rows={4}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+          disabled={isDeleted}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none disabled:bg-gray-100 disabled:cursor-not-allowed"
         />
       </div>
 
@@ -939,7 +984,7 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
         <div className="flex items-center gap-3">
           <button
             onClick={handleApprove}
-            disabled={!selectedBid || submitting || loading}
+            disabled={!selectedBid || submitting || loading || isDeleted}
             className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
               isApproved
                 ? "bg-green-600 hover:bg-green-700 text-white"
@@ -960,7 +1005,7 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
           </button>
           <button
             onClick={handleDisqualify}
-            disabled={submitting || loading}
+            disabled={submitting || loading || isDeleted}
             className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
               isDisqualified
                 ? "bg-red-600 hover:bg-red-700 text-white"
@@ -1078,7 +1123,7 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => handleSubmit(true)}
-                disabled={!selectedBid || submitting || loading}
+                disabled={!selectedBid || submitting || loading || isDeleted}
                 className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {submitting ? "Saving..." : "Save Draft"}

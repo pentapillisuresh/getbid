@@ -87,7 +87,7 @@ function App() {
         </main>
 
         {/* Global Notification Component */}
-        <NotificationComponent />
+        {/* <NotificationComponent /> */}
 
         {/* Footer - shown on every page */}
         {/* <Footer /> */}

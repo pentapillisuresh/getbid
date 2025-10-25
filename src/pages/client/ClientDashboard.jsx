@@ -7,6 +7,7 @@ import {
   ClipboardCheck,
   BarChart3,
   History,
+  Activity,
 } from "lucide-react";
 import DashboardLayout from "../../components/shared/DashboardLayout";
 import Sidebar from "../../components/shared/Sidebar";
@@ -15,7 +16,7 @@ import TenderManagement from "./pages/TenderManagement";
 import BidEvaluation from "./pages/BidEvaluation";
 import VendorManagement from "./pages/VendorManagement";
 import ReportsAnalytics from "./pages/ReportsAnalytics";
-import AuditTrail from "./pages/AuditTrail";
+import ActivitiesPage from "./pages/ActivitiesPage";
 import ProfilePage from "./pages/ProfilePage";
 import TenderDashboard from "./pages/TenderDashboard";
 
@@ -72,9 +73,9 @@ const ClientDashboard = () => {
       path: "/reports-analytics",
     },
     {
-      icon: <History className="w-5 h-5" />,
-      label: "Audit Trail",
-      path: "/audit-trail",
+      icon: <Activity className="w-5 h-5" />,
+      label: "Activities",
+      path: "/activities",
     },
   ];
 
@@ -101,7 +102,7 @@ const ClientDashboard = () => {
           <Route path="/bid-evaluation" element={<BidEvaluation />} />
           <Route path="/vendor-management" element={<VendorManagement />} />
           <Route path="/reports-analytics" element={<ReportsAnalytics />} />
-          <Route path="/audit-trail" element={<AuditTrail />} />
+          <Route path="/activities" element={<ActivitiesPage />} />
           <Route
             path="/profile"
             element={<ProfilePage userInfo={userInfo} />}
