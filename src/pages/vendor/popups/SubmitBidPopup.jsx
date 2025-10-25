@@ -164,80 +164,189 @@ const SubmitBidPopup = ({ tender, onClose, onSubmitted }) => {
     quotationFileRef.current?.click();
   };
 
-  const handleProceedToVerify = () => {
-    setShowVerifyPopup(true);
+  const handleProceedToVerify = async () => {
+    try {
+      // Get user info for email and userId
+      let storedUser = {};
+      try {
+        if (typeof window !== "undefined" && window.localStorage) {
+          const raw = window.localStorage.getItem("user");
+          if (raw) storedUser = JSON.parse(raw) || {};
+        }
+      } catch (e) {
+        storedUser = {};
+      }
+
+      const email = storedUser.email;
+      const userId = storedUser._id || storedUser.id;
+
+      if (!email) {
+        toastService.showError("Email not found in user profile");
+        return;
+      }
+
+      if (!userId) {
+        toastService.showError("User ID not found in user profile");
+        return;
+      }
+
+      // Make API call to send OTP
+      const body = {
+        type: "email",
+        contact: email,
+        userId: userId,
+      };
+
+      const data = await api.post("/auth/send-otp", {
+        body,
+        showToasts: false,
+      });
+
+      if (data && data.success) {
+        toastService.showSuccess("OTP sent successfully to your email");
+        setShowVerifyPopup(true);
+      } else {
+        throw new Error(data?.message || "Failed to send OTP");
+      }
+    } catch (error) {
+      console.error("Error sending OTP:", error);
+      toastService.showError(error.message || "Failed to send OTP");
+    }
   };
 
   const handleVerifyClose = () => {
     setShowVerifyPopup(false);
   };
 
-  const handleVerifySubmit = () => {
-    // When user confirms in verification popup, submit the bid to API
-    (async () => {
+  const handleVerifySubmit = async (otp) => {
+    try {
+      setSubmitting(true);
+
+      // Get user info for OTP verification
+      let storedUser = {};
       try {
-        setSubmitting(true);
-
-        // 1) Upload quotation file (multipart) if present
-        let quotationFileId = null;
-        if (quotationFile) {
-          const fd = new FormData();
-          fd.append("image", quotationFile, quotationFile.name);
-
-          const multipartClient = createApiClient({
-            baseURL: api.defaults.baseURL,
-            headers: {},
-            getAuthToken: api.defaults.getAuthToken,
-          });
-
-          const uploadResp = await multipartClient.post("/v1/File/upload", {
-            body: fd,
-          });
-
-          const uploaded =
-            uploadResp && (uploadResp.file || uploadResp.data || uploadResp);
-          // uploaded could be the file object or an object containing file
-          const fileObj = uploaded && uploaded.file ? uploaded.file : uploaded;
-          if (fileObj && fileObj._id) quotationFileId = fileObj._id;
+        if (typeof window !== "undefined" && window.localStorage) {
+          const raw = window.localStorage.getItem("user");
+          if (raw) storedUser = JSON.parse(raw) || {};
         }
-
-        // 2) Prepare payload
-        const selectedDocIds = documents
-          .filter((d) => d.selected)
-          .map((d) => d.id);
-
-        const body = {
-          tender: tender?._id || tender?.id || tender?.title || "unknown",
-          amount: Number(String(bidAmount).replace(/,/g, "")) || 0,
-          timeline: deliveryTimeline,
-          summary: techProposal,
-          quotation: quotationFileId || "",
-          documents: selectedDocIds,
-        };
-
-        const resp = await api.post("/v1/bids", { body, showToasts: true });
-        // API client will show toasts when showToasts is true. Avoid duplicate toasts here.
-        setShowVerifyPopup(false);
-        // Notify parent to refresh data. Prefer onSubmitted callback when provided.
-        if (typeof onSubmitted === "function") {
-          try {
-            await onSubmitted();
-          } catch (e) {
-            // ignore parent errors
-            console.error("onSubmitted callback failed", e);
-          }
-        } else {
-          // fallback: call onClose with refresh flag so parents like TenderListings can reload
-          onClose && onClose(true);
-        }
-      } catch (err) {
-        console.error("Submit bid failed", err);
-        const msg = (err && err.message) || "Failed to submit bid";
-        toastService.showError(msg);
-      } finally {
-        setSubmitting(false);
+      } catch (e) {
+        storedUser = {};
       }
-    })();
+
+      const email = storedUser.email;
+
+      if (!email) {
+        toastService.showError("Email not found in user profile");
+        return;
+      }
+
+      // 1) First verify OTP
+      const otpVerificationBody = {
+        type: "email",
+        contact: email,
+        otp: otp,
+        deviceDetails: {
+          deviceType: "web",
+          deviceName: "Browser",
+          deviceToken: "web-browser-token",
+        },
+      };
+
+      const otpVerificationResult = await api.post("/auth/verify-otp", {
+        body: otpVerificationBody,
+        showToasts: false,
+      });
+
+      if (!otpVerificationResult || !otpVerificationResult.success) {
+        throw new Error(
+          otpVerificationResult?.message ||
+            "Invalid OTP. Please check and try again."
+        );
+      }
+
+      toastService.showSuccess("OTP verified successfully");
+
+      // 2) If OTP verification is successful, proceed with bid submission
+      // Upload quotation file (multipart) if present
+      let quotationFileId = null;
+      if (quotationFile) {
+        const fd = new FormData();
+        fd.append("image", quotationFile, quotationFile.name);
+
+        const multipartClient = createApiClient({
+          baseURL: api.defaults.baseURL,
+          headers: {},
+          getAuthToken: api.defaults.getAuthToken,
+        });
+
+        const uploadResp = await multipartClient.post("/v1/File/upload", {
+          body: fd,
+        });
+
+        const uploaded =
+          uploadResp && (uploadResp.file || uploadResp.data || uploadResp);
+        // uploaded could be the file object or an object containing file
+        const fileObj = uploaded && uploaded.file ? uploaded.file : uploaded;
+        if (fileObj && fileObj._id) quotationFileId = fileObj._id;
+      }
+
+      // 3) Prepare bid payload
+      const selectedDocIds = documents
+        .filter((d) => d.selected)
+        .map((d) => d.id);
+
+      const bidBody = {
+        tender: tender?._id || tender?.id || tender?.title || "unknown",
+        amount: Number(String(bidAmount).replace(/,/g, "")) || 0,
+        timeline: deliveryTimeline,
+        summary: techProposal,
+        quotation: quotationFileId || "",
+        documents: selectedDocIds,
+      };
+
+      const resp = await api.post("/v1/bids", {
+        body: bidBody,
+        showToasts: true,
+      });
+
+      // Close verification popup and main popup
+      setShowVerifyPopup(false);
+
+      // Notify parent to refresh data
+      if (typeof onSubmitted === "function") {
+        try {
+          await onSubmitted();
+        } catch (e) {
+          console.error("onSubmitted callback failed", e);
+        }
+      } else {
+        onClose && onClose(true);
+      }
+    } catch (err) {
+      console.error("Verification or bid submission failed", err);
+
+      // Extract meaningful error message
+      let errorMessage = "Failed to verify OTP or submit bid";
+
+      if (err && err.message) {
+        // If it's our custom error message, use it
+        if (
+          err.message.includes("Invalid OTP") ||
+          err.message.includes("OTP")
+        ) {
+          errorMessage = err.message;
+        } else if (err.message.includes("HTTP error")) {
+          // For HTTP errors, show a user-friendly message
+          errorMessage = "Invalid OTP. Please check the code and try again.";
+        } else {
+          errorMessage = err.message;
+        }
+      }
+
+      toastService.showError(errorMessage);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const selectedDocCount = documents.filter((doc) => doc.selected).length;
@@ -603,7 +712,7 @@ const SubmitBidPopup = ({ tender, onClose, onSubmitted }) => {
                       : "bg-gray-300 text-gray-500 cursor-not-allowed"
                   }`}
                 >
-                  proceed to verify
+                  Proceed to Verify
                 </button>
               </div>
             </div>

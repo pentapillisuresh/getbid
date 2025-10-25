@@ -813,7 +813,7 @@ const ClientDashboardHome = () => {
           </div>
 
           {/* Quick Stats */}
-          <div className="card">
+          {/* <div className="card">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Quick Stats
             </h3>
@@ -843,7 +843,7 @@ const ClientDashboardHome = () => {
                 <span className="text-lg font-bold text-purple-600">94%</span>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

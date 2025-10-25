@@ -51,13 +51,13 @@ const VendorDashboard = () => {
       icon: <FileText className="w-5 h-5" />,
       label: "Tender Listings",
       path: "/tender-listings",
-      badge: "24",
+      // badge: "24",
     },
     {
       icon: <ClipboardList className="w-5 h-5" />,
       label: "Bid Management",
       path: "/bid-management",
-      badge: "5",
+      // badge: "5",
     },
     {
       icon: <Activity className="w-5 h-5" />,
@@ -78,7 +78,7 @@ const VendorDashboard = () => {
       icon: <TrendingUp className="w-5 h-5" />,
       label: "Clarifications & Q&A",
       path: "/clarifications",
-      badge: "2",
+      // badge: "2",
     },
     {
       icon: <HeadphonesIcon className="w-5 h-5" />,

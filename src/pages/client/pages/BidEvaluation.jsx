@@ -3,6 +3,7 @@ import { FileText, Award, CheckCircle } from "lucide-react";
 import EvaluationModal from "../popup/EvaluationModal";
 import TechnicalReportModal from "../popup/TechnicalReportModal";
 import FinancialReportModal from "../popup/FinancialReportModal";
+import FullReportModal from "../popup/FullReportModal";
 import { getMyTenders } from "../../../services/tenderApiService";
 import { bidsService } from "../../../services/bidsService";
 import toast from "../../../services/toastService";
@@ -11,6 +12,7 @@ const BidEvaluation = () => {
   const [evaluationModalOpen, setEvaluationModalOpen] = useState(false);
   const [technicalModalOpen, setTechnicalModalOpen] = useState(false);
   const [financialModalOpen, setFinancialModalOpen] = useState(false);
+  const [fullReportModalOpen, setFullReportModalOpen] = useState(false);
   const [currentEvaluation, setCurrentEvaluation] = useState(null);
   const [evaluationType, setEvaluationType] = useState("technical");
   const [tenders, setTenders] = useState([]);
@@ -209,6 +211,11 @@ const BidEvaluation = () => {
     setFinancialModalOpen(true);
   };
 
+  const handleFullReport = (tender) => {
+    setCurrentEvaluation(tender);
+    setFullReportModalOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
@@ -339,87 +346,197 @@ const BidEvaluation = () => {
             </p>
           </div>
         ) : (
-          filteredTenders.map((tender) => {
-            const tenderStatus = getTenderStatus(tender);
-            const { technicalStatus, financialStatus } =
-              getEvaluationStatus(tender);
-            const bidDeadline = new Date(
-              tender.bidDeadline
-            ).toLocaleDateString();
-            const value = new Intl.NumberFormat("en-IN", {
-              style: "currency",
-              currency: "INR",
-              minimumFractionDigits: 0,
-            }).format(tender.value);
+          <div className="space-y-6">
+            {filteredTenders.map((tender) => {
+              const tenderStatus = getTenderStatus(tender);
+              const { technicalStatus, financialStatus } =
+                getEvaluationStatus(tender);
+              const bidDeadline = new Date(
+                tender.bidDeadline
+              ).toLocaleDateString();
+              const value = new Intl.NumberFormat("en-IN", {
+                style: "currency",
+                currency: "INR",
+                minimumFractionDigits: 0,
+              }).format(tender.value);
 
-            return (
-              <div
-                key={tender._id}
-                className="bg-white rounded-lg shadow border border-gray-200 p-6"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h2 className="text-lg font-semibold text-gray-900">
-                        {tender.title}
-                      </h2>
-                      <span
-                        className={`px-3 py-1 rounded-md text-sm font-medium ${tenderStatus.color}`}
+              return (
+                <div
+                  key={tender._id}
+                  className="bg-white rounded-lg shadow border border-gray-200 p-6"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h2 className="text-lg font-semibold text-gray-900">
+                          {tender.title}
+                        </h2>
+                        <span
+                          className={`px-3 py-1 rounded-md text-sm font-medium ${tenderStatus.color}`}
+                        >
+                          {tenderStatus.status}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-6 text-sm text-gray-600 mb-4">
+                        <span>ID: {tender.tenderId}</span>
+                        <span>Bids Received: {tender.bidsCount}</span>
+                        <span>Deadline: {bidDeadline}</span>
+                        <span>Est. Value: {value}</span>
+                        <span>Category: {tender.category}</span>
+                      </div>
+
+                      <div className="flex items-center gap-4 mb-4">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`w-3 h-3 rounded-full ${
+                              technicalStatus === "completed"
+                                ? "bg-green-500"
+                                : technicalStatus === "in-progress"
+                                ? "bg-orange-500"
+                                : "bg-gray-300"
+                            }`}
+                          ></span>
+                          <span className="text-sm text-gray-700">
+                            Technical Evaluation
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`w-3 h-3 rounded-full ${
+                              financialStatus === "completed"
+                                ? "bg-green-500"
+                                : financialStatus === "in-progress"
+                                ? "bg-orange-500"
+                                : "bg-gray-300"
+                            }`}
+                          ></span>
+                          <span className="text-sm text-gray-700">
+                            Financial Evaluation
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-6 text-sm">
+                        <span className="text-green-600 flex items-center gap-1">
+                          <CheckCircle className="w-4 h-4" />
+                          Approved:{" "}
+                          {tender.bids
+                            ? tender.bids.filter(
+                                (bid) => bid.status === "approved"
+                              ).length
+                            : 0}
+                        </span>
+                        <span className="text-red-600 flex items-center gap-1">
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M6 18L18 6M6 6l12 12"
+                            />
+                          </svg>
+                          Disqualified:{" "}
+                          {tender.bids
+                            ? tender.bids.filter(
+                                (bid) => bid.status === "disqualified"
+                              ).length
+                            : 0}
+                        </span>
+                        <span className="text-blue-600 flex items-center gap-1">
+                          <Award className="w-4 h-4" />
+                          Awarded:{" "}
+                          {tender.bids
+                            ? tender.bids.filter(
+                                (bid) => bid.status === "awarded"
+                              ).length
+                            : 0}
+                        </span>
+                        <span className="text-orange-600 flex items-center gap-1">
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                          Pending:{" "}
+                          {tender.bids
+                            ? tender.bids.filter(
+                                (bid) => bid.status === "pending"
+                              ).length
+                            : 0}
+                        </span>
+                      </div>
+
+                      <div className="flex gap-2 mt-4">
+                        <button
+                          onClick={() => handleTechnicalReport(tender)}
+                          disabled={technicalStatus === "pending"}
+                          className={`px-4 py-1.5 rounded text-sm font-medium ${
+                            technicalStatus === "pending"
+                              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                              : "bg-orange-50 text-orange-700 hover:bg-orange-100"
+                          }`}
+                        >
+                          Technical Report
+                        </button>
+                        <button
+                          onClick={() => handleFinancialReport(tender)}
+                          disabled={financialStatus === "pending"}
+                          className={`px-4 py-1.5 rounded text-sm font-medium ${
+                            financialStatus === "pending"
+                              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                              : "bg-blue-50 text-blue-700 hover:bg-blue-100"
+                          }`}
+                        >
+                          Financial Report
+                        </button>
+                        <button
+                          onClick={() => handleFullReport(tender)}
+                          disabled={
+                            technicalStatus === "pending" ||
+                            financialStatus === "pending"
+                          }
+                          className={`px-4 py-1.5 rounded text-sm font-medium ${
+                            technicalStatus === "pending" ||
+                            financialStatus === "pending"
+                              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                              : "bg-green-50 text-green-700 hover:bg-green-100"
+                          }`}
+                        >
+                          Full Report
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-2 ml-4">
+                      <button
+                        onClick={() => {
+                          if (technicalStatus === "completed") {
+                            handleEvaluateBids(tender, "financial");
+                          } else {
+                            handleEvaluateBids(tender, "technical");
+                          }
+                        }}
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap"
+                        disabled={tender.bidsCount === 0}
                       >
-                        {tenderStatus.status}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-6 text-sm text-gray-600 mb-4">
-                      <span>ID: {tender.tenderId}</span>
-                      <span>Bids Received: {tender.bidsCount}</span>
-                      <span>Deadline: {bidDeadline}</span>
-                      <span>Est. Value: {value}</span>
-                      <span>Category: {tender.category}</span>
-                    </div>
-
-                    <div className="flex items-center gap-4 mb-4">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`w-3 h-3 rounded-full ${
-                            technicalStatus === "completed"
-                              ? "bg-green-500"
-                              : technicalStatus === "in-progress"
-                              ? "bg-orange-500"
-                              : "bg-gray-300"
-                          }`}
-                        ></span>
-                        <span className="text-sm text-gray-700">
-                          Technical Evaluation
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`w-3 h-3 rounded-full ${
-                            financialStatus === "completed"
-                              ? "bg-green-500"
-                              : financialStatus === "in-progress"
-                              ? "bg-orange-500"
-                              : "bg-gray-300"
-                          }`}
-                        ></span>
-                        <span className="text-sm text-gray-700">
-                          Financial Evaluation
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-6 text-sm">
-                      <span className="text-green-600 flex items-center gap-1">
-                        <CheckCircle className="w-4 h-4" />
-                        Approved:{" "}
-                        {tender.bids
-                          ? tender.bids.filter(
-                              (bid) => bid.status === "approved"
-                            ).length
-                          : 0}
-                      </span>
-                      <span className="text-red-600 flex items-center gap-1">
+                        <FileText className="w-4 h-4" />
+                        {tender.bidsCount === 0 ? "No Bids" : "Evaluate Bids"}
+                      </button>
+                      <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 whitespace-nowrap">
                         <svg
                           className="w-4 h-4"
                           fill="none"
@@ -430,103 +547,17 @@ const BidEvaluation = () => {
                             strokeLinecap="round"
                             strokeLinejoin="round"
                             strokeWidth={2}
-                            d="M6 18L18 6M6 6l12 12"
+                            d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                           />
                         </svg>
-                        Disqualified:{" "}
-                        {tender.bids
-                          ? tender.bids.filter(
-                              (bid) => bid.status === "disqualified"
-                            ).length
-                          : 0}
-                      </span>
-                      <span className="text-blue-600 flex items-center gap-1">
-                        <Award className="w-4 h-4" />
-                        Awarded:{" "}
-                        {tender.bids
-                          ? tender.bids.filter(
-                              (bid) => bid.status === "awarded"
-                            ).length
-                          : 0}
-                      </span>
-                      <span className="text-orange-600 flex items-center gap-1">
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                        Pending:{" "}
-                        {tender.bids
-                          ? tender.bids.filter(
-                              (bid) => bid.status === "pending"
-                            ).length
-                          : 0}
-                      </span>
-                    </div>
-
-                    <div className="flex gap-2 mt-4">
-                      <button
-                        onClick={() => handleTechnicalReport(tender)}
-                        className="px-4 py-1.5 bg-orange-50 text-orange-700 rounded text-sm font-medium hover:bg-orange-100"
-                      >
-                        Technical Report
-                      </button>
-                      <button
-                        onClick={() => handleFinancialReport(tender)}
-                        className="px-4 py-1.5 bg-blue-50 text-blue-700 rounded text-sm font-medium hover:bg-blue-100"
-                      >
-                        Financial Report
-                      </button>
-                      <button className="px-4 py-1.5 bg-green-50 text-green-700 rounded text-sm font-medium hover:bg-green-100">
-                        Full Report
+                        Manage Q&A
                       </button>
                     </div>
-                  </div>
-
-                  <div className="flex flex-col gap-2 ml-4">
-                    <button
-                      onClick={() => {
-                        if (technicalStatus === "completed") {
-                          handleEvaluateBids(tender, "financial");
-                        } else {
-                          handleEvaluateBids(tender, "technical");
-                        }
-                      }}
-                      className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap"
-                      disabled={tender.bidsCount === 0}
-                    >
-                      <FileText className="w-4 h-4" />
-                      {tender.bidsCount === 0 ? "No Bids" : "Evaluate Bids"}
-                    </button>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 whitespace-nowrap">
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-                      Manage Q&A
-                    </button>
                   </div>
                 </div>
-              </div>
-            );
-          })
+              );
+            })}
+          </div>
         )}
 
         {/* Pagination */}
@@ -572,6 +603,13 @@ const BidEvaluation = () => {
         <FinancialReportModal
           tender={currentEvaluation}
           onClose={() => setFinancialModalOpen(false)}
+        />
+      )}
+
+      {fullReportModalOpen && currentEvaluation && (
+        <FullReportModal
+          tender={currentEvaluation}
+          onClose={() => setFullReportModalOpen(false)}
         />
       )}
     </div>

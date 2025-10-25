@@ -13,6 +13,7 @@ import AwardContractModal from "./AwardContractModal";
 import DisqualifyBidModal from "./DisqualifyBidModal";
 import TechnicalReportModal from "./TechnicalReportModal";
 import FinancialReportModal from "./FinancialReportModal";
+import FullReportModal from "./FullReportModal";
 import {
   submitTechnicalEvaluation,
   submitFinancialEvaluation,
@@ -55,6 +56,7 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
     useState(false);
   const [financialReportModalOpen, setFinancialReportModalOpen] =
     useState(false);
+  const [fullReportModalOpen, setFullReportModalOpen] = useState(false);
   const [completeTechnicalModalOpen, setCompleteTechnicalModalOpen] =
     useState(false);
   const [completeFinancialModalOpen, setCompleteFinancialModalOpen] =
@@ -568,6 +570,10 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
     setFinancialReportModalOpen(true);
   };
 
+  const handleGenerateFullReport = () => {
+    setFullReportModalOpen(true);
+  };
+
   // Check tender status to determine tab accessibility
   const canAccessTechnical = tender.status === "in-progress";
   // tender.status !== "technical-evaluation" && !technicalEvaluationCompleted;
@@ -1016,13 +1022,6 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
             Disqualify Bid
           </button>
         </div>
-
-        <button
-          onClick={handleGenerateTechnicalReport}
-          className="text-blue-600 hover:text-blue-700 font-medium"
-        >
-          Generate Technical Report
-        </button>
       </div>
     </div>
   );
@@ -1075,12 +1074,47 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                 </button>
               </div>
             </div>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <X className="w-5 h-5 text-gray-500" />
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleGenerateTechnicalReport}
+                disabled={!canAccessTechnical}
+                className={`px-3 py-1.5 rounded text-sm font-medium ${
+                  !canAccessTechnical
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-orange-50 text-orange-700 hover:bg-orange-100"
+                }`}
+              >
+                Technical Report
+              </button>
+              <button
+                onClick={handleGenerateFinancialReport}
+                disabled={!canAccessFinancial}
+                className={`px-3 py-1.5 rounded text-sm font-medium ${
+                  !canAccessFinancial
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-blue-50 text-blue-700 hover:bg-blue-100"
+                }`}
+              >
+                Financial Report
+              </button>
+              <button
+                onClick={handleGenerateFullReport}
+                disabled={!canAccessFinancial}
+                className={`px-3 py-1.5 rounded text-sm font-medium ${
+                  !canAccessFinancial
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-green-50 text-green-700 hover:bg-green-100"
+                }`}
+              >
+                Full Report
+              </button>
+              <button
+                onClick={onClose}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
           </div>
 
           <div className="flex-1 overflow-y-auto p-6">
@@ -1807,6 +1841,13 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
             </div>
           </div>
         </div>
+      )}
+
+      {fullReportModalOpen && (
+        <FullReportModal
+          tender={tender}
+          onClose={() => setFullReportModalOpen(false)}
+        />
       )}
     </>
   );

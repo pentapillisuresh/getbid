@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import api from "../../../services/apiService";
 import activitiesService from "../../../services/activitiesService";
 import toastService from "../../../services/toastService";
 import tenderApiService from "../../../services/tenderApiService";
+import vendorStatsService from "../../../services/vendorStatsService";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -35,6 +36,8 @@ const VendorDashboardHome = () => {
   const [showTopupModal, setShowTopupModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedTender, setSelectedTender] = useState(null);
+  const [statsData, setStatsData] = useState(null);
+  const [statsLoading, setStatsLoading] = useState(true);
   const navigate = useNavigate();
 
   // Fallback demo activities for vendor
@@ -344,49 +347,136 @@ const VendorDashboardHome = () => {
     }
   };
 
-  const stats = [
-    {
-      title: "Active Tenders",
-      value: "24",
-      change: "+2",
-      changeType: "positive",
-      icon: <FileText className="w-8 h-8 text-blue-600" />,
-      description: "Currently published and open for bidding",
-    },
-    {
-      title: "Submitted Bids",
-      value: "12",
-      change: "+3",
-      changeType: "positive",
-      icon: <Clock className="w-8 h-8 text-orange-600" />,
-      description: "Bids received and under review",
-    },
-    {
-      title: "Success Rate",
-      value: "68%",
-      change: "+5%",
-      changeType: "positive",
-      icon: <CheckCircle className="w-8 h-8 text-green-600" />,
-      description: "This month success rate",
-    },
-    {
-      title: "Under Review",
-      value: "5",
-      change: "0",
-      changeType: "neutral",
-      icon: <TrendingUp className="w-8 h-8 text-purple-600" />,
-      description: "No change from last period",
-    },
-  ];
+  // Fetch vendor stats from API
+  const fetchVendorStats = async () => {
+    try {
+      setStatsLoading(true);
+      console.log("🔄 Fetching vendor stats from API...");
 
-  // Load activities on component mount
+      const response = await vendorStatsService.getVendorStats();
+      console.log("📊 Vendor stats service response:", response);
+
+      if (response.success && response.data) {
+        console.log("✅ Setting stats data:", response.data);
+        setStatsData(response.data);
+        console.log("✅ Vendor stats loaded successfully:", response.data);
+      } else {
+        console.warn("⚠️ Failed to fetch vendor stats:", response.error);
+        // Keep statsData as null to use fallback demo data
+        setStatsData(null);
+      }
+    } catch (error) {
+      console.error("❌ Error fetching vendor stats:", error);
+      // Keep statsData as null to use fallback demo data
+      setStatsData(null);
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
+  // Create stats array from API data or fallback to demo data
+  const getStats = () => {
+    console.log("📊 getStats called with statsData:", statsData);
+
+    if (statsData) {
+      console.log("📊 Using API data for stats");
+      const apiStats = [
+        {
+          title: "Active Tenders",
+          value: statsData.activeTenders?.toString() || "0",
+          change: "+2",
+          changeType: "positive",
+          icon: <FileText className="w-8 h-8 text-blue-600" />,
+          description: "Currently published and open for bidding",
+        },
+        {
+          title: "Submitted Bids",
+          value: statsData.submittedBids?.toString() || "0",
+          change: "+3",
+          changeType: "positive",
+          icon: <Clock className="w-8 h-8 text-orange-600" />,
+          description: "Bids submitted and under review",
+        },
+        {
+          title: "Success Rate",
+          value: `${statsData.successRate || 0}%`,
+          change: "+5%",
+          changeType: "positive",
+          icon: <CheckCircle className="w-8 h-8 text-green-600" />,
+          description: "This month success rate",
+        },
+        {
+          title: "Under Review",
+          value: statsData.underReview?.toString() || "0",
+          change: "0",
+          changeType: "neutral",
+          icon: <TrendingUp className="w-8 h-8 text-purple-600" />,
+          description: "Bids currently under evaluation",
+        },
+      ];
+      console.log("📊 Generated API stats:", apiStats);
+      return apiStats;
+    }
+
+    console.log("📊 Using fallback demo data for stats");
+    // Fallback demo stats when API data is not available
+    return [
+      {
+        title: "Active Tenders",
+        value: "24",
+        change: "+2",
+        changeType: "positive",
+        icon: <FileText className="w-8 h-8 text-blue-600" />,
+        description: "Currently published and open for bidding",
+      },
+      {
+        title: "Submitted Bids",
+        value: "12",
+        change: "+3",
+        changeType: "positive",
+        icon: <Clock className="w-8 h-8 text-orange-600" />,
+        description: "Bids received and under review",
+      },
+      {
+        title: "Success Rate",
+        value: "68%",
+        change: "+5%",
+        changeType: "positive",
+        icon: <CheckCircle className="w-8 h-8 text-green-600" />,
+        description: "This month success rate",
+      },
+      {
+        title: "Under Review",
+        value: "5",
+        change: "0",
+        changeType: "neutral",
+        icon: <TrendingUp className="w-8 h-8 text-purple-600" />,
+        description: "No change from last period",
+      },
+    ];
+  };
+
+  // Calculate stats using useMemo to react to statsData changes
+  const stats = useMemo(() => {
+    console.log("🔄 Recalculating stats with data:", statsData);
+    return getStats();
+  }, [statsData]);
+
+  // Load activities and stats on component mount
   useEffect(() => {
     console.log(
-      "🚀 VendorDashboardHome mounted, fetching activities and deadlines..."
+      "🚀 VendorDashboardHome mounted, fetching activities, deadlines, and stats..."
     );
     fetchRecentActivities();
     fetchUpcomingDeadlines();
+    fetchVendorStats();
   }, []);
+
+  // Debug effect to monitor statsData changes
+  useEffect(() => {
+    console.log("📊 statsData changed:", statsData);
+    console.log("📊 statsLoading:", statsLoading);
+  }, [statsData, statsLoading]);
 
   const [recentTenders, setRecentTenders] = useState([]);
   const [tendersLoading, setTendersLoading] = useState(false);
@@ -631,7 +721,7 @@ const VendorDashboardHome = () => {
             <p className="text-primary-100 mb-4">
               Manage your tenders and track bid submissions efficiently
             </p>
-            <div className="flex items-center gap-6 text-sm">
+            {/* <div className="flex items-center gap-6 text-sm">
               <span className="flex items-center gap-2">
                 <CheckCircle className="w-4 h-4" />
                 Last login: Today 09:30 AM
@@ -640,7 +730,7 @@ const VendorDashboardHome = () => {
                 <Award className="w-4 h-4" />
                 Account Status: Verified
               </span>
-            </div>
+            </div> */}
           </div>
           <div className="text-right">
             <div className="bg-white/20 backdrop-blur rounded-lg p-4 flex items-center justify-center">
@@ -783,36 +873,56 @@ const VendorDashboardHome = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => (
-          <div
-            key={index}
-            className="card hover:shadow-md transition-shadow duration-200"
-          >
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                {stat.icon}
-                <div>
-                  <div className="text-2xl font-bold text-gray-900">
-                    {stat.value}
+        {statsLoading
+          ? // Loading skeleton for stats cards
+            Array.from({ length: 4 }).map((_, index) => (
+              <div
+                key={index}
+                className="card hover:shadow-md transition-shadow duration-200"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-gray-200 rounded animate-pulse"></div>
+                    <div>
+                      <div className="w-16 h-8 bg-gray-200 rounded animate-pulse mb-2"></div>
+                      <div className="w-20 h-4 bg-gray-200 rounded animate-pulse"></div>
+                    </div>
                   </div>
-                  <div className="text-sm text-gray-600">{stat.title}</div>
+                  <div className="w-8 h-6 bg-gray-200 rounded-full animate-pulse"></div>
                 </div>
+                <div className="w-full h-4 bg-gray-200 rounded animate-pulse"></div>
               </div>
-              {stat.change !== "0" && (
-                <div
-                  className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                    stat.changeType === "positive"
-                      ? "bg-green-100 text-green-600"
-                      : "bg-red-100 text-red-600"
-                  }`}
-                >
-                  <span>{stat.change}</span>
+            ))
+          : stats.map((stat, index) => (
+              <div
+                key={index}
+                className="card hover:shadow-md transition-shadow duration-200"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    {stat.icon}
+                    <div>
+                      <div className="text-2xl font-bold text-gray-900">
+                        {stat.value}
+                      </div>
+                      <div className="text-sm text-gray-600">{stat.title}</div>
+                    </div>
+                  </div>
+                  {/* {stat.change !== "0" && (
+                    <div
+                      className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                        stat.changeType === "positive"
+                          ? "bg-green-100 text-green-600"
+                          : "bg-red-100 text-red-600"
+                      }`}
+                    >
+                      <span>{stat.change}</span>
+                    </div>
+                  )} */}
                 </div>
-              )}
-            </div>
-            <p className="text-sm text-gray-500">{stat.description}</p>
-          </div>
-        ))}
+                <p className="text-sm text-gray-500">{stat.description}</p>
+              </div>
+            ))}
       </div>
 
       {/* Quick Actions */}
@@ -1203,7 +1313,7 @@ const VendorDashboardHome = () => {
           </div>
 
           {/* Recent Notifications */}
-          <div className="card">
+          {/* <div className="card">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">
                 Recent Notifications
@@ -1261,7 +1371,7 @@ const VendorDashboardHome = () => {
                 View All Notifications →
               </button>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
 

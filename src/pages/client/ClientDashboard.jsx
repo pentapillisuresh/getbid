@@ -60,13 +60,13 @@ const ClientDashboard = () => {
       icon: <ClipboardCheck className="w-5 h-5" />,
       label: "Bid Evaluation",
       path: "/bid-evaluation",
-      badge: "8",
+      // badge: "8",
     },
     {
       icon: <Users className="w-5 h-5" />,
       label: "Vendor Management",
       path: "/vendor-management",
-      badge: "248",
+      // badge: "248",
     },
     {
       icon: <BarChart3 className="w-5 h-5" />,

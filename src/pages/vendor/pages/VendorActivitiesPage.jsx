@@ -550,7 +550,7 @@ const VendorActivitiesPage = () => {
           </p>
         </div>
 
-        <div className="divide-y divide-gray-100">
+        <div className="">
           {initialLoading ? (
             // Loading skeleton
             Array(5)

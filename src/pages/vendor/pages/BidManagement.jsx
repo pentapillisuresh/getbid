@@ -305,13 +305,13 @@ const BidManagement = () => {
         .length.toString(),
       icon: <Clock className="w-6 h-6 text-orange-600" />,
     },
-    {
-      label: "Total Value",
-      value: `₹${(
-        bids.reduce((sum, bid) => sum + (bid.raw?.amount || 0), 0) / 100000
-      ).toFixed(1)}L`,
-      icon: <IndianRupee className="w-6 h-6 text-purple-600" />,
-    },
+    // {
+    //   label: "Total Value",
+    //   value: `₹${(
+    //     bids.reduce((sum, bid) => sum + (bid.raw?.amount || 0), 0) / 100000
+    //   ).toFixed(1)}L`,
+    //   icon: <IndianRupee className="w-6 h-6 text-purple-600" />,
+    // },
   ];
 
   // Handlers
@@ -424,7 +424,7 @@ const BidManagement = () => {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {stats.map((stat, index) => (
               <div
                 key={index}
@@ -687,7 +687,7 @@ const BidManagement = () => {
                       </p>
                     </div>
 
-                    {(bid.evaluated || bid.status === "awarded") &&
+                    {/* {(bid.evaluated || bid.status === "awarded") &&
                       bid.status === "awarded" && (
                         <div className="flex items-center gap-2 mb-3">
                           <Users className="w-4 h-4 text-purple-600" />
@@ -698,16 +698,16 @@ const BidManagement = () => {
                             Participants list is now available for viewing
                           </button>
                         </div>
-                      )}
+                      )} */}
 
-                    {bid.canRebid && (
+                    {/* {bid.canRebid && (
                       <div className="flex items-center gap-2 mb-3 text-green-600">
                         <RotateCcw className="w-4 h-4" />
                         <span className="text-sm font-medium">
                           Re-bid available before deadline
                         </span>
                       </div>
-                    )}
+                    )} */}
                   </div>
                 </div>
 
@@ -739,14 +739,14 @@ const BidManagement = () => {
                   </div>
 
                   <div className="flex items-center gap-3">
-                    {bid.canRebid && (
+                    {/* {bid.canRebid && (
                       <button
                         onClick={() => handleShowRebid(bid)}
                         className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors"
                       >
                         Re-Bid
                       </button>
-                    )}
+                    )} */}
                     {bid.status === "awarded" && (
                       <button
                         onClick={() => handleShowContract(bid)}
