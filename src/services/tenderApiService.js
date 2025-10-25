@@ -402,6 +402,59 @@ export const awardContract = async (bidId, contractData) => {
   }
 };
 
+/**
+ * Get closing soon tenders for client
+ * @returns {Promise} - Closing soon tenders response
+ */
+export const getClosingSoonTenders = async () => {
+  try {
+    const response = await api.get("/v1/tenders/closing-soon", {
+      showToasts: false,
+    });
+
+    return response;
+  } catch (error) {
+    console.error("Error fetching closing soon tenders:", error);
+    throw error;
+  }
+};
+
+/**
+ * Get closing soon tenders for vendor (available tenders closing soon)
+ * @returns {Promise} - Closing soon tenders response
+ */
+export const getVendorClosingSoonTenders = async () => {
+  try {
+    // Try vendor-specific endpoint first
+    try {
+      const response = await api.get("/v1/tenders/closing-soon", {
+        showToasts: false,
+      });
+      return response;
+    } catch (vendorEndpointError) {
+      console.log(
+        "Vendor-specific endpoint not available, falling back to general endpoint"
+      );
+
+      // Fallback to general tenders endpoint with vendor view
+      const response = await api.get("/v1/tenders", {
+        queryParams: {
+          page: 1,
+          limit: 10,
+          isVendorView: true,
+          sortBy: "bidDeadline",
+          order: "asc",
+        },
+        showToasts: false,
+      });
+      return response;
+    }
+  } catch (error) {
+    console.error("Error fetching vendor closing soon tenders:", error);
+    throw error;
+  }
+};
+
 export default {
   uploadTenderDocument,
   uploadMultipleTenderDocuments,
@@ -419,4 +472,6 @@ export default {
   completeTechnicalEvaluation,
   completeFinancialEvaluation,
   awardContract,
+  getClosingSoonTenders,
+  getVendorClosingSoonTenders,
 };

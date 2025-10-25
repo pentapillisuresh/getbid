@@ -8,6 +8,7 @@ import {
   Folder,
   HeadphonesIcon,
   TrendingUp,
+  Activity,
 } from "lucide-react";
 import DashboardLayout from "../../components/shared/DashboardLayout";
 import Sidebar from "../../components/shared/Sidebar";
@@ -18,6 +19,8 @@ import ProfileManagement from "./pages/ProfileManagement";
 import DocumentRepository from "./pages/DocumentRepository";
 import ClarificationQA from "./pages/ClarificationQA";
 import SupportHelpdesk from "./pages/SupportHelpdesk";
+import VendorActivitiesPage from "./pages/VendorActivitiesPage";
+import NotificationsPage from "../client/pages/NotificationsPage";
 
 const VendorDashboard = () => {
   // Try to read logged-in user from localStorage (set during login)
@@ -55,6 +58,11 @@ const VendorDashboard = () => {
       label: "Bid Management",
       path: "/bid-management",
       badge: "5",
+    },
+    {
+      icon: <Activity className="w-5 h-5" />,
+      label: "Activities",
+      path: "/activities",
     },
     {
       icon: <User className="w-5 h-5" />,
@@ -97,10 +105,12 @@ const VendorDashboard = () => {
           <Route path="/dashboard" element={<VendorDashboardHome />} />
           <Route path="/tender-listings" element={<TenderListings />} />
           <Route path="/bid-management" element={<BidManagement />} />
+          <Route path="/activities" element={<VendorActivitiesPage />} />
           <Route path="/profile-management" element={<ProfileManagement />} />
           <Route path="/document-repository" element={<DocumentRepository />} />
           <Route path="/clarifications" element={<ClarificationQA />} />
           <Route path="/support" element={<SupportHelpdesk />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
         </Routes>
       </main>
     </DashboardLayout>

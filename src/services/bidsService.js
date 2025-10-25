@@ -95,6 +95,20 @@ export const bidsService = {
       throw error;
     }
   },
+
+  /**
+   * Get bid statistics for client
+   * @returns {Promise<Object>} API response with bid stats
+   */
+  async getBidStats() {
+    try {
+      const response = await api.get("/v1/bids/client/stats");
+      return response;
+    } catch (error) {
+      console.error("Error fetching bid stats:", error);
+      throw error;
+    }
+  },
 };
 
 export default bidsService;

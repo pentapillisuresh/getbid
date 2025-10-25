@@ -4,6 +4,7 @@ import EvaluationModal from "../popup/EvaluationModal";
 import TechnicalReportModal from "../popup/TechnicalReportModal";
 import FinancialReportModal from "../popup/FinancialReportModal";
 import { getMyTenders } from "../../../services/tenderApiService";
+import { bidsService } from "../../../services/bidsService";
 import toast from "../../../services/toastService";
 
 const BidEvaluation = () => {
@@ -19,6 +20,14 @@ const BidEvaluation = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [filter, setFilter] = useState("all");
   const [error, setError] = useState(null);
+  const [bidStats, setBidStats] = useState({
+    totalBids: 0,
+    pendingBids: 0,
+    approvedBids: 0,
+    disqualifiedBids: 0,
+    awardedBids: 0,
+  });
+  const [statsLoading, setStatsLoading] = useState(true);
 
   // Fetch tenders from API
   const fetchTenders = async (page = 1, limit = 10) => {
@@ -42,8 +51,26 @@ const BidEvaluation = () => {
     }
   };
 
+  // Fetch bid statistics from API
+  const fetchBidStats = async () => {
+    try {
+      setStatsLoading(true);
+      const response = await bidsService.getBidStats();
+
+      if (response.success) {
+        setBidStats(response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching bid stats:", error);
+      toast.showError("Failed to load bid statistics");
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchTenders();
+    fetchBidStats();
   }, []);
 
   // Helper function to get tender status based on tender status field
@@ -90,77 +117,30 @@ const BidEvaluation = () => {
     return { technicalStatus, financialStatus };
   };
 
-  // Calculate stats from tenders data
-  const calculateStats = () => {
-    const totalEvaluations = tenders.length;
-
-    let technicalPhase = 0;
-    let financialPhase = 0;
-    let completed = 0;
-
-    // Calculate bid status counts across all tenders
-    let totalPending = 0;
-    let totalApproved = 0;
-    let totalDisqualified = 0;
-    let totalAwarded = 0;
-
-    tenders.forEach((tender) => {
-      const { status, bids } = tender;
-
-      // Count tender phases based on status
-      if (status === "technical-evaluation") {
-        technicalPhase++;
-      } else if (status === "financial-evaluation") {
-        financialPhase++;
-      } else if (status === "completed") {
-        completed++;
-      }
-
-      // Count bid statuses directly from bids array
-      if (bids && Array.isArray(bids)) {
-        bids.forEach((bid) => {
-          switch (bid.status) {
-            case "pending":
-              totalPending++;
-              break;
-            case "approved":
-              totalApproved++;
-              break;
-            case "disqualified":
-              totalDisqualified++;
-              break;
-            case "awarded":
-              totalAwarded++;
-              break;
-            default:
-              break;
-          }
-        });
-      }
-    });
-
+  // Get stats from API data
+  const getStats = () => {
     return [
       {
-        label: "Total Evaluations",
-        value: totalEvaluations.toString(),
+        label: "Total Bids",
+        value: bidStats.totalBids.toString(),
         icon: <FileText className="w-6 h-6 text-blue-600" />,
         bgColor: "bg-blue-50",
       },
       {
         label: "Pending Bids",
-        value: totalPending.toString(),
+        value: bidStats.pendingBids.toString(),
         icon: <FileText className="w-6 h-6 text-orange-600" />,
         bgColor: "bg-orange-50",
       },
       {
         label: "Approved Bids",
-        value: totalApproved.toString(),
+        value: bidStats.approvedBids.toString(),
         icon: <CheckCircle className="w-6 h-6 text-green-600" />,
         bgColor: "bg-green-50",
       },
       {
         label: "Disqualified Bids",
-        value: totalDisqualified.toString(),
+        value: bidStats.disqualifiedBids.toString(),
         icon: (
           <svg
             className="w-6 h-6 text-red-600"
@@ -180,14 +160,14 @@ const BidEvaluation = () => {
       },
       {
         label: "Awarded Bids",
-        value: totalAwarded.toString(),
+        value: bidStats.awardedBids.toString(),
         icon: <Award className="w-6 h-6 text-purple-600" />,
         bgColor: "bg-purple-50",
       },
     ];
   };
 
-  const stats = calculateStats();
+  const stats = getStats();
 
   // Filter tenders based on selected filter
   const getFilteredTenders = () => {
@@ -247,7 +227,10 @@ const BidEvaluation = () => {
               <option value="pending">Pending/Open</option>
             </select>
             <button
-              onClick={() => fetchTenders(1)}
+              onClick={() => {
+                fetchTenders(1);
+                fetchBidStats();
+              }}
               className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
             >
               <svg
@@ -273,24 +256,42 @@ const BidEvaluation = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-          {stats.map((stat, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-lg shadow p-6 border border-gray-200"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">{stat.label}</p>
-                  <p className="text-3xl font-bold text-gray-900">
-                    {stat.value}
-                  </p>
+          {statsLoading
+            ? // Loading state for stats
+              Array.from({ length: 5 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="bg-white rounded-lg shadow p-6 border border-gray-200"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="h-4 bg-gray-200 rounded w-20 mb-2 animate-pulse"></div>
+                      <div className="h-8 bg-gray-200 rounded w-12 animate-pulse"></div>
+                    </div>
+                    <div className="p-3 rounded-lg bg-gray-100">
+                      <div className="w-6 h-6 bg-gray-200 rounded animate-pulse"></div>
+                    </div>
+                  </div>
                 </div>
-                <div className={`p-3 rounded-lg ${stat.bgColor}`}>
-                  {stat.icon}
+              ))
+            : stats.map((stat, index) => (
+                <div
+                  key={index}
+                  className="bg-white rounded-lg shadow p-6 border border-gray-200"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1">{stat.label}</p>
+                      <p className="text-3xl font-bold text-gray-900">
+                        {stat.value}
+                      </p>
+                    </div>
+                    <div className={`p-3 rounded-lg ${stat.bgColor}`}>
+                      {stat.icon}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          ))}
+              ))}
         </div>
 
         {loading ? (
@@ -318,7 +319,10 @@ const BidEvaluation = () => {
             </h3>
             <p className="text-gray-600 mb-4">{error}</p>
             <button
-              onClick={() => fetchTenders(1)}
+              onClick={() => {
+                fetchTenders(1);
+                fetchBidStats();
+              }}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
               Try Again

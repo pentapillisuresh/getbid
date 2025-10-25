@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import api from "../../../services/apiService";
+import activitiesService from "../../../services/activitiesService";
 import toastService from "../../../services/toastService";
+import tenderApiService from "../../../services/tenderApiService";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -16,6 +18,15 @@ import {
   Eye,
   X,
   XCircle,
+  RefreshCw,
+  AlertCircle,
+  Activity,
+  Edit,
+  Trash2,
+  Plus,
+  Users,
+  Settings,
+  Loader2,
 } from "lucide-react";
 import TopupModal from "../../../components/shared/TopupModal";
 import ViewDetailsPopup from "../popups/ViewDetailsPopup";
@@ -25,6 +36,314 @@ const VendorDashboardHome = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedTender, setSelectedTender] = useState(null);
   const navigate = useNavigate();
+
+  // Fallback demo activities for vendor
+  const getFallbackActivities = () => [
+    {
+      id: "demo-1",
+      action: "bid_submitted",
+      description: "Submitted bid for Highway Construction Project",
+      details: "Highway Construction Project Phase 2",
+      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+      entityType: "bid",
+    },
+    {
+      id: "demo-2",
+      action: "tender_viewed",
+      description: "Viewed tender details",
+      details: "School Building Construction",
+      timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+      entityType: "tender",
+    },
+    {
+      id: "demo-3",
+      action: "document_uploaded",
+      description: "Uploaded technical specifications",
+      details: "Water Treatment Plant Upgrade",
+      timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
+      entityType: "document",
+    },
+    {
+      id: "demo-4",
+      action: "evaluation_received",
+      description: "Received bid evaluation results",
+      details: "Metro Rail Extension Project",
+      timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      entityType: "evaluation",
+    },
+  ];
+
+  // State for recent activities from API - initialize with demo data
+  const [recentActivities, setRecentActivities] = useState(
+    getFallbackActivities()
+  );
+  const [activitiesLoading, setActivitiesLoading] = useState(false);
+  const [activitiesError, setActivitiesError] = useState(null);
+
+  // State for upcoming deadlines from API
+  const [upcomingDeadlines, setUpcomingDeadlines] = useState([]);
+  const [deadlinesLoading, setDeadlinesLoading] = useState(true);
+  const [deadlinesError, setDeadlinesError] = useState(null);
+
+  // Function to get activity icon based on action type
+  const getActivityIcon = (action) => {
+    switch (action?.toLowerCase()) {
+      case "bid_submitted":
+      case "submit":
+      case "submitted":
+        return <CheckCircle className="w-5 h-5 text-green-600" />;
+      case "bid_updated":
+      case "update":
+      case "updated":
+      case "edit":
+      case "edited":
+        return <Edit className="w-5 h-5 text-blue-600" />;
+      case "tender_viewed":
+      case "view":
+      case "viewed":
+        return <Eye className="w-5 h-5 text-purple-600" />;
+      case "document_uploaded":
+      case "upload":
+      case "uploaded":
+        return <FileText className="w-5 h-5 text-indigo-600" />;
+      case "clarification_asked":
+      case "clarification":
+        return <AlertCircle className="w-5 h-5 text-yellow-600" />;
+      case "evaluation_received":
+      case "evaluation":
+        return <Clock className="w-5 h-5 text-orange-600" />;
+      case "contract_awarded":
+      case "award":
+      case "awarded":
+        return <Award className="w-5 h-5 text-yellow-600" />;
+      case "profile_updated":
+      case "profile":
+        return <Users className="w-5 h-5 text-gray-600" />;
+      case "create":
+      case "created":
+        return <Plus className="w-5 h-5 text-green-600" />;
+      case "delete":
+      case "deleted":
+        return <Trash2 className="w-5 h-5 text-red-600" />;
+      case "download":
+      case "downloaded":
+        return <Download className="w-5 h-5 text-indigo-600" />;
+      case "schedule":
+      case "scheduled":
+        return <Calendar className="w-5 h-5 text-blue-600" />;
+      default:
+        return <Activity className="w-5 h-5 text-gray-600" />;
+    }
+  };
+
+  // Function to format activity time
+  const formatActivityTime = (timestamp) => {
+    if (!timestamp) return "Unknown time";
+
+    try {
+      const now = new Date();
+      const activityTime = new Date(timestamp);
+      const diffInMs = now - activityTime;
+      const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+      const diffInHours = Math.floor(diffInMinutes / 60);
+      const diffInDays = Math.floor(diffInHours / 24);
+
+      if (diffInMinutes < 1) return "Just now";
+      if (diffInMinutes < 60)
+        return `${diffInMinutes} minute${diffInMinutes > 1 ? "s" : ""} ago`;
+      if (diffInHours < 24)
+        return `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
+      if (diffInDays < 7)
+        return `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
+
+      return activityTime.toLocaleDateString();
+    } catch (error) {
+      return "Unknown time";
+    }
+  };
+
+  // Fetch recent activities from API
+  const fetchRecentActivities = async () => {
+    try {
+      setActivitiesLoading(true);
+      setActivitiesError(null);
+
+      console.log("🔄 Fetching vendor activities from API...");
+
+      // Set fallback data immediately to ensure something is shown
+      const fallbackData = getFallbackActivities();
+
+      const response = await activitiesService.getMyActivities({
+        page: 1,
+        limit: 5, // Only get 5 most recent for dashboard
+      });
+
+      console.log("📥 Vendor API Response:", response);
+
+      // Handle different possible response structures
+      let activitiesData = null;
+
+      if (
+        response?.data?.activities &&
+        Array.isArray(response.data.activities)
+      ) {
+        activitiesData = response.data.activities;
+        console.log(
+          "✅ Found activities in response.data.activities:",
+          activitiesData.length
+        );
+      } else if (response?.activities && Array.isArray(response.activities)) {
+        activitiesData = response.activities;
+        console.log(
+          "✅ Found activities in response.activities:",
+          activitiesData.length
+        );
+      } else if (response?.data && Array.isArray(response.data)) {
+        activitiesData = response.data;
+        console.log(
+          "✅ Found activities in response.data array:",
+          activitiesData.length
+        );
+      } else if (Array.isArray(response)) {
+        activitiesData = response;
+        console.log(
+          "✅ Found activities as direct array:",
+          activitiesData.length
+        );
+      }
+
+      if (activitiesData && activitiesData.length > 0) {
+        setRecentActivities(activitiesData);
+        console.log("✅ Using live API data");
+      } else {
+        console.log(
+          "⚠️ No activities found in API response, using fallback data"
+        );
+        setRecentActivities(fallbackData);
+      }
+    } catch (error) {
+      console.error("❌ Error fetching recent activities:", error);
+      setActivitiesError(error.message);
+      // Use fallback demo data on error
+      setRecentActivities(getFallbackActivities());
+      console.log("⚠️ Using fallback data due to error");
+    } finally {
+      setActivitiesLoading(false);
+    }
+  };
+
+  // Fetch upcoming deadlines from API
+  const fetchUpcomingDeadlines = async () => {
+    try {
+      setDeadlinesLoading(true);
+      setDeadlinesError(null);
+
+      console.log("🔄 Fetching upcoming deadlines from API...");
+
+      const response = await tenderApiService.getVendorClosingSoonTenders();
+
+      console.log("📅 Upcoming Deadlines API Response:", response);
+
+      // Handle different possible response structures
+      let tendersData = [];
+
+      if (response?.success && response?.data && Array.isArray(response.data)) {
+        tendersData = response.data;
+      } else if (Array.isArray(response?.data)) {
+        tendersData = response.data;
+      } else if (Array.isArray(response)) {
+        tendersData = response;
+      } else {
+        console.log("⚠️ Unexpected response format, trying to extract data...");
+        tendersData = [];
+      }
+
+      if (tendersData.length > 0) {
+        // Filter and transform only active tenders that are closing soon
+        const currentDate = new Date();
+        const filteredTenders = tendersData.filter((tender) => {
+          if (!tender.bidDeadline) return false;
+          const deadline = new Date(tender.bidDeadline);
+          const diffTime = deadline - currentDate;
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          return diffDays > 0 && diffDays <= 30; // Only show tenders closing within 30 days
+        });
+
+        const formattedDeadlines = filteredTenders
+          .sort((a, b) => new Date(a.bidDeadline) - new Date(b.bidDeadline)) // Sort by deadline
+          .slice(0, 10) // Take only top 10
+          .map((tender) => {
+            const deadline = new Date(tender.bidDeadline);
+            const diffTime = deadline - currentDate;
+            const daysLeft = Math.max(
+              0,
+              Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+            );
+
+            return {
+              id: tender._id,
+              tenderId: tender.tenderId,
+              title: tender.title,
+              type: "Bid Submission",
+              deadline: deadline.toLocaleDateString("en-GB"),
+              bidDeadlineISO: tender.bidDeadline,
+              daysLeft: daysLeft,
+              isUrgent: daysLeft <= 3,
+              priority:
+                daysLeft <= 3 ? "high" : daysLeft <= 7 ? "medium" : "low",
+              category: tender.category,
+              value: tender.value,
+              status: tender.status,
+              description: tender.description,
+            };
+          });
+
+        setUpcomingDeadlines(formattedDeadlines);
+        console.log(
+          "✅ Using live deadlines data:",
+          formattedDeadlines.length,
+          "deadlines found"
+        );
+      } else {
+        console.log("⚠️ No valid tenders found in API response");
+        throw new Error("No tenders data found");
+      }
+    } catch (error) {
+      console.error("❌ Error fetching upcoming deadlines:", error);
+      setDeadlinesError(error.message);
+
+      // Fallback to demo data on error
+      const fallbackDeadlines = [
+        {
+          title: "Bridge Construction Tender",
+          type: "Bid Submission",
+          deadline: "30/10/2025",
+          daysLeft: 5,
+          priority: "high",
+        },
+        {
+          title: "Road Maintenance Contract",
+          type: "Technical Evaluation",
+          deadline: "05/11/2025",
+          daysLeft: 11,
+          priority: "medium",
+        },
+        {
+          title: "Hospital Equipment Supply",
+          type: "Award Decision",
+          deadline: "15/11/2025",
+          daysLeft: 21,
+          priority: "low",
+        },
+      ];
+
+      setUpcomingDeadlines(fallbackDeadlines);
+      console.log("⚠️ Using fallback deadlines data");
+    } finally {
+      setDeadlinesLoading(false);
+    }
+  };
+
   const stats = [
     {
       title: "Active Tenders",
@@ -59,6 +378,15 @@ const VendorDashboardHome = () => {
       description: "No change from last period",
     },
   ];
+
+  // Load activities on component mount
+  useEffect(() => {
+    console.log(
+      "🚀 VendorDashboardHome mounted, fetching activities and deadlines..."
+    );
+    fetchRecentActivities();
+    fetchUpcomingDeadlines();
+  }, []);
 
   const [recentTenders, setRecentTenders] = useState([]);
   const [tendersLoading, setTendersLoading] = useState(false);
@@ -148,37 +476,6 @@ const VendorDashboardHome = () => {
     })();
   }, []);
 
-  const recentActivity = [
-    {
-      type: "new_tender",
-      title: "New tender published",
-      description: "Highway Construction Project Phase 2",
-      time: "2 hours ago",
-      icon: <FileText className="w-5 h-5 text-green-600" />,
-    },
-    {
-      type: "bid_completed",
-      title: "Bid evaluation completed",
-      description: "School Building Construction",
-      time: "4 hours ago",
-      icon: <CheckCircle className="w-5 h-5 text-blue-600" />,
-    },
-    {
-      type: "meeting_scheduled",
-      title: "Pre-bid meeting scheduled",
-      description: "Water Treatment Plant Upgrade",
-      time: "6 hours ago",
-      icon: <Calendar className="w-5 h-5 text-orange-600" />,
-    },
-    {
-      type: "clarification",
-      title: "Clarification published",
-      description: "Metro Rail Extension Project",
-      time: "1 day ago",
-      icon: <FileText className="w-5 h-5 text-purple-600" />,
-    },
-  ];
-
   const quickActions = [
     {
       title: "Browse Tenders",
@@ -207,30 +504,6 @@ const VendorDashboardHome = () => {
       icon: <Award className="w-6 h-6 text-orange-600" />,
       color: "orange",
       action: "topup",
-    },
-  ];
-
-  const upcomingDeadlines = [
-    {
-      title: "Bridge Construction Tender",
-      type: "Bid Submission",
-      deadline: "15/04/2024",
-      daysLeft: 3,
-      priority: "high",
-    },
-    {
-      title: "Road Maintenance Contract",
-      type: "Technical Evaluation",
-      deadline: "20/04/2024",
-      daysLeft: 8,
-      priority: "medium",
-    },
-    {
-      title: "Hospital Equipment Supply",
-      type: "Award Decision",
-      deadline: "25/04/2024",
-      daysLeft: 13,
-      priority: "low",
     },
   ];
 
@@ -673,72 +946,259 @@ const VendorDashboardHome = () => {
         <div className="space-y-6">
           {/* Recent Activity */}
           <div className="card">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Recent Activity
-            </h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Recent Activity
+              </h3>
+              <div className="flex items-center gap-2">
+                {activitiesError && (
+                  <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">
+                    Demo Data
+                  </span>
+                )}
+                {!activitiesError && !activitiesLoading && (
+                  <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                    Live Data
+                  </span>
+                )}
+                <button
+                  onClick={fetchRecentActivities}
+                  disabled={activitiesLoading}
+                  className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+                  title="Refresh activities"
+                >
+                  <RefreshCw
+                    className={`w-4 h-4 ${
+                      activitiesLoading ? "animate-spin" : ""
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+
+            {activitiesError && (
+              <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-sm text-yellow-800">
+                  <AlertCircle className="w-4 h-4 inline mr-2" />
+                  Cannot connect to API at{" "}
+                  <code className="bg-yellow-100 px-1 rounded">
+                    localhost:3003
+                  </code>
+                  .
+                  <br />
+                  Showing demo data. Start your backend server and click
+                  refresh.
+                </p>
+                <button
+                  onClick={() => {
+                    console.log("🧪 Testing API connection manually...");
+                    fetchRecentActivities();
+                  }}
+                  className="mt-2 text-xs bg-yellow-200 hover:bg-yellow-300 px-2 py-1 rounded transition-colors"
+                >
+                  Test API Connection
+                </button>
+              </div>
+            )}
+
             <div className="space-y-4">
-              {recentActivity.map((activity, index) => (
-                <div key={index} className="flex items-start gap-3">
-                  <div className="p-2 rounded-full bg-gray-50">
-                    {activity.icon}
+              {activitiesLoading ? (
+                // Loading skeleton
+                Array(4)
+                  .fill(0)
+                  .map((_, index) => (
+                    <div
+                      key={index}
+                      className="flex items-start gap-3 p-3 animate-pulse"
+                    >
+                      <div className="w-9 h-9 bg-gray-200 rounded-full"></div>
+                      <div className="flex-1">
+                        <div className="h-4 bg-gray-200 rounded mb-2 w-3/4"></div>
+                        <div className="h-3 bg-gray-200 rounded mb-1 w-full"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/4"></div>
+                      </div>
+                    </div>
+                  ))
+              ) : recentActivities.length > 0 ? (
+                recentActivities.map((activity, index) => (
+                  <div
+                    key={activity.id || activity._id || index}
+                    className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors"
+                  >
+                    <div className="p-2 rounded-full bg-gray-50">
+                      {getActivityIcon(activity.action)}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900 text-sm">
+                        {activity.description || activity.action || "Activity"}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        {activity.details ||
+                          activity.entityType ||
+                          activity.metadata?.tenderTitle ||
+                          "No details available"}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {formatActivityTime(
+                          activity.timestamp || activity.createdAt
+                        )}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <p className="font-medium text-gray-900 text-sm">
-                      {activity.title}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      {activity.description}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {activity.time}
-                    </p>
-                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <Activity className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                  <p>No recent activities found</p>
                 </div>
-              ))}
+              )}
+            </div>
+
+            <div className="mt-6 text-center">
+              <button
+                className="text-primary-600 hover:text-primary-700 font-medium text-sm"
+                onClick={() => navigate("/vendor/activities")}
+              >
+                View All Activities →
+              </button>
             </div>
           </div>
 
           {/* Upcoming Deadlines */}
           <div className="card">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Upcoming Deadlines
-            </h3>
-            <div className="space-y-3">
-              {upcomingDeadlines.map((item, index) => (
-                <div
-                  key={index}
-                  className={`p-3 rounded-lg border-l-4 ${
-                    item.priority === "high"
-                      ? "border-red-400 bg-red-50"
-                      : item.priority === "medium"
-                      ? "border-blue-400 bg-blue-50"
-                      : "border-blue-400 bg-blue-50"
-                  }`}
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Upcoming Deadlines
+              </h3>
+              {deadlinesLoading && (
+                <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+              )}
+              {!deadlinesLoading && (
+                <button
+                  onClick={fetchUpcomingDeadlines}
+                  className="p-1 hover:bg-gray-100 rounded"
+                  title="Refresh deadlines"
                 >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-medium text-gray-900 text-sm">
-                        {item.title}
-                      </p>
-                      <p className="text-sm text-gray-600">{item.type}</p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Due: {item.deadline}
-                      </p>
+                  <RefreshCw className="w-4 h-4 text-gray-500" />
+                </button>
+              )}
+            </div>
+
+            {deadlinesError && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg mb-4">
+                <p className="text-sm text-red-600">
+                  Error loading deadlines: {deadlinesError}
+                </p>
+                <button
+                  onClick={fetchUpcomingDeadlines}
+                  className="text-sm text-red-700 underline mt-1"
+                >
+                  Try again
+                </button>
+              </div>
+            )}
+
+            <div className="space-y-3">
+              {deadlinesLoading ? (
+                // Loading skeleton
+                [...Array(3)].map((_, index) => (
+                  <div
+                    key={index}
+                    className="p-3 rounded-lg border-l-4 border-gray-300 bg-gray-50 animate-pulse"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
+                        <div className="h-3 bg-gray-300 rounded w-1/2 mb-1"></div>
+                        <div className="h-3 bg-gray-300 rounded w-1/3"></div>
+                      </div>
+                      <div className="h-3 bg-gray-300 rounded w-16"></div>
                     </div>
-                    <span
-                      className={`text-xs font-medium ${
-                        item.priority === "high"
-                          ? "text-red-600"
-                          : item.priority === "medium"
-                          ? "text-blue-600"
-                          : "text-blue-600"
-                      }`}
-                    >
-                      {item.daysLeft} days left
-                    </span>
                   </div>
+                ))
+              ) : upcomingDeadlines.length > 0 ? (
+                upcomingDeadlines.map((item, index) => (
+                  <div
+                    key={item.id || index}
+                    className={`p-3 rounded-lg border-l-4 cursor-pointer hover:shadow-md transition-shadow ${
+                      item.priority === "high"
+                        ? "border-red-400 bg-red-50"
+                        : item.priority === "medium"
+                        ? "border-blue-400 bg-blue-50"
+                        : "border-blue-400 bg-blue-50"
+                    }`}
+                    onClick={() => {
+                      if (item.id) {
+                        navigate("/vendor/tender-listings");
+                      }
+                    }}
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <p className="font-medium text-gray-900 text-sm">
+                          {item.title}
+                        </p>
+                        <p className="text-sm text-gray-600">{item.type}</p>
+                        {item.tenderId && (
+                          <p className="text-xs text-gray-500 mt-1">
+                            ID: {item.tenderId}
+                          </p>
+                        )}
+                        <p className="text-xs text-gray-500 mt-1">
+                          Due: {item.deadline}
+                        </p>
+                        {item.category && (
+                          <p className="text-xs text-gray-400 mt-1">
+                            Category: {item.category}
+                          </p>
+                        )}
+                        {item.value && (
+                          <p className="text-xs text-green-600 mt-1">
+                            Value: ₹{item.value.toLocaleString()}
+                          </p>
+                        )}
+                        {item.description && (
+                          <p className="text-xs text-gray-400 mt-1 line-clamp-2">
+                            {item.description}
+                          </p>
+                        )}
+                      </div>
+                      <div className="text-right ml-2">
+                        <span
+                          className={`text-xs font-medium block ${
+                            item.priority === "high"
+                              ? "text-red-600"
+                              : item.priority === "medium"
+                              ? "text-blue-600"
+                              : "text-blue-600"
+                          }`}
+                        >
+                          {item.daysLeft} days left
+                        </span>
+                        {item.isUrgent && (
+                          <span className="text-xs text-red-500 font-medium">
+                            URGENT
+                          </span>
+                        )}
+                        {item.id && (
+                          <ExternalLink className="w-3 h-3 text-gray-400 mt-1" />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="p-3 text-center text-gray-500">
+                  <Calendar className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">No upcoming deadlines</p>
+                  <button
+                    onClick={() => navigate("/vendor/tender-listings")}
+                    className="text-sm text-blue-600 hover:text-blue-700 mt-1"
+                  >
+                    Browse available tenders
+                  </button>
                 </div>
-              ))}
+              )}
             </div>
           </div>
 

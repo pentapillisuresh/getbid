@@ -19,6 +19,7 @@ import ReportsAnalytics from "./pages/ReportsAnalytics";
 import ActivitiesPage from "./pages/ActivitiesPage";
 import ProfilePage from "./pages/ProfilePage";
 import TenderDashboard from "./pages/TenderDashboard";
+import NotificationsPage from "./pages/NotificationsPage";
 
 const ClientDashboard = () => {
   const location = useLocation();
@@ -108,6 +109,7 @@ const ClientDashboard = () => {
             element={<ProfilePage userInfo={userInfo} />}
           />
           <Route path="/tender" element={<TenderDashboard />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
         </Routes>
       </main>
     </DashboardLayout>

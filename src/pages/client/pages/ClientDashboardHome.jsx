@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   FileText,
   Clock,
@@ -20,12 +21,31 @@ import {
   RefreshCw,
 } from "lucide-react";
 import activitiesService from "../../../services/activitiesService";
+import api from "../../../services/apiService";
+import tenderApiService from "../../../services/tenderApiService";
 
 const ClientDashboardHome = () => {
+  const navigate = useNavigate();
+
   // State for recent activities from API
   const [recentActivities, setRecentActivities] = useState([]);
   const [activitiesLoading, setActivitiesLoading] = useState(true);
   const [activitiesError, setActivitiesError] = useState(null);
+
+  // State for client stats from API
+  const [clientStats, setClientStats] = useState({
+    activeTenders: 0,
+    underEvaluation: 0,
+    awarded: 0,
+    totalVendors: 0,
+  });
+  const [statsLoading, setStatsLoading] = useState(true);
+  const [statsError, setStatsError] = useState(null);
+
+  // State for upcoming deadlines from API
+  const [upcomingDeadlines, setUpcomingDeadlines] = useState([]);
+  const [deadlinesLoading, setDeadlinesLoading] = useState(true);
+  const [deadlinesError, setDeadlinesError] = useState(null);
 
   // Function to get activity icon based on action type
   const getActivityIcon = (action) => {
@@ -164,6 +184,117 @@ const ClientDashboardHome = () => {
     }
   };
 
+  // Fetch client stats from API
+  const fetchClientStats = async () => {
+    try {
+      setStatsLoading(true);
+      setStatsError(null);
+
+      console.log("🔄 Fetching client stats from API...");
+
+      const response = await api.get("/v1/tenders/client/stats");
+
+      console.log("📊 Client Stats API Response:", response);
+
+      if (response?.success && response?.data) {
+        const { activeTenders, underEvaluation, awarded, totalVendors } =
+          response.data;
+
+        setClientStats({
+          activeTenders: activeTenders || 0,
+          underEvaluation: underEvaluation || 0,
+          awarded: awarded || 0,
+          totalVendors: totalVendors || 0,
+        });
+
+        console.log("✅ Using live stats data");
+      } else {
+        throw new Error("Invalid response format");
+      }
+    } catch (error) {
+      console.error("❌ Error fetching client stats:", error);
+      setStatsError(error.message);
+      // Keep default values on error
+      console.log("⚠️ Using fallback stats data");
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
+  // Fetch upcoming deadlines from API
+  const fetchUpcomingDeadlines = async () => {
+    try {
+      setDeadlinesLoading(true);
+      setDeadlinesError(null);
+
+      console.log("🔄 Fetching upcoming deadlines from API...");
+
+      const response = await tenderApiService.getClosingSoonTenders();
+
+      console.log("📅 Upcoming Deadlines API Response:", response);
+
+      if (response?.success && response?.data && Array.isArray(response.data)) {
+        const formattedDeadlines = response.data.map((tender) => ({
+          id: tender._id,
+          tenderId: tender.tenderId,
+          title: tender.title,
+          type: "Bid Submission",
+          deadline: new Date(tender.bidDeadline).toLocaleDateString("en-GB"),
+          bidDeadlineISO: tender.bidDeadline,
+          daysLeft: tender.daysRemaining,
+          isUrgent: tender.isUrgent,
+          priority:
+            tender.daysRemaining <= 3
+              ? "high"
+              : tender.daysRemaining <= 7
+              ? "medium"
+              : "low",
+          category: tender.category,
+          value: tender.value,
+          status: tender.status,
+        }));
+
+        setUpcomingDeadlines(formattedDeadlines);
+        console.log("✅ Using live deadlines data:", formattedDeadlines);
+      } else {
+        throw new Error("Invalid response format");
+      }
+    } catch (error) {
+      console.error("❌ Error fetching upcoming deadlines:", error);
+      setDeadlinesError(error.message);
+
+      // Fallback to demo data on error
+      const fallbackDeadlines = [
+        {
+          title: "Bridge Construction Tender",
+          type: "Bid Submission",
+          deadline: "15/04/2024",
+          daysLeft: 3,
+          priority: "high",
+        },
+        {
+          title: "Road Maintenance Contract",
+          type: "Technical Evaluation",
+          deadline: "20/04/2024",
+          daysLeft: 8,
+          priority: "medium",
+        },
+        {
+          title: "Hospital Equipment Supply",
+          type: "Award Decision",
+          deadline: "25/04/2024",
+          daysLeft: 13,
+          priority: "low",
+        },
+      ];
+
+      setUpcomingDeadlines(fallbackDeadlines);
+      console.log("⚠️ Using fallback deadlines data");
+    } finally {
+      setDeadlinesLoading(false);
+    }
+  };
+
   // Fallback demo activities
   const getFallbackActivities = () => [
     {
@@ -200,14 +331,16 @@ const ClientDashboardHome = () => {
     },
   ];
 
-  // Load activities on component mount
+  // Load activities and stats on component mount
   useEffect(() => {
     fetchRecentActivities();
+    fetchClientStats();
+    fetchUpcomingDeadlines();
   }, []);
   const stats = [
     {
       title: "Active Tenders",
-      value: "12",
+      value: statsLoading ? "-" : clientStats.activeTenders.toString(),
       change: "+2",
       changeType: "positive",
       icon: <FileText className="w-8 h-8 text-blue-600" />,
@@ -215,7 +348,7 @@ const ClientDashboardHome = () => {
     },
     {
       title: "Under Evaluation",
-      value: "8",
+      value: statsLoading ? "-" : clientStats.underEvaluation.toString(),
       change: "+3",
       changeType: "positive",
       icon: <Clock className="w-8 h-8 text-orange-600" />,
@@ -223,7 +356,7 @@ const ClientDashboardHome = () => {
     },
     {
       title: "Awarded This Month",
-      value: "15",
+      value: statsLoading ? "-" : clientStats.awarded.toString(),
       change: "+5",
       changeType: "positive",
       icon: <Award className="w-8 h-8 text-green-600" />,
@@ -231,35 +364,11 @@ const ClientDashboardHome = () => {
     },
     {
       title: "Total Vendors",
-      value: "248",
+      value: statsLoading ? "-" : clientStats.totalVendors.toString(),
       change: "+12",
       changeType: "positive",
       icon: <Users className="w-8 h-8 text-purple-600" />,
       description: "Registered vendor database",
-    },
-  ];
-
-  const upcomingDeadlines = [
-    {
-      title: "Bridge Construction Tender",
-      type: "Bid Submission",
-      deadline: "15/04/2024",
-      daysLeft: 3,
-      priority: "high",
-    },
-    {
-      title: "Road Maintenance Contract",
-      type: "Technical Evaluation",
-      deadline: "20/04/2024",
-      daysLeft: 8,
-      priority: "medium",
-    },
-    {
-      title: "Hospital Equipment Supply",
-      type: "Award Decision",
-      deadline: "25/04/2024",
-      daysLeft: 13,
-      priority: "low",
     },
   ];
 
@@ -269,30 +378,35 @@ const ClientDashboardHome = () => {
       description: "Publish a new tender",
       icon: <Plus className="w-6 h-6 text-green-600" />,
       color: "green",
+      route: "/client/tender-management",
     },
     {
       title: "Schedule Pre-bid Meeting",
       description: "Organize vendor meeting",
       icon: <Calendar className="w-6 h-6 text-blue-600" />,
       color: "blue",
+      route: "/client/tender-management",
     },
     {
       title: "Evaluate Bids",
       description: "Review submitted bids",
       icon: <CheckCircle className="w-6 h-6 text-purple-600" />,
       color: "purple",
+      route: "/client/bid-evaluation",
     },
     {
       title: "Manage Vendors",
       description: "Vendor verification",
       icon: <Users className="w-6 h-6 text-orange-600" />,
       color: "orange",
+      route: "/client/vendor-management",
     },
     {
       title: "View Reports",
       description: "Analytics and insights",
       icon: <TrendingUp className="w-6 h-6 text-indigo-600" />,
       color: "indigo",
+      route: "/client/reports-analytics",
     },
   ];
 
@@ -306,52 +420,126 @@ const ClientDashboardHome = () => {
             <p className="text-primary-100 mb-4">
               Manage your tenders and track bid submissions efficiently
             </p>
-            <div className="flex items-center gap-3">
+            {/* <div className="flex items-center gap-3">
               <div className="text-sm text-primary-200">Last 30 days</div>
-            </div>
+            </div> */}
           </div>
-          <div className="text-right">
+          {/* <div className="text-right">
             <select className="bg-white/20 backdrop-blur text-white border border-white/30 rounded-lg px-3 py-2 text-sm">
               <option>Last 30 days</option>
               <option>Last 90 days</option>
               <option>This Year</option>
             </select>
-          </div>
+          </div> */}
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => (
-          <div
-            key={index}
-            className="card hover:shadow-md transition-shadow duration-200"
-          >
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                {stat.icon}
-                <div>
-                  <div className="text-2xl font-bold text-gray-900">
-                    {stat.value}
-                  </div>
-                  <div className="text-sm text-gray-600">{stat.title}</div>
-                </div>
-              </div>
-              {stat.change !== "0" && (
-                <div
-                  className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                    stat.changeType === "positive"
-                      ? "bg-green-100 text-green-600"
-                      : "bg-red-100 text-red-600"
-                  }`}
-                >
-                  <span>{stat.change}</span>
-                </div>
-              )}
-            </div>
-            <p className="text-sm text-gray-500">{stat.description}</p>
+      <div className="space-y-4">
+        {/* Stats Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">
+              Dashboard Statistics
+            </h2>
+            <p className="text-sm text-gray-600">
+              Real-time overview of your tender management
+            </p>
           </div>
-        ))}
+          <div className="flex items-center gap-2">
+            {statsError && (
+              <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">
+                Demo Data
+              </span>
+            )}
+            {!statsError && !statsLoading && (
+              <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                Live Data
+              </span>
+            )}
+            <button
+              onClick={fetchClientStats}
+              disabled={statsLoading}
+              className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+              title="Refresh statistics"
+            >
+              <RefreshCw
+                className={`w-4 h-4 ${statsLoading ? "animate-spin" : ""}`}
+              />
+            </button>
+          </div>
+        </div>
+
+        {/* Error Banner for Stats */}
+        {statsError && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-yellow-600" />
+              <div>
+                <p className="text-yellow-800 font-medium">
+                  Stats API Connection Issue
+                </p>
+                <p className="text-yellow-700 text-sm">
+                  Cannot connect to stats service. Showing fallback data.
+                </p>
+              </div>
+              <button
+                onClick={fetchClientStats}
+                className="ml-auto text-yellow-600 hover:text-yellow-700"
+              >
+                <RefreshCw className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {stats.map((stat, index) => (
+            <div
+              key={index}
+              className="card hover:shadow-md transition-shadow duration-200"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  {statsLoading ? (
+                    <div className="w-8 h-8 bg-gray-200 rounded animate-pulse"></div>
+                  ) : (
+                    stat.icon
+                  )}
+                  <div>
+                    <div className="text-2xl font-bold text-gray-900">
+                      {statsLoading ? (
+                        <div className="w-8 h-6 bg-gray-200 rounded animate-pulse"></div>
+                      ) : (
+                        stat.value
+                      )}
+                    </div>
+                    <div className="text-sm text-gray-600">{stat.title}</div>
+                  </div>
+                </div>
+                {/* {stat.change !== "0" && (
+                  <div
+                    className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                      stat.changeType === "positive"
+                        ? "bg-green-100 text-green-600"
+                        : "bg-red-100 text-red-600"
+                    }`}
+                  >
+                    <span>{stat.change}</span>
+                  </div>
+                )} */}
+              </div>
+              <p className="text-sm text-gray-500">
+                {statsLoading ? (
+                  <div className="w-full h-4 bg-gray-200 rounded animate-pulse"></div>
+                ) : (
+                  stat.description
+                )}
+              </p>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Quick Actions */}
@@ -361,6 +549,7 @@ const ClientDashboardHome = () => {
           {quickActions.map((action, index) => (
             <button
               key={index}
+              onClick={() => navigate(action.route)}
               className="p-4 rounded-lg border-2 border-dashed border-gray-200 hover:border-primary-300 hover:bg-primary-50 transition-all duration-200 text-left group"
             >
               <div className="flex flex-col items-center text-center">
@@ -506,45 +695,120 @@ const ClientDashboardHome = () => {
         <div className="space-y-6">
           {/* Upcoming Deadlines */}
           <div className="card">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Upcoming Deadlines
-            </h3>
-            <div className="space-y-3">
-              {upcomingDeadlines.map((item, index) => (
-                <div
-                  key={index}
-                  className={`p-3 rounded-lg border-l-4 ${
-                    item.priority === "high"
-                      ? "border-red-400 bg-red-50"
-                      : item.priority === "medium"
-                      ? "border-blue-400 bg-blue-50"
-                      : "border-blue-400 bg-blue-50"
-                  }`}
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Upcoming Deadlines
+              </h3>
+              {deadlinesLoading && (
+                <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+              )}
+              {!deadlinesLoading && (
+                <button
+                  onClick={fetchUpcomingDeadlines}
+                  className="p-1 hover:bg-gray-100 rounded"
+                  title="Refresh deadlines"
                 >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-medium text-gray-900 text-sm">
-                        {item.title}
-                      </p>
-                      <p className="text-sm text-gray-600">{item.type}</p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Due: {item.deadline}
-                      </p>
+                  <RefreshCw className="w-4 h-4 text-gray-500" />
+                </button>
+              )}
+            </div>
+
+            {deadlinesError && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg mb-4">
+                <p className="text-sm text-red-600">
+                  Error loading deadlines: {deadlinesError}
+                </p>
+                <button
+                  onClick={fetchUpcomingDeadlines}
+                  className="text-sm text-red-700 underline mt-1"
+                >
+                  Try again
+                </button>
+              </div>
+            )}
+
+            <div className="space-y-3">
+              {deadlinesLoading ? (
+                // Loading skeleton
+                [...Array(3)].map((_, index) => (
+                  <div
+                    key={index}
+                    className="p-3 rounded-lg border-l-4 border-gray-300 bg-gray-50 animate-pulse"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
+                        <div className="h-3 bg-gray-300 rounded w-1/2 mb-1"></div>
+                        <div className="h-3 bg-gray-300 rounded w-1/3"></div>
+                      </div>
+                      <div className="h-3 bg-gray-300 rounded w-16"></div>
                     </div>
-                    <span
-                      className={`text-xs font-medium ${
-                        item.priority === "high"
-                          ? "text-red-600"
-                          : item.priority === "medium"
-                          ? "text-blue-600"
-                          : "text-blue-600"
-                      }`}
-                    >
-                      {item.daysLeft} days left
-                    </span>
                   </div>
+                ))
+              ) : upcomingDeadlines.length > 0 ? (
+                upcomingDeadlines.map((item, index) => (
+                  <div
+                    key={item.id || index}
+                    className={`p-3 rounded-lg border-l-4 ${
+                      item.priority === "high"
+                        ? "border-red-400 bg-red-50"
+                        : item.priority === "medium"
+                        ? "border-blue-400 bg-blue-50"
+                        : "border-blue-400 bg-blue-50"
+                    }`}
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <p className="font-medium text-gray-900 text-sm">
+                          {item.title}
+                        </p>
+                        <p className="text-sm text-gray-600">{item.type}</p>
+                        {item.tenderId && (
+                          <p className="text-xs text-gray-500 mt-1">
+                            ID: {item.tenderId}
+                          </p>
+                        )}
+                        <p className="text-xs text-gray-500 mt-1">
+                          Due: {item.deadline}
+                        </p>
+                        {item.category && (
+                          <p className="text-xs text-gray-400 mt-1">
+                            Category: {item.category}
+                          </p>
+                        )}
+                        {item.value && (
+                          <p className="text-xs text-green-600 mt-1">
+                            Value: ₹{item.value.toLocaleString()}
+                          </p>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <span
+                          className={`text-xs font-medium block ${
+                            item.priority === "high"
+                              ? "text-red-600"
+                              : item.priority === "medium"
+                              ? "text-blue-600"
+                              : "text-blue-600"
+                          }`}
+                        >
+                          {item.daysLeft} days left
+                        </span>
+                        {item.isUrgent && (
+                          <span className="text-xs text-red-500 font-medium">
+                            URGENT
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="p-3 text-center text-gray-500">
+                  <Calendar className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">No upcoming deadlines</p>
                 </div>
-              ))}
+              )}
             </div>
           </div>
 
@@ -577,30 +841,6 @@ const ClientDashboardHome = () => {
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Success Rate</span>
                 <span className="text-lg font-bold text-purple-600">94%</span>
-              </div>
-            </div>
-          </div>
-
-          {/* System Status */}
-          <div className="card bg-green-50 border border-green-200">
-            <div className="flex items-center gap-3 mb-3">
-              <CheckCircle className="w-5 h-5 text-green-600" />
-              <h3 className="text-lg font-semibold text-green-900">
-                System Status
-              </h3>
-            </div>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-green-700">All Services</span>
-                <span className="text-green-600 font-medium">Operational</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-green-700">Last Backup</span>
-                <span className="text-green-600 font-medium">2 hours ago</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-green-700">Security Scan</span>
-                <span className="text-green-600 font-medium">Passed</span>
               </div>
             </div>
           </div>
