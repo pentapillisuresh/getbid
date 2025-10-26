@@ -17,6 +17,7 @@ import Registration from "./pages/Registration";
 import OTPVerification from "./pages/OTPVerification";
 import VendorDashboard from "./pages/vendor/VendorDashboard";
 import ClientDashboard from "./pages/client/ClientDashboard";
+import TendersSection from "./pages/Home/TendersSection";
 
 // Services
 import AnalyticsReporting from "./components/services/AnalyticsReporting";
@@ -27,6 +28,7 @@ import TrainingSupport from "./components/services/TrainingSupport";
 import TenderSearch from "./components/services/TenderSearch";
 import firebaseMessagingService from "./services/firebaseMessagingService";
 import NotificationComponent from "./components/shared/NotificationComponent";
+import ScrollToTop from "./components/shared/ScrollToTop";
 
 function App() {
   // Initialize Firebase messaging on app start
@@ -45,6 +47,7 @@ function App() {
 
   return (
     <Router>
+      <ScrollToTop />
       <div className="min-h-screen flex flex-col bg-gray-50">
         {/* Header - shown on every page */}
         {/* <Header /> */}
@@ -75,6 +78,10 @@ function App() {
             />
             <Route path="/services/tendersearch" element={<TenderSearch />} />
 
+            <Route
+              path="/browse-tenders"
+              element={<TendersSection isStandalone={true} />}
+            />
             <Route path="/choose-login-type" element={<ChooseLoginType />} />
             <Route path="/register" element={<Registration />} />
             <Route path="/otp-verification" element={<OTPVerification />} />

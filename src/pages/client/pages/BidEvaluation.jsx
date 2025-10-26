@@ -216,6 +216,19 @@ const BidEvaluation = () => {
     setFullReportModalOpen(true);
   };
 
+  // Helper function to check if bid deadline has passed (end of day)
+  const isBidDeadlinePassed = (bidDeadline) => {
+    if (!bidDeadline) return false;
+
+    const deadlineDate = new Date(bidDeadline);
+    const currentDate = new Date();
+
+    // Set deadline to end of day (23:59:59.999)
+    deadlineDate.setHours(23, 59, 59, 999);
+
+    return currentDate > deadlineDate;
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
@@ -359,6 +372,10 @@ const BidEvaluation = () => {
                 currency: "INR",
                 minimumFractionDigits: 0,
               }).format(tender.value);
+
+              // Check if bid deadline has passed and bids are available
+              const canEvaluateBids =
+                tender.bidsCount > 0 && isBidDeadlinePassed(tender.bidDeadline);
 
               return (
                 <div
@@ -530,11 +547,26 @@ const BidEvaluation = () => {
                             handleEvaluateBids(tender, "technical");
                           }
                         }}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 whitespace-nowrap"
-                        disabled={tender.bidsCount === 0}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg whitespace-nowrap ${
+                          canEvaluateBids
+                            ? "bg-blue-600 text-white hover:bg-blue-700"
+                            : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        }`}
+                        disabled={!canEvaluateBids}
+                        title={
+                          tender.bidsCount === 0
+                            ? "No bids received"
+                            : !isBidDeadlinePassed(tender.bidDeadline)
+                            ? "Evaluation will be available after bid deadline"
+                            : "Evaluate bids"
+                        }
                       >
                         <FileText className="w-4 h-4" />
-                        {tender.bidsCount === 0 ? "No Bids" : "Evaluate Bids"}
+                        {tender.bidsCount === 0
+                          ? "No Bids"
+                          : !isBidDeadlinePassed(tender.bidDeadline)
+                          ? "Deadline Not Passed"
+                          : "Evaluate Bids"}
                       </button>
                       <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 whitespace-nowrap">
                         <svg

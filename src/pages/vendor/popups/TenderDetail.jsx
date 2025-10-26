@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ArrowLeft,
   Download,
@@ -15,6 +15,11 @@ import {
 
 const TenderDetail = ({ tender, onBack, onShowParticipants, onShowRebid }) => {
   const [activeSection, setActiveSection] = useState("overview");
+
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   // Create evaluation steps based on bid data
   const createEvaluationSteps = () => {
@@ -37,74 +42,41 @@ const TenderDetail = ({ tender, onBack, onShowParticipants, onShowRebid }) => {
       },
     ];
 
-    // Add evaluation steps based on current status
-    if (tender.status !== "submitted" && tender.status !== "draft") {
-      steps.push({
-        id: 3,
-        title: "Under Review",
-        date: "In Progress",
-        status: "completed",
-      });
-    }
-
     if (tender.technicalEvaluation) {
       steps.push({
-        id: 4,
+        id: 3,
         title: "Technical Evaluation",
         date: `Score: ${tender.technicalEvaluation.totalRating}/100`,
         status: "completed",
       });
     } else if (tender.status === "technical") {
       steps.push({
-        id: 4,
+        id: 3,
         title: "Technical Evaluation",
-        date: "In Progress",
-        status: "current",
-      });
-    } else if (
-      ["financial", "completed", "awarded", "rejected"].includes(tender.status)
-    ) {
-      steps.push({
-        id: 4,
-        title: "Technical Evaluation",
-        date: "Pending",
-        status: "pending",
-      });
-    }
-
-    if (tender.financialEvaluation) {
-      steps.push({
-        id: 5,
-        title: "Financial Evaluation",
-        date: `Score: ${tender.financialEvaluation.totalRating}/100`,
-        status: "completed",
-      });
-    } else if (tender.status === "financial") {
-      steps.push({
-        id: 5,
-        title: "Financial Evaluation",
         date: "In Progress",
         status: "current",
       });
     } else {
       steps.push({
-        id: 5,
-        title: "Financial Evaluation",
+        id: 3,
+        title: "Technical Evaluation",
         date: "Pending",
         status: "pending",
       });
     }
 
     steps.push({
-      id: 6,
+      id: 4,
       title: "Decision",
       date:
         tender.status === "awarded"
           ? "Awarded"
           : tender.status === "rejected"
           ? "Rejected"
+          : tender.status === "disqualified"
+          ? "Disqualified"
           : "Pending",
-      status: ["awarded", "rejected"].includes(tender.status)
+      status: ["awarded", "rejected", "disqualified"].includes(tender.status)
         ? "completed"
         : "pending",
     });
@@ -122,14 +94,6 @@ const TenderDetail = ({ tender, onBack, onShowParticipants, onShowRebid }) => {
       score: tender.technicalEvaluation.totalRating,
       maxScore: 100,
       color: "bg-primary",
-    });
-  }
-  if (tender.financialEvaluation) {
-    evaluationScores.push({
-      criteria: "Financial",
-      score: tender.financialEvaluation.totalRating,
-      maxScore: 100,
-      color: "bg-green-500",
     });
   }
 

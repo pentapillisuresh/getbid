@@ -10,8 +10,13 @@ import {
 } from "lucide-react";
 
 const ViewDetailsPopup = ({ tender, onClose }) => {
+  console.log(tender);
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div
+      style={{ marginTop: "0px" }}
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+    >
       <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-white flex-shrink-0">
@@ -19,7 +24,11 @@ const ViewDetailsPopup = ({ tender, onClose }) => {
             <h2 className="text-xl font-semibold text-gray-900">
               {tender.title}
             </h2>
-            <p className="text-gray-600 text-sm mt-1">{tender.department}</p>
+            <p className="text-gray-600 text-sm mt-1">
+              Tender ID:{" "}
+              {(tender && tender.raw && tender.raw.tenderId) ||
+                (tender && tender.originalData && tender.originalData.tenderId)}
+            </p>
           </div>
           <button
             onClick={onClose}
@@ -262,9 +271,9 @@ const ViewDetailsPopup = ({ tender, onClose }) => {
           >
             Close
           </button>
-          <button className="bg-primary-500 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors">
+          {/* <button className="bg-primary-500 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors">
             Download All Documents
-          </button>
+          </button> */}
         </div>
       </div>
     </div>

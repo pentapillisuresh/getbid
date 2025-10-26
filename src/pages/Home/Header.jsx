@@ -63,14 +63,16 @@ const Header = () => {
           <button
             onClick={() => navigate("/")}
             className={`font-medium transition ${
-              isActive("/") ? "text-[#6B21A8]" : "text-gray-800 hover:text-[#6B21A8]"
+              isActive("/")
+                ? "text-[#6B21A8]"
+                : "text-gray-800 hover:text-[#6B21A8]"
             }`}
           >
             Home
           </button>
 
           {/* About */}
-     <button
+          <button
             onClick={() => scrollToSection("about")}
             className={`font-medium transition ${
               location.search.includes("scroll=about")
@@ -146,7 +148,7 @@ const Header = () => {
           </button>
         </nav>
 
-        {/* Right Side: Login + Call */}
+        {/* Right Side: Login + Browse Tenders */}
         <div className="hidden md:flex items-center space-x-5">
           <button
             onClick={() => navigate("/choose-login-type")}
@@ -155,12 +157,12 @@ const Header = () => {
             Login
           </button>
 
-          <a
-            href="tel:+919494777198"
+          <button
+            onClick={() => navigate("/browse-tenders")}
             className="bg-[#16A34A] text-white px-5 py-2 rounded-lg font-medium hover:bg-green-700 transition"
           >
-            Call us: +91 9494777198
-          </a>
+            Browse Tenders
+          </button>
         </div>
 
         {/* Mobile Menu Toggle */}
@@ -254,12 +256,15 @@ const Header = () => {
               Login
             </button>
 
-            <a
-              href="tel:+919494777198"
+            <button
+              onClick={() => {
+                navigate("/browse-tenders");
+                setMenuOpen(false);
+              }}
               className="bg-[#16A34A] text-white px-5 py-2 rounded-lg font-medium text-center hover:bg-green-700 transition"
             >
-              Call us: +91 9494777198
-            </a>
+              Browse Tenders
+            </button>
           </div>
         </div>
       )}

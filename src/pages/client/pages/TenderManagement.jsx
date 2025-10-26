@@ -670,20 +670,20 @@ const TenderManagement = () => {
                           <MessageCircle className="w-4 h-4" />
                           Manage Q&A
                         </button>
-                        <button
+                        {/* <button
                           onClick={() => handleAmendTenderClick(tender)}
                           className="flex items-center gap-2 text-green-600 hover:text-green-700 font-medium text-sm"
                         >
                           <Edit className="w-4 h-4" />
                           Amend Tender
-                        </button>
-                        <button className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors">
+                        </button> */}
+                        {/* <button className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors">
                           Start Evaluation
-                        </button>
+                        </button> */}
                       </>
                     )}
 
-                    {tender.status === "evaluation" && (
+                    {/* {tender.status === "evaluation" && (
                       <>
                         <button className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors">
                           Evaluate Bids
@@ -692,7 +692,7 @@ const TenderManagement = () => {
                           Award Tender
                         </button>
                       </>
-                    )}
+                    )} */}
                   </div>
                 </div>
               </div>

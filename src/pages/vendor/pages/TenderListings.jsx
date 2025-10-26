@@ -122,9 +122,20 @@ const TenderListings = () => {
       status === "in-progress" ||
       (status === "Open" && tender.raw?.status === "in-progress");
 
-    // Check if bid deadline is greater than current date
+    // Check if bid deadline allows submission (until end of deadline day)
     const bidDeadline = tender.raw?.bidDeadline;
-    const isDeadlineValid = bidDeadline && new Date(bidDeadline) > new Date();
+    let isDeadlineValid = false;
+
+    if (bidDeadline) {
+      const deadlineDate = new Date(bidDeadline);
+      const currentDate = new Date();
+
+      // Set deadline to end of day (23:59:59.999)
+      deadlineDate.setHours(23, 59, 59, 999);
+
+      // Allow submission until end of deadline day
+      isDeadlineValid = currentDate <= deadlineDate;
+    }
 
     // Check if bid is not already submitted
     const isNotSubmitted = !tender.isBidSubmitted;
@@ -142,7 +153,7 @@ const TenderListings = () => {
       else setLoading(true);
       setError(null);
       try {
-        const res = await api.get("/v1/tenders", {
+        const res = await api.get("/v1/tenders/vendors", {
           queryParams: { page, limit, isVendorView: true },
         });
         // API shape: { success, message, totalCount, currentPage, totalPages, data: [...] }

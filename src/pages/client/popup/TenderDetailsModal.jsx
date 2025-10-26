@@ -348,7 +348,7 @@ const TenderDetailsModal = ({ show, onClose, tender, onCancelTender }) => {
         {/* Fixed Footer */}
         <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 flex-shrink-0">
           <div className="flex items-center gap-3">
-            {tender.documents && tender.documents.length > 0 && (
+            {/* {tender.documents && tender.documents.length > 0 && (
               <button
                 onClick={() => {
                   tender.documents.forEach(downloadDocument);
@@ -358,7 +358,7 @@ const TenderDetailsModal = ({ show, onClose, tender, onCancelTender }) => {
                 <Download className="w-4 h-4" />
                 Download All Documents
               </button>
-            )}
+            )} */}
           </div>
 
           <div className="flex items-center gap-3">
@@ -369,7 +369,7 @@ const TenderDetailsModal = ({ show, onClose, tender, onCancelTender }) => {
               Close
             </button>
 
-            {tender.status === "published" && tender.bidsReceived > 0 && (
+            {/* {tender.status === "published" && tender.bidsReceived > 0 && (
               <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium transition-colors">
                 View Bids ({tender.bidsReceived})
               </button>
@@ -381,7 +381,6 @@ const TenderDetailsModal = ({ show, onClose, tender, onCancelTender }) => {
               </button>
             )}
 
-            {/* Cancel Tender Button - Only show for published tenders that are not awarded */}
             {tender.status === "published" && !tender.awardedTo && (
               <button
                 onClick={onCancelTender}
@@ -389,7 +388,7 @@ const TenderDetailsModal = ({ show, onClose, tender, onCancelTender }) => {
               >
                 Cancel Tender
               </button>
-            )}
+            )} */}
           </div>
         </div>
       </div>

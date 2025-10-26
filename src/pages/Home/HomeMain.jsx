@@ -18,7 +18,7 @@ function HomeMain() {
       <HeroSection />
       <FeaturesSection />
       <ServicesSection />
-      <TendersSection />
+      {/* <TendersSection /> */}
 
       <PricingPlans />
       <WhyChooseUs />
