@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import apiService from "../../../services/apiService";
 import {
   Plus,
   Search,
@@ -34,6 +35,8 @@ import {
 const TenderManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
+  const [stateFilter, setStateFilter] = useState("");
+  const [districtFilter, setDistrictFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState("create"); // 'create', 'edit', 'amend'
@@ -119,6 +122,16 @@ const TenderManagement = () => {
       // Add category filter if selected
       if (categoryFilter) {
         queryParams.category = categoryFilter;
+      }
+
+      // Add state filter if selected
+      if (stateFilter) {
+        queryParams.state = stateFilter;
+      }
+
+      // Add district filter if selected
+      if (districtFilter) {
+        queryParams.district = districtFilter;
       }
 
       // Add status filter if selected
@@ -254,7 +267,7 @@ const TenderManagement = () => {
       setHasMore(true);
       fetchTenders(1, true);
     }
-  }, [categoryFilter, statusFilter]);
+  }, [categoryFilter, statusFilter, stateFilter, districtFilter]);
 
   const handleNewTender = (response) => {
     console.log("New Tender Created:", response);
@@ -277,14 +290,65 @@ const TenderManagement = () => {
     fetchStats();
   };
 
-  // Filter options
-  const categoryOptions = [
+  // API filter options
+  const [categoryOptions, setCategoryOptions] = useState([
     { value: "", label: "All Categories" },
-    { value: "Infrastructure", label: "Infrastructure" },
-    { value: "Construction", label: "Construction" },
-    { value: "IT Services", label: "IT Services" },
-    { value: "Healthcare", label: "Healthcare" },
-  ];
+  ]);
+  const [stateOptions, setStateOptions] = useState([
+    { value: "", label: "All States" },
+  ]);
+  const [districtOptions, setDistrictOptions] = useState([
+    { value: "", label: "All Districts" },
+  ]);
+  const [districtsLoading, setDistrictsLoading] = useState(false);
+
+  // Fetch categories and states on mount
+  useEffect(() => {
+    apiService
+      .get("/v1/common/categories")
+      .then((data) => {
+        setCategoryOptions([
+          { value: "", label: "All Categories" },
+          ...data.map((cat) => ({ value: cat, label: cat })),
+        ]);
+      })
+      .catch(() =>
+        setCategoryOptions([{ value: "", label: "All Categories" }])
+      );
+    apiService
+      .get("/v1/common/states")
+      .then((data) => {
+        setStateOptions([
+          { value: "", label: "All States" },
+          ...data.map((state) => ({ value: state, label: state })),
+        ]);
+      })
+      .catch(() => setStateOptions([{ value: "", label: "All States" }]));
+  }, []);
+
+  // Fetch districts when state changes
+  useEffect(() => {
+    if (stateFilter) {
+      setDistrictsLoading(true);
+      apiService
+        .get(`/v1/common/districts/${encodeURIComponent(stateFilter)}`)
+        .then((data) => {
+          setDistrictOptions([
+            { value: "", label: "All Districts" },
+            ...data.map((district) => ({ value: district, label: district })),
+          ]);
+          setDistrictsLoading(false);
+        })
+        .catch(() => {
+          setDistrictOptions([{ value: "", label: "All Districts" }]);
+          setDistrictsLoading(false);
+        });
+      setDistrictFilter("");
+    } else {
+      setDistrictOptions([{ value: "", label: "All Districts" }]);
+      setDistrictFilter("");
+    }
+  }, [stateFilter]);
 
   const statusOptions = [
     { value: "", label: "All Status" },
@@ -480,7 +544,7 @@ const TenderManagement = () => {
 
           <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
             {/* Category Filter */}
-            <div className="min-w-[200px]">
+            <div className="min-w-[180px]">
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
@@ -493,9 +557,41 @@ const TenderManagement = () => {
                 ))}
               </select>
             </div>
-
+            {/* State Filter */}
+            <div className="min-w-[180px]">
+              <select
+                value={stateFilter}
+                onChange={(e) => setStateFilter(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              >
+                {stateOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {/* District Filter */}
+            <div className="min-w-[180px]">
+              <select
+                value={districtFilter}
+                onChange={(e) => setDistrictFilter(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                disabled={
+                  !stateFilter ||
+                  districtsLoading ||
+                  districtOptions.length === 1
+                }
+              >
+                {districtOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {districtsLoading ? "Loading..." : option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
             {/* Status Filter */}
-            <div className="min-w-[200px]">
+            <div className="min-w-[180px]">
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
@@ -508,17 +604,28 @@ const TenderManagement = () => {
                 ))}
               </select>
             </div>
-
             {/* Clear Filters Button */}
             <button
               onClick={() => {
                 setCategoryFilter("");
+                setStateFilter("");
+                setDistrictFilter("");
                 setStatusFilter("");
                 setSearchTerm("");
               }}
-              disabled={!categoryFilter && !statusFilter && !searchTerm}
+              disabled={
+                !categoryFilter &&
+                !stateFilter &&
+                !districtFilter &&
+                !statusFilter &&
+                !searchTerm
+              }
               className={`flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg transition-colors ${
-                categoryFilter || statusFilter || searchTerm
+                categoryFilter ||
+                stateFilter ||
+                districtFilter ||
+                statusFilter ||
+                searchTerm
                   ? "text-gray-700 hover:text-gray-900 hover:bg-gray-50 bg-white"
                   : "text-gray-400 bg-gray-50 cursor-not-allowed"
               }`}

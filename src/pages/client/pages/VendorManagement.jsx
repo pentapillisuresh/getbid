@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import apiService from "../../../services/apiService";
 import {
   Search,
   Filter,
@@ -38,14 +39,21 @@ const VendorManagement = () => {
     { id: "blacklisted", label: "Blacklisted", count: 3 },
   ];
 
-  const categories = [
+  const [categories, setCategories] = useState([
     { value: "all", label: "All Categories" },
-    { value: "construction", label: "Construction" },
-    { value: "it", label: "IT Services" },
-    { value: "healthcare", label: "Healthcare" },
-    { value: "infrastructure", label: "Infrastructure" },
-    { value: "supply", label: "Supply & Logistics" },
-  ];
+  ]);
+
+  useEffect(() => {
+    apiService
+      .get("/v1/common/categories")
+      .then((data) => {
+        setCategories([
+          { value: "all", label: "All Categories" },
+          ...data.map((cat) => ({ value: cat.toLowerCase(), label: cat })),
+        ]);
+      })
+      .catch(() => setCategories([{ value: "all", label: "All Categories" }]));
+  }, []);
 
   // remote vendors state (from /v1/users?role=vendor)
   const [vendors, setVendors] = useState([]);

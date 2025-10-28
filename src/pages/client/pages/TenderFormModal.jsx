@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import apiService from "../../../services/apiService";
 
 const TenderFormModal = ({ isOpen, onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
@@ -12,7 +13,47 @@ const TenderFormModal = ({ isOpen, onClose, onSubmit }) => {
     preBidMeeting: false,
     meetingDate: "",
     venue: "",
+    state: "",
+    district: "",
   });
+
+  const [states, setStates] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [districtsLoading, setDistrictsLoading] = useState(false);
+  const [categories, setCategories] = useState([]);
+  // Fetch states and categories on mount
+  useEffect(() => {
+    apiService
+      .get("/v1/common/states")
+      .then(setStates)
+      .catch(() => setStates([]));
+    apiService
+      .get("/v1/common/categories")
+      .then(setCategories)
+      .catch(() => setCategories([]));
+  }, []);
+
+  // Fetch districts when state changes
+  useEffect(() => {
+    if (formData.state) {
+      setDistrictsLoading(true);
+      fetch(`/v1/common/districts/${encodeURIComponent(formData.state)}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setDistricts(data);
+          setDistrictsLoading(false);
+        })
+        .catch(() => {
+          setDistricts([]);
+          setDistrictsLoading(false);
+        });
+      // Reset district selection when state changes
+      setFormData((prev) => ({ ...prev, district: "" }));
+    } else {
+      setDistricts([]);
+      setFormData((prev) => ({ ...prev, district: "" }));
+    }
+  }, [formData.state]);
 
   if (!isOpen) return null;
 
@@ -47,7 +88,7 @@ const TenderFormModal = ({ isOpen, onClose, onSubmit }) => {
       <div className="bg-white w-full max-w-3xl rounded-lg shadow-lg p-6 overflow-y-auto max-h-[90vh]">
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">Create New Tender</h2>
+          <h2 className="text-xl font-bold">Create New Tender1</h2>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 text-xl"
@@ -82,9 +123,11 @@ const TenderFormModal = ({ isOpen, onClose, onSubmit }) => {
             className="border p-2 rounded"
           >
             <option value="">Select Category</option>
-            <option value="Construction">Construction</option>
-            <option value="IT">IT Services</option>
-            <option value="Healthcare">Healthcare</option>
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
           </select>
           <input
             type="date"
@@ -93,6 +136,39 @@ const TenderFormModal = ({ isOpen, onClose, onSubmit }) => {
             onChange={handleChange}
             className="border p-2 rounded"
           />
+          {/* State Dropdown */}
+          <select
+            name="state"
+            value={formData.state}
+            onChange={handleChange}
+            className="border p-2 rounded col-span-1"
+          >
+            <option value="">Select State</option>
+            {states.map((state) => (
+              <option key={state} value={state}>
+                {state}
+              </option>
+            ))}
+          </select>
+          {/* District Dropdown */}
+          <select
+            name="district"
+            value={formData.district}
+            onChange={handleChange}
+            className="border p-2 rounded col-span-1"
+            disabled={
+              !formData.state || districtsLoading || districts.length === 0
+            }
+          >
+            <option value="">
+              {districtsLoading ? "Loading..." : "Select District"}
+            </option>
+            {districts.map((district) => (
+              <option key={district} value={district}>
+                {district}
+              </option>
+            ))}
+          </select>
         </div>
         <textarea
           name="description"

@@ -7,6 +7,7 @@ import {
   amendTender,
 } from "../../../services/tenderApiService";
 import toastService from "../../../services/toastService";
+import apiService from "../../../services/apiService";
 
 const TenderFormModal = ({
   show,
@@ -38,6 +39,46 @@ const TenderFormModal = ({
     userType: "",
     supportingDocuments: [],
   });
+
+  // State/District/Category dropdowns
+  const [states, setStates] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [districtsLoading, setDistrictsLoading] = useState(false);
+  const [categories, setCategories] = useState([]);
+
+  // Fetch states and categories on mount
+  useEffect(() => {
+    apiService
+      .get("/v1/common/states")
+      .then(setStates)
+      .catch(() => setStates([]));
+    apiService
+      .get("/v1/common/categories")
+      .then(setCategories)
+      .catch(() => setCategories([]));
+  }, []);
+
+  // Fetch districts when state changes
+  useEffect(() => {
+    if (formData.state) {
+      setDistrictsLoading(true);
+      apiService
+        .get(`/v1/common/districts/${encodeURIComponent(formData.state)}`)
+        .then((data) => {
+          setDistricts(data);
+          setDistrictsLoading(false);
+        })
+        .catch(() => {
+          setDistricts([]);
+          setDistrictsLoading(false);
+        });
+      // Reset district selection when state changes
+      setFormData((prev) => ({ ...prev, district: "" }));
+    } else {
+      setDistricts([]);
+      setFormData((prev) => ({ ...prev, district: "" }));
+    }
+  }, [formData.state]);
 
   // File picker state
   const [dragActive, setDragActive] = useState(false);
@@ -357,10 +398,11 @@ const TenderFormModal = ({
                   required
                 >
                   <option value="">Select Category</option>
-                  <option value="Construction">Construction</option>
-                  <option value="IT Services">IT Services</option>
-                  <option value="Healthcare">Healthcare</option>
-                  <option value="Infrastructure">Infrastructure</option>
+                  {categories.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -415,7 +457,7 @@ const TenderFormModal = ({
                 Location & Contact Information
               </h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
                     State *
@@ -428,11 +470,11 @@ const TenderFormModal = ({
                     required
                   >
                     <option value="">Select State</option>
-                    <option value="Andhra Pradesh">Andhra Pradesh</option>
-                    <option value="Telangana">Telangana</option>
-                    <option value="Karnataka">Karnataka</option>
-                    <option value="Tamil Nadu">Tamil Nadu</option>
-                    <option value="Kerala">Kerala</option>
+                    {states.map((state) => (
+                      <option key={state} value={state}>
+                        {state}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -440,15 +482,27 @@ const TenderFormModal = ({
                   <label className="block text-sm font-medium text-gray-700">
                     District *
                   </label>
-                  <input
-                    type="text"
+                  <select
                     name="district"
                     value={formData.district}
                     onChange={handleChange}
                     className="mt-1 w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500"
-                    placeholder="Enter district"
                     required
-                  />
+                    disabled={
+                      !formData.state ||
+                      districtsLoading ||
+                      districts.length === 0
+                    }
+                  >
+                    <option value="">
+                      {districtsLoading ? "Loading..." : "Select District"}
+                    </option>
+                    {districts.map((district) => (
+                      <option key={district} value={district}>
+                        {district}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 

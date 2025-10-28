@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import apiService from "../../services/apiService";
 import { useNavigate } from "react-router-dom";
 import {
   Calendar,
@@ -32,36 +33,47 @@ const TendersSection = ({ isStandalone = false }) => {
   const [isViewDetailsOpen, setIsViewDetailsOpen] = useState(false);
   const [filters, setFilters] = useState({
     search: "",
-    category: "",
-    location: "",
+    category: "All Categories",
+    state: "All States",
+    district: "All Districts",
     sortBy: "deadline",
   });
 
-  // Categories for dropdown
-  const categories = [
-    "All Categories",
-    "Construction",
-    "IT Services",
-    "Consulting",
-    "Supply",
-    "Transportation",
-    "Healthcare",
-    "Education",
-    "Infrastructure",
-  ];
+  const [categories, setCategories] = useState(["All Categories"]);
+  const [states, setStates] = useState(["All States"]);
+  const [districts, setDistricts] = useState(["All Districts"]);
+  const [districtsLoading, setDistrictsLoading] = useState(false);
 
-  // Locations for dropdown
-  const locations = [
-    "All Locations",
-    "Mumbai, Maharashtra",
-    "New Delhi",
-    "Bangalore, Karnataka",
-    "Chennai, Tamil Nadu",
-    "Hyderabad, Telangana",
-    "Pune, Maharashtra",
-    "Kolkata, West Bengal",
-    "Ahmedabad, Gujarat",
-  ];
+  useEffect(() => {
+    apiService
+      .get("/v1/common/categories")
+      .then((data) => setCategories(["All Categories", ...data]))
+      .catch(() => setCategories(["All Categories"]));
+    apiService
+      .get("/v1/common/states")
+      .then((data) => setStates(["All States", ...data]))
+      .catch(() => setStates(["All States"]));
+  }, []);
+
+  useEffect(() => {
+    if (filters.state && filters.state !== "All States") {
+      setDistrictsLoading(true);
+      apiService
+        .get(`/v1/common/districts/${encodeURIComponent(filters.state)}`)
+        .then((data) => {
+          setDistricts(["All Districts", ...data]);
+          setDistrictsLoading(false);
+        })
+        .catch(() => {
+          setDistricts(["All Districts"]);
+          setDistrictsLoading(false);
+        });
+      setFilters((prev) => ({ ...prev, district: "All Districts" }));
+    } else {
+      setDistricts(["All Districts"]);
+      setFilters((prev) => ({ ...prev, district: "All Districts" }));
+    }
+  }, [filters.state]);
 
   // Sort options
   const sortOptions = [
@@ -74,12 +86,22 @@ const TendersSection = ({ isStandalone = false }) => {
     fetchPublicTenders(1, true);
   }, []);
 
-  // Handle filter changes
+  // Debounced search filter
   useEffect(() => {
+    let debounceTimeout;
     if (page === 1) {
-      fetchPublicTenders(1, true);
+      if (filters.search) {
+        debounceTimeout = setTimeout(() => {
+          fetchPublicTenders(1, true);
+        }, 400); // 400ms debounce
+      } else {
+        fetchPublicTenders(1, true);
+      }
     }
-  }, [filters]);
+    return () => {
+      if (debounceTimeout) clearTimeout(debounceTimeout);
+    };
+  }, [filters, page]);
 
   // Handle infinite scroll
   useEffect(() => {
@@ -124,9 +146,11 @@ const TendersSection = ({ isStandalone = false }) => {
           filters.category !== "All Categories" && {
             category: filters.category,
           }),
-        ...(filters.location &&
-          filters.location !== "All Locations" && {
-            location: filters.location,
+        ...(filters.state &&
+          filters.state !== "All States" && { state: filters.state }),
+        ...(filters.district &&
+          filters.district !== "All Districts" && {
+            district: filters.district,
           }),
         ...(filters.sortBy && { sortBy: filters.sortBy }),
       };
@@ -319,18 +343,40 @@ const TendersSection = ({ isStandalone = false }) => {
                 <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
               </div>
 
-              {/* Location Dropdown */}
+              {/* State Dropdown */}
               <div className="relative">
                 <select
-                  value={filters.location}
-                  onChange={(e) =>
-                    handleFilterChange("location", e.target.value)
-                  }
+                  value={filters.state}
+                  onChange={(e) => handleFilterChange("state", e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none bg-white"
                 >
-                  {locations.map((location) => (
-                    <option key={location} value={location}>
-                      {location}
+                  {states.map((state) => (
+                    <option key={state} value={state}>
+                      {state}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+              </div>
+
+              {/* District Dropdown */}
+              <div className="relative">
+                <select
+                  value={filters.district}
+                  onChange={(e) =>
+                    handleFilterChange("district", e.target.value)
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none bg-white"
+                  disabled={
+                    !filters.state ||
+                    filters.state === "All States" ||
+                    districtsLoading ||
+                    districts.length === 1
+                  }
+                >
+                  {districts.map((district) => (
+                    <option key={district} value={district}>
+                      {districtsLoading ? "Loading..." : district}
                     </option>
                   ))}
                 </select>
@@ -338,7 +384,7 @@ const TendersSection = ({ isStandalone = false }) => {
               </div>
 
               {/* Sort Dropdown */}
-              <div className="relative">
+              {/* <div className="relative">
                 <select
                   value={filters.sortBy}
                   onChange={(e) => handleFilterChange("sortBy", e.target.value)}
@@ -351,7 +397,7 @@ const TendersSection = ({ isStandalone = false }) => {
                   ))}
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
-              </div>
+              </div> */}
             </div>
           </div>
 

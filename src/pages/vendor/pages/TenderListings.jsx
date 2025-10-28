@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import apiService from "../../../services/apiService";
 import {
   Search,
   Download,
@@ -26,29 +27,67 @@ const TenderListings = () => {
   const [selectedTender, setSelectedTender] = useState(null);
 
   // -------------------- Filter Options --------------------
-  const categories = [
+  const [categories, setCategories] = useState([
     { value: "all", label: "All Categories" },
-    { value: "construction", label: "Construction" },
-    { value: "it", label: "IT Services" },
-    { value: "healthcare", label: "Healthcare" },
-    { value: "transportation", label: "Transportation" },
-    { value: "supply", label: "Supply" },
-  ];
+  ]);
+  const [states, setStates] = useState([{ value: "all", label: "All States" }]);
+  const [districts, setDistricts] = useState([
+    { value: "all", label: "All Districts" },
+  ]);
+  const [districtsLoading, setDistrictsLoading] = useState(false);
+  useEffect(() => {
+    apiService
+      .get("/v1/common/categories")
+      .then((data) =>
+        setCategories([
+          { value: "all", label: "All Categories" },
+          ...data.map((cat) => ({ value: cat, label: cat })),
+        ])
+      )
+      .catch(() => setCategories([{ value: "all", label: "All Categories" }]));
+    apiService
+      .get("/v1/common/states")
+      .then((data) =>
+        setStates([
+          { value: "all", label: "All States" },
+          ...data.map((state) => ({ value: state, label: state })),
+        ])
+      )
+      .catch(() => setStates([{ value: "all", label: "All States" }]));
+  }, []);
+
+  useEffect(() => {
+    if (selectedState && selectedState !== "all") {
+      setDistrictsLoading(true);
+      apiService
+        .get(`/v1/common/districts/${encodeURIComponent(selectedState)}`)
+        .then((data) => {
+          setDistricts([
+            { value: "all", label: "All Districts" },
+            ...data.map((district) => ({ value: district, label: district })),
+          ]);
+          setDistrictsLoading(false);
+        })
+        .catch(() => {
+          setDistricts([{ value: "all", label: "All Districts" }]);
+          setDistrictsLoading(false);
+        });
+      setSelectedDistrict("all");
+    } else {
+      setDistricts([{ value: "all", label: "All Districts" }]);
+      setSelectedDistrict("all");
+    }
+  }, [selectedState]);
 
   const statuses = [
-    { value: "all", label: "All Status" },
-    { value: "open", label: "Open" },
-    { value: "closing-soon", label: "Closing Soon" },
-    { value: "prebid", label: "Pre-bid Meeting" },
+    { value: "", label: "All Status" },
+    { value: "in-progress", label: "In Progress" },
+    { value: "technical-evaluation", label: "Technical Evaluated" },
+    { value: "financial-evaluation", label: "Financial Evaluated" },
+    { value: "completed", label: "Completed" },
   ];
 
-  const statesAndDistricts = {
-    all: ["All Districts"],
-    Maharashtra: ["All Districts", "Mumbai", "Pune", "Nagpur", "Nashik"],
-    Karnataka: ["All Districts", "Bangalore", "Mysore", "Mangalore", "Hubli"],
-    Delhi: ["All Districts", "New Delhi", "Central Delhi", "East Delhi"],
-    TamilNadu: ["All Districts", "Chennai", "Coimbatore", "Madurai", "Salem"],
-  };
+  // Remove hardcoded statesAndDistricts, use API values for states/districts
 
   // -------------------- Tenders Data (from API) --------------------
   const [tenders, setTenders] = useState([]);
@@ -153,14 +192,34 @@ const TenderListings = () => {
       else setLoading(true);
       setError(null);
       try {
-        const res = await api.get("/v1/tenders/vendors", {
-          queryParams: { page, limit, isVendorView: true },
+        // Always use latest filter values
+        console.log(
+          selectedCategory,
+          selectedStatus,
+          selectedState,
+          selectedDistrict
+        );
+
+        const queryParams = {
+          page,
+          limit,
+          isVendorView: true,
+          ...(searchTerm && { search: searchTerm }),
+          ...(selectedCategory &&
+            selectedCategory !== "all" && { category: selectedCategory }),
+          ...(selectedStatus &&
+            selectedStatus !== "all" && { status: selectedStatus }),
+          ...(selectedState &&
+            selectedState !== "all" && { state: selectedState }),
+          ...(selectedDistrict &&
+            selectedDistrict !== "all" && { district: selectedDistrict }),
+        };
+        const res = await apiService.get("/v1/tenders/vendors", {
+          queryParams,
         });
-        // API shape: { success, message, totalCount, currentPage, totalPages, data: [...] }
         const items = (res.data || []).map((it) => ({
           _id: it._id,
           title: it.title,
-          // new fields from API
           bidsCount: it.bidsCount || 0,
           isBidSubmitted: !!it.isBidSubmitted,
           department: it.postedBy ? it.postedBy.name : "—",
@@ -206,7 +265,14 @@ const TenderListings = () => {
         isFetchingRef.current = false;
       }
     },
-    [limit]
+    [
+      limit,
+      searchTerm,
+      selectedCategory,
+      selectedStatus,
+      selectedState,
+      selectedDistrict,
+    ]
   );
 
   // initial load
@@ -247,8 +313,10 @@ const TenderListings = () => {
   }, []);
 
   // reset when filters/search change
+  // Reload tenders when any filter changes
   useEffect(() => {
-    // when filters change, reset to first page and reload
+    console.log("1111111111111111111111y");
+
     setTenders([]);
     setTotalPages(1);
     setCurrentPage(0);
@@ -337,7 +405,6 @@ const TenderListings = () => {
         openPopup("submit", tender);
       } else {
         // no subscriptions -> show topup modal
-        console.log("111111111111111111111111111111x");
         openPopup("topup");
       }
     } catch (err) {
@@ -392,9 +459,9 @@ const TenderListings = () => {
 
         {/* Filters */}
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
             {/* Search */}
-            <div className="md:col-span-5 relative">
+            <div className="md:col-span-2 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
@@ -408,7 +475,9 @@ const TenderListings = () => {
             {/* Category */}
             <select
               value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
+              onChange={(e) => {
+                setSelectedCategory(e.target.value);
+              }}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             >
               {categories.map((c) => (
@@ -419,7 +488,7 @@ const TenderListings = () => {
             </select>
 
             {/* Status */}
-            {/* <select
+            <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -429,39 +498,64 @@ const TenderListings = () => {
                   {s.label}
                 </option>
               ))}
-            </select> */}
+            </select>
 
             {/* State */}
-            {/* <select
+            <select
               value={selectedState}
               onChange={(e) => {
+                console.log("11111111111111111111111x " + e.target.value);
+
                 setSelectedState(e.target.value);
                 setSelectedDistrict("all");
               }}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             >
-              <option value="all">All States</option>
-              {Object.keys(statesAndDistricts)
-                .filter((s) => s !== "all")
-                .map((state) => (
-                  <option key={state} value={state}>
-                    {state}
-                  </option>
-                ))}
-            </select> */}
-
-            {/* District */}
-            {/* <select
-              value={selectedDistrict}
-              onChange={(e) => setSelectedDistrict(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-            >
-              {statesAndDistricts[selectedState].map((d) => (
-                <option key={d} value={d === "All Districts" ? "all" : d}>
-                  {d}
+              {states.map((s) => (
+                <option key={s.value} value={s.value}>
+                  {s.label}
                 </option>
               ))}
-            </select> */}
+            </select>
+
+            {/* District */}
+            <select
+              value={selectedDistrict}
+              onChange={(e) => {
+                setSelectedDistrict(e.target.value);
+              }}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              disabled={districtsLoading || districts.length === 1}
+            >
+              {districts.map((d) => (
+                <option key={d.value} value={d.value}>
+                  {districtsLoading ? "Loading..." : d.label}
+                </option>
+              ))}
+            </select>
+
+            {/* Clear Filters Button */}
+            <button
+              type="button"
+              onClick={() => {
+                setSearchTerm("");
+                setSelectedCategory("all");
+                setSelectedStatus("all");
+                setSelectedState("all");
+                setSelectedDistrict("all");
+                // Data will reload automatically via useEffect when filters change
+              }}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 hover:bg-gray-100 transition-colors"
+              disabled={
+                !searchTerm &&
+                selectedCategory === "all" &&
+                selectedStatus === "" &&
+                selectedState === "all" &&
+                selectedDistrict === "all"
+              }
+            >
+              Clear Filters
+            </button>
           </div>
         </div>
 
