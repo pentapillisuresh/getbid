@@ -13,6 +13,9 @@ import {
   Phone,
   Check,
   Edit2,
+  Upload,
+  FileText,
+  X,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/apiService";
@@ -47,6 +50,12 @@ const Registration = () => {
   const [emailVerified, setEmailVerified] = useState(false);
   const [mobileVerified, setMobileVerified] = useState(false);
 
+  // File upload states
+  const [panFile, setPanFile] = useState(null);
+  const [gstFile, setGstFile] = useState(null);
+  const [panFileId, setPanFileId] = useState(null);
+  const [gstFileId, setGstFileId] = useState(null);
+
   // Generate a random 4-character captcha: uppercase letters + digits
   const generateCaptcha = () => {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -66,13 +75,16 @@ const Registration = () => {
     panOtp: "",
     gstNumber: "",
     gstOtp: "",
-    firstName: "Rajesh",
-    lastName: "Kumar",
-    fatherName: "Ramesh Kumar",
-    dateOfBirth: "1985-06-15",
-    address: "123, MG Road, Commercial Complex",
-    city: "Mumbai",
-    state: "Maharashtra",
+    firstName: "",
+    lastName: "",
+    fatherName: "",
+    dateOfBirth: "",
+    companyName: "",
+    companyType: "",
+    incorporationDate: "",
+    address: "",
+    city: "",
+    state: "",
     email: "",
     mobile: "",
     alternatePhone: "",
@@ -86,6 +98,7 @@ const Registration = () => {
     captcha: "",
     agreeTerms: false,
     agreePrivacy: false,
+    // File data will be stored separately in panFile and gstFile state variables
   });
   const [loading, setLoading] = useState(false);
 
@@ -115,6 +128,22 @@ const Registration = () => {
       if (captchaError) setCaptchaError("");
     }
 
+    // Handle PAN number formatting
+    if (name === "panNumber") {
+      newValue = value
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, "")
+        .slice(0, 10);
+    }
+
+    // Handle GST number formatting
+    if (name === "gstNumber") {
+      newValue = value
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, "")
+        .slice(0, 15);
+    }
+
     // Reset verification status when email or mobile is changed
     if (name === "email" && value !== formData.email) {
       setEmailVerified(false);
@@ -132,12 +161,22 @@ const Registration = () => {
     if (name === "panNumber" && value !== formData.panNumber) {
       setPanVerified(false);
       setShowPanOtp(false);
+      setPanFile(null);
+      setPanFileId(null);
+      // Reset the file input
+      const fileInput = document.getElementById("pan-file-input");
+      if (fileInput) fileInput.value = "";
       setFormData((prev) => ({ ...prev, panOtp: "" }));
     }
 
     if (name === "gstNumber" && value !== formData.gstNumber) {
       setGstVerified(false);
       setShowGstOtp(false);
+      setGstFile(null);
+      setGstFileId(null);
+      // Reset the file input
+      const fileInput = document.getElementById("gst-file-input");
+      if (fileInput) fileInput.value = "";
       setFormData((prev) => ({ ...prev, gstOtp: "" }));
     }
 
@@ -147,6 +186,8 @@ const Registration = () => {
     }));
   };
 
+  // PAN OTP functions - Commented out for now
+  /*
   const sendPanOtp = () => {
     if (formData.panNumber.length === 10) {
       setShowPanOtp(true);
@@ -165,7 +206,10 @@ const Registration = () => {
       alert("Invalid OTP. Please try again.");
     }
   };
+  */
 
+  // GST OTP functions - Commented out for now
+  /*
   const sendGstOtp = () => {
     if (formData.gstNumber.length === 15) {
       setShowGstOtp(true);
@@ -183,6 +227,124 @@ const Registration = () => {
     } else {
       alert("Invalid OTP. Please try again.");
     }
+  };
+  */
+
+  // File upload handlers
+  const validatePanNumber = (pan) => {
+    const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+    return panRegex.test(pan);
+  };
+
+  const validateGstNumber = (gst) => {
+    const gstRegex =
+      /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+    return gstRegex.test(gst);
+  };
+
+  // Function to upload file to the backend and get file ID
+  const uploadFile = async (file) => {
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const response = await api.post("/v1/File/upload", {
+      body: formData,
+      showToasts: false,
+    });
+
+    if (response.success && response.file && response.file._id) {
+      return response.file._id;
+    } else {
+      throw new Error(response.message || "File upload failed");
+    }
+  };
+
+  const handlePanFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      // Validate PAN number first
+      if (!validatePanNumber(formData.panNumber)) {
+        toastService.showError(
+          "Please enter a valid PAN number in format ABCDE1234F"
+        );
+        return;
+      }
+
+      // Validate file type (PDF, JPG, PNG)
+      const allowedTypes = [
+        "application/pdf",
+        "image/jpeg",
+        "image/png",
+        "image/jpg",
+      ];
+      if (!allowedTypes.includes(file.type)) {
+        toastService.showError("Please upload only PDF, JPG, or PNG files");
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toastService.showError("File size should not exceed 5MB");
+        return;
+      }
+
+      setPanFile(file);
+      setPanVerified(true);
+      toastService.showSuccess("PAN document selected successfully!");
+    }
+  };
+
+  const handleGstFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      // Validate GST number first
+      if (!validateGstNumber(formData.gstNumber)) {
+        toastService.showError(
+          "Please enter a valid GST number in format 22AAAAA0000A1Z5"
+        );
+        return;
+      }
+
+      // Validate file type (PDF, JPG, PNG)
+      const allowedTypes = [
+        "application/pdf",
+        "image/jpeg",
+        "image/png",
+        "image/jpg",
+      ];
+      if (!allowedTypes.includes(file.type)) {
+        toastService.showError("Please upload only PDF, JPG, or PNG files");
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toastService.showError("File size should not exceed 5MB");
+        return;
+      }
+
+      setGstFile(file);
+      setGstVerified(true);
+      toastService.showSuccess("GST document selected successfully!");
+    }
+  };
+
+  const removePanFile = () => {
+    setPanFile(null);
+    setPanFileId(null);
+    setPanVerified(false);
+    // Reset the file input
+    const fileInput = document.getElementById("pan-file-input");
+    if (fileInput) fileInput.value = "";
+  };
+
+  const removeGstFile = () => {
+    setGstFile(null);
+    setGstFileId(null);
+    setGstVerified(false);
+    // Reset the file input
+    const fileInput = document.getElementById("gst-file-input");
+    if (fileInput) fileInput.value = "";
   };
 
   const sendEmailOtp = async () => {
@@ -333,6 +495,11 @@ const Registration = () => {
     setPanVerified(false);
     setShowPanOtp(false);
     setFormData((prev) => ({ ...prev, panOtp: "" }));
+    setPanFile(null);
+    setPanFileId(null);
+    // Reset the file input
+    const fileInput = document.getElementById("pan-file-input");
+    if (fileInput) fileInput.value = "";
     toastService.showSuccess(
       "PAN field is now editable. Please verify again after making changes."
     );
@@ -342,6 +509,11 @@ const Registration = () => {
     setGstVerified(false);
     setShowGstOtp(false);
     setFormData((prev) => ({ ...prev, gstOtp: "" }));
+    setGstFile(null);
+    setGstFileId(null);
+    // Reset the file input
+    const fileInput = document.getElementById("gst-file-input");
+    if (fileInput) fileInput.value = "";
     toastService.showSuccess(
       "GST field is now editable. Please verify again after making changes."
     );
@@ -363,6 +535,42 @@ const Registration = () => {
         alert("Please verify both email and mobile number");
         return;
       }
+
+      // Validate mandatory personal fields
+      if (!formData.firstName.trim()) {
+        toastService.showError("First Name is required");
+        return;
+      }
+
+      if (!formData.lastName.trim()) {
+        toastService.showError("Last Name is required");
+        return;
+      }
+
+      if (!formData.fatherName.trim()) {
+        toastService.showError("Father's Name is required");
+        return;
+      }
+
+      if (!formData.dateOfBirth) {
+        toastService.showError("Date of Birth is required");
+        return;
+      }
+
+      // Validate company fields if entity type is company
+      // if (entityType === "company") {
+      if (
+        !formData.companyName ||
+        !formData.companyType ||
+        !formData.incorporationDate
+      ) {
+        toastService.showError(
+          "Please fill in all required company information fields"
+        );
+        return;
+      }
+      // }
+
       // Ensure user has provided a password (or it will be auto-generated at submit)
       if (!formData.password || formData.password.length < 8) {
         alert("Please enter a password of at least 8 characters");
@@ -406,48 +614,109 @@ const Registration = () => {
       return;
     }
 
-    // Build payload according to API spec
-    const name =
-      [formData.firstName, formData.lastName]
-        .filter(Boolean)
-        .join(" ")
-        .trim() ||
-      formData.firstName ||
-      formData.lastName ||
-      "";
-    const password =
-      formData.password && formData.password.length >= 8
-        ? formData.password
-        : generateTempPassword(); // prefer user password if provided
+    // Validate mandatory fields
+    if (!formData.firstName.trim()) {
+      toastService.showError("First Name is required");
+      return;
+    }
 
-    const payload = {
-      name,
-      email: formData.email || undefined,
-      phoneNumber: formData.mobile || undefined,
-      role: registrationType === "client" ? "client" : "vendor",
-      entity: entityType === "company" ? "company" : "individual",
-      PAN:
-        entityType === "individual"
-          ? formData.panNumber || undefined
-          : undefined,
-      GST:
-        entityType === "company" ? formData.gstNumber || undefined : undefined,
-      alternativePhoneNumber: formData.alternatePhone || undefined,
-      website: formData.website || undefined,
-      password,
-      businessInfo: {
-        category: formData.businessCategory || undefined,
-        annualTurnover: formData.annualTurnover || undefined,
-        experience: formData.experience || undefined,
-      },
-      deviceDetails: firebaseMessagingService.getDeviceDetails(),
-    };
+    if (!formData.lastName.trim()) {
+      toastService.showError("Last Name is required");
+      return;
+    }
+
+    if (!formData.fatherName.trim()) {
+      toastService.showError("Father's Name is required");
+      return;
+    }
+
+    if (!formData.dateOfBirth) {
+      toastService.showError("Date of Birth is required");
+      return;
+    }
 
     try {
       setLoading(true);
+
+      // Upload files first if they exist
+      let panFileId = null;
+      let gstFileId = null;
+
+      if (panFile) {
+        try {
+          panFileId = await uploadFile(panFile);
+          toastService.showSuccess("PAN document uploaded successfully!");
+        } catch (error) {
+          toastService.showError(
+            error.message || "Failed to upload PAN document"
+          );
+          return;
+        }
+      }
+
+      if (gstFile) {
+        try {
+          gstFileId = await uploadFile(gstFile);
+          toastService.showSuccess("GST document uploaded successfully!");
+        } catch (error) {
+          toastService.showError(
+            error.message || "Failed to upload GST document"
+          );
+          return;
+        }
+      }
+
+      // Build payload according to API spec
+      const name =
+        [formData.firstName, formData.lastName]
+          .filter(Boolean)
+          .join(" ")
+          .trim() ||
+        formData.firstName ||
+        formData.lastName ||
+        "";
+      const password =
+        formData.password && formData.password.length >= 8
+          ? formData.password
+          : generateTempPassword(); // prefer user password if provided
+
+      const payload = {
+        name,
+        fatherName: formData.fatherName || undefined,
+        dateOfBirth: formData.dateOfBirth || undefined,
+        email: formData.email || undefined,
+        phoneNumber: formData.mobile || undefined,
+        role: registrationType === "client" ? "client" : "vendor",
+        entity: entityType === "company" ? "company" : "individual",
+        PAN:
+          entityType === "individual"
+            ? formData.panNumber || undefined
+            : undefined,
+        GST:
+          entityType === "company"
+            ? formData.gstNumber || undefined
+            : undefined,
+        PANDocument: panFileId || undefined,
+        GSTDocument: gstFileId || undefined,
+        alternativePhoneNumber: formData.alternatePhone || undefined,
+        website: formData.website || undefined,
+        password,
+        businessInfo: {
+          category: formData.businessCategory || undefined,
+          annualTurnover: formData.annualTurnover || undefined,
+          experience: formData.experience || undefined,
+        },
+        deviceDetails: firebaseMessagingService.getDeviceDetails(),
+        company: {
+          name: formData.companyName || undefined,
+          companyType: formData.companyType || undefined,
+          incorporationDate: formData.incorporationDate || undefined,
+        },
+        // : undefined,
+      };
+
       const res = await api.post("/auth/signup", {
         body: payload,
-        // ask api service to show toasts based on response message keys
         showToasts: false,
       });
 
@@ -574,6 +843,20 @@ const Registration = () => {
                         setShowPanOtp(false);
                         setGstVerified(false);
                         setShowGstOtp(false);
+                        // Clear company files
+                        setGstFile(null);
+                        const gstFileInput =
+                          document.getElementById("gst-file-input");
+                        if (gstFileInput) gstFileInput.value = "";
+                        // Clear company form data
+                        setFormData((prev) => ({
+                          ...prev,
+                          companyName: "",
+                          companyType: "",
+                          incorporationDate: "",
+                          gstNumber: "",
+                          gstOtp: "",
+                        }));
                       }}
                       className={`p-6 rounded-xl border-2 transition-all ${
                         entityType === "individual"
@@ -595,6 +878,20 @@ const Registration = () => {
                         setShowPanOtp(false);
                         setGstVerified(false);
                         setShowGstOtp(false);
+                        // Clear PAN files
+                        setPanFile(null);
+                        const panFileInput =
+                          document.getElementById("pan-file-input");
+                        if (panFileInput) panFileInput.value = "";
+                        // Clear PAN form data and set company defaults
+                        setFormData((prev) => ({
+                          ...prev,
+                          panNumber: "",
+                          panOtp: "",
+                          companyName: "",
+                          companyType: "",
+                          incorporationDate: "",
+                        }));
                       }}
                       className={`p-6 rounded-xl border-2 transition-all ${
                         entityType === "company"
@@ -627,7 +924,8 @@ const Registration = () => {
                       disabled={panVerified}
                     />
 
-                    {!panVerified && !showPanOtp && (
+                    {/* OTP Verification - Commented out for now */}
+                    {/* {!panVerified && !showPanOtp && (
                       <button
                         type="button"
                         onClick={sendPanOtp}
@@ -665,6 +963,67 @@ const Registration = () => {
                           </button>
                         </div>
                       </div>
+                    )} */}
+
+                    {/* File Upload Section - Only enabled if PAN number is valid */}
+                    {!panVerified && (
+                      <div className="mt-4">
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          Upload PAN Document *
+                        </label>
+                        {formData.panNumber &&
+                        validatePanNumber(formData.panNumber) ? (
+                          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-400 transition-colors">
+                            <input
+                              id="pan-file-input"
+                              type="file"
+                              accept=".pdf,.jpg,.jpeg,.png"
+                              onChange={handlePanFileUpload}
+                              className="hidden"
+                            />
+                            <label
+                              htmlFor="pan-file-input"
+                              className="cursor-pointer flex flex-col items-center"
+                            >
+                              <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                              <span className="text-sm text-gray-600">
+                                Click to select PAN document
+                              </span>
+                              <span className="text-xs text-gray-500 mt-1">
+                                PDF, JPG, PNG (Max 5MB)
+                              </span>
+                            </label>
+                          </div>
+                        ) : (
+                          <div className="border-2 border-dashed border-gray-200 rounded-lg p-4 text-center bg-gray-50">
+                            <Upload className="w-8 h-8 text-gray-300 mb-2 mx-auto" />
+                            <span className="text-sm text-gray-400">
+                              Please enter a valid PAN number first
+                            </span>
+                            <span className="text-xs text-gray-400 block mt-1">
+                              Format: ABCDE1234F (5 letters + 4 digits + 1
+                              letter)
+                            </span>
+                          </div>
+                        )}
+                        {panFile && (
+                          <div className="mt-2 bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <FileText className="w-4 h-4 text-blue-600" />
+                              <span className="text-sm text-blue-800">
+                                {panFile.name}
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={removePanFile}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     )}
 
                     {panVerified && (
@@ -673,7 +1032,7 @@ const Registration = () => {
                           <div className="flex items-center gap-2 text-blue-700">
                             <CheckCircle className="w-5 h-5" />
                             <span className="font-semibold">
-                              PAN verified successfully!
+                              PAN document selected successfully!
                             </span>
                           </div>
                           <div className="relative group">
@@ -689,6 +1048,14 @@ const Registration = () => {
                             </div>
                           </div>
                         </div>
+                        {panFile && (
+                          <div className="mt-2 bg-white border border-blue-200 rounded-lg p-2 flex items-center gap-2">
+                            <FileText className="w-4 h-4 text-blue-600" />
+                            <span className="text-sm text-gray-700">
+                              {panFile.name}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -708,7 +1075,8 @@ const Registration = () => {
                       disabled={gstVerified}
                     />
 
-                    {!gstVerified && !showGstOtp && (
+                    {/* OTP Verification - Commented out for now */}
+                    {/* {!gstVerified && !showGstOtp && (
                       <button
                         type="button"
                         onClick={sendGstOtp}
@@ -746,6 +1114,66 @@ const Registration = () => {
                           </button>
                         </div>
                       </div>
+                    )} */}
+
+                    {/* File Upload Section - Only enabled if GST number is valid */}
+                    {!gstVerified && (
+                      <div className="mt-4">
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          Upload GST Document *
+                        </label>
+                        {formData.gstNumber &&
+                        validateGstNumber(formData.gstNumber) ? (
+                          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-400 transition-colors">
+                            <input
+                              id="gst-file-input"
+                              type="file"
+                              accept=".pdf,.jpg,.jpeg,.png"
+                              onChange={handleGstFileUpload}
+                              className="hidden"
+                            />
+                            <label
+                              htmlFor="gst-file-input"
+                              className="cursor-pointer flex flex-col items-center"
+                            >
+                              <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                              <span className="text-sm text-gray-600">
+                                Click to select GST document
+                              </span>
+                              <span className="text-xs text-gray-500 mt-1">
+                                PDF, JPG, PNG (Max 5MB)
+                              </span>
+                            </label>
+                          </div>
+                        ) : (
+                          <div className="border-2 border-dashed border-gray-200 rounded-lg p-4 text-center bg-gray-50">
+                            <Upload className="w-8 h-8 text-gray-300 mb-2 mx-auto" />
+                            <span className="text-sm text-gray-400">
+                              Please enter a valid GST number first
+                            </span>
+                            <span className="text-xs text-gray-400 block mt-1">
+                              Format: 22AAAAA0000A1Z5 (15 characters)
+                            </span>
+                          </div>
+                        )}
+                        {gstFile && (
+                          <div className="mt-2 bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <FileText className="w-4 h-4 text-blue-600" />
+                              <span className="text-sm text-blue-800">
+                                {gstFile.name}
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={removeGstFile}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     )}
 
                     {gstVerified && (
@@ -754,7 +1182,7 @@ const Registration = () => {
                           <div className="flex items-center gap-2 text-blue-700">
                             <CheckCircle className="w-5 h-5" />
                             <span className="font-semibold">
-                              GST verified successfully!
+                              GST document selected successfully!
                             </span>
                           </div>
                           <div className="relative group">
@@ -770,6 +1198,14 @@ const Registration = () => {
                             </div>
                           </div>
                         </div>
+                        {gstFile && (
+                          <div className="mt-2 bg-white border border-blue-200 rounded-lg p-2 flex items-center gap-2">
+                            <FileText className="w-4 h-4 text-blue-600" />
+                            <span className="text-sm text-gray-700">
+                              {gstFile.name}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -791,12 +1227,15 @@ const Registration = () => {
 
                 <div>
                   <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                    Auto-filled Details
+                    {entityType === "individual"
+                      ? "Personal"
+                      : "Company & Personal"}{" "}
+                    Details
                   </h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-semibold text-gray-700 mb-2">
-                        First Name
+                        First Name *
                       </label>
                       <input
                         type="text"
@@ -804,11 +1243,12 @@ const Registration = () => {
                         value={formData.firstName}
                         onChange={handleInputChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm"
+                        required
                       />
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-gray-700 mb-2">
-                        Last Name
+                        Last Name *
                       </label>
                       <input
                         type="text"
@@ -816,11 +1256,12 @@ const Registration = () => {
                         value={formData.lastName}
                         onChange={handleInputChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm"
+                        required
                       />
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-gray-700 mb-2">
-                        Father's Name
+                        Father's Name *
                       </label>
                       <input
                         type="text"
@@ -828,11 +1269,12 @@ const Registration = () => {
                         value={formData.fatherName}
                         onChange={handleInputChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm"
+                        required
                       />
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-gray-700 mb-2">
-                        Date of Birth
+                        Date of Birth *
                       </label>
                       <input
                         type="date"
@@ -840,8 +1282,76 @@ const Registration = () => {
                         value={formData.dateOfBirth}
                         onChange={handleInputChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm"
+                        required
                       />
                     </div>
+
+                    {/* Company Information Fields */}
+                    {/* {entityType === "company" && ( */}
+                    <>
+                      <div className="col-span-2">
+                        <label className="block text-xs font-semibold text-gray-700 mb-2">
+                          Company Name *
+                        </label>
+                        <input
+                          type="text"
+                          name="companyName"
+                          value={formData.companyName}
+                          onChange={handleInputChange}
+                          placeholder="TechCorp Solutions Private Limited"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-2">
+                          Company Type *
+                        </label>
+                        <select
+                          name="companyType"
+                          value={formData.companyType}
+                          onChange={handleInputChange}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm"
+                          required
+                        >
+                          <option value="">Select Company Type</option>
+                          <option value="Private Limited Company">
+                            Private Limited Company
+                          </option>
+                          <option value="Public Limited Company">
+                            Public Limited Company
+                          </option>
+                          <option value="Limited Liability Partnership">
+                            Limited Liability Partnership
+                          </option>
+                          <option value="Partnership">Partnership</option>
+                          <option value="Sole Proprietorship">
+                            Sole Proprietorship
+                          </option>
+                          <option value="One Person Company">
+                            One Person Company
+                          </option>
+                          <option value="Section 8 Company">
+                            Section 8 Company
+                          </option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-2">
+                          Incorporation Date *
+                        </label>
+                        <input
+                          type="date"
+                          name="incorporationDate"
+                          value={formData.incorporationDate}
+                          onChange={handleInputChange}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm"
+                          required
+                        />
+                      </div>
+                    </>
+                    {/* )} */}
+
                     <div className="col-span-2">
                       <label className="block text-xs font-semibold text-gray-700 mb-2">
                         Address
