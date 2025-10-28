@@ -192,14 +192,6 @@ const TenderListings = () => {
       else setLoading(true);
       setError(null);
       try {
-        // Always use latest filter values
-        console.log(
-          selectedCategory,
-          selectedStatus,
-          selectedState,
-          selectedDistrict
-        );
-
         const queryParams = {
           page,
           limit,
@@ -249,6 +241,7 @@ const TenderListings = () => {
           statusColor:
             calculateDaysLeft(it.bidDeadline) <= 7 ? "yellow" : "green",
           priority: it.priority || "medium",
+          neverBid: it.neverBid,
           raw: it,
         }));
 
@@ -315,8 +308,6 @@ const TenderListings = () => {
   // reset when filters/search change
   // Reload tenders when any filter changes
   useEffect(() => {
-    console.log("1111111111111111111111y");
-
     setTenders([]);
     setTotalPages(1);
     setCurrentPage(0);
@@ -504,8 +495,6 @@ const TenderListings = () => {
             <select
               value={selectedState}
               onChange={(e) => {
-                console.log("11111111111111111111111x " + e.target.value);
-
                 setSelectedState(e.target.value);
                 setSelectedDistrict("all");
               }}
@@ -692,6 +681,23 @@ const TenderListings = () => {
                           className="bg-gray-300 text-gray-600 px-6 py-3 rounded-lg font-medium"
                         >
                           Bid Submitted
+                        </button>
+                      ) : t.neverBid === false ? (
+                        <button
+                          onClick={() => handleSubmitClick(t)}
+                          disabled={!isSubmitBidEnabled(t)}
+                          className={`px-6 py-3 rounded-lg font-medium transition-transform ${
+                            isSubmitBidEnabled(t)
+                              ? "bg-purple-600 hover:bg-purple-700 text-white hover:scale-105"
+                              : "bg-gray-300 text-gray-600 cursor-not-allowed"
+                          }`}
+                          title={
+                            !isSubmitBidEnabled(t)
+                              ? "Tender not available for bidding (status must be in-progress and deadline not passed)"
+                              : "Re-Bid for this tender"
+                          }
+                        >
+                          Re-Bid
                         </button>
                       ) : (
                         <button

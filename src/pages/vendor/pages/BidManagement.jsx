@@ -18,6 +18,7 @@ import TenderDetail from "../popups/TenderDetail";
 import ParticipantsList from "../popups/ParticipantsList";
 import RebidConfirmation from "../popups/RebidConfirmation";
 import ContractDetailsModal from "../popups/ContractDetailsModal";
+import SubmitBidPopup from "../popups/SubmitBidPopup";
 import api from "../../../services/apiService";
 import bidsService from "../../../services/bidsService";
 import toast from "../../../services/toastService";
@@ -46,6 +47,9 @@ const BidManagement = () => {
   const [error, setError] = useState(null);
   const [hasMore, setHasMore] = useState(true);
   const sentinelRef = useRef(null);
+
+  const [showSubmitBid, setShowSubmitBid] = useState(false);
+  const [submitBidTender, setSubmitBidTender] = useState(null);
 
   const getStatusBadge = (status) => {
     const baseClasses =
@@ -96,9 +100,7 @@ const BidManagement = () => {
       ? new Date(item.tender.bidDeadline)
       : null;
     const isBeforeDeadline = deadline ? new Date() < deadline : false;
-    canRebid =
-      isBeforeDeadline &&
-      (displayStatus === "submitted" || displayStatus === "pending");
+    canRebid = isBeforeDeadline && displayStatus === "deleted";
 
     // Format bid amount with currency
     const formattedAmount =
@@ -330,9 +332,23 @@ const BidManagement = () => {
     setShowParticipants(true);
   };
 
-  const handleShowRebid = (tender) => {
-    setSelectedTender(tender);
-    setShowRebid(true);
+  const formatCurrency = (val) => {
+    if (val === undefined || val === null) return "-";
+    try {
+      return new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+        maximumFractionDigits: 0,
+      }).format(val);
+    } catch (e) {
+      return String(val);
+    }
+  };
+
+  const handleShowRebid = (bid) => {
+    bid.tender.estimatedValue = formatCurrency(bid.tender.value);
+    setSubmitBidTender(bid.tender);
+    setShowSubmitBid(true);
   };
 
   const handleShowContract = (bid) => {
@@ -364,14 +380,8 @@ const BidManagement = () => {
         deleteReason.trim()
       );
 
-      // Remove the deleted bid from the local state
-      setBids((prevBids) =>
-        prevBids.filter(
-          (b) =>
-            b._id !== (bidToDelete.id || bidToDelete._id) &&
-            b.id !== (bidToDelete.id || bidToDelete._id)
-        )
-      );
+      // Re-fetch bids from API after successful deletion
+      await fetchBids(1, true);
 
       // Close modal and reset state
       setShowDeleteModal(false);
@@ -880,6 +890,17 @@ const BidManagement = () => {
           onClose={() => {
             setShowContract(false);
             setSelectedBidForContract(null);
+          }}
+        />
+      )}
+
+      {showSubmitBid && submitBidTender && (
+        <SubmitBidPopup
+          tender={submitBidTender}
+          onClose={() => setShowSubmitBid(false)}
+          onSubmitted={() => {
+            setShowSubmitBid(false);
+            // Optionally re-fetch bids or show a success message
           }}
         />
       )}

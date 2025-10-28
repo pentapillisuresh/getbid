@@ -382,7 +382,10 @@ const SubmitBidPopup = ({ tender, onClose, onSubmitted }) => {
 
   return (
     <>
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div
+        style={{ marginTop: "0px" }}
+        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      >
         <div className="bg-white rounded-xl max-w-4xl w-full max-h-[97vh] overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50">
@@ -412,27 +415,29 @@ const SubmitBidPopup = ({ tender, onClose, onSubmitted }) => {
                   <div>
                     <span className="text-gray-600">Company:</span>
                     <div className="font-semibold text-gray-900">
-                      {storedUser.companyName ||
-                        storedUser.name ||
-                        "Your Company"}
+                      {tender?.raw?.postedBy?.company?.name ||
+                        tender?.postedBy?.company?.name ||
+                        "-"}
                     </div>
                   </div>
                   <div>
-                    <span className="text-gray-600">Registration:</span>
+                    <span className="text-gray-600">Registration Date:</span>
                     <div className="font-semibold text-gray-900">
-                      TC-2019-001
+                      {tender?.postedBy?.company?.incorporationDate ||
+                        tender?.raw?.postedBy?.company?.incorporationDate ||
+                        "-"}
                     </div>
                   </div>
                   <div>
                     <span className="text-gray-600">Contact Person:</span>
                     <div className="font-semibold text-gray-900">
-                      John Smith
+                      {tender.contactPerson}
                     </div>
                   </div>
                   <div>
-                    <span className="text-gray-600">Email:</span>
+                    <span className="text-gray-600">Phone Number:</span>
                     <div className="font-semibold text-blue-600">
-                      {storedUser.email || ""}
+                      {tender.contactNumber}
                     </div>
                   </div>
                 </div>

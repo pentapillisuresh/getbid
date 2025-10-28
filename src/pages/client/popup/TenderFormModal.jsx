@@ -828,9 +828,6 @@ const TenderFormModal = ({
                 required
               >
                 <option value="">Select Location Scope</option>
-                <option value="Select Location Scope">
-                  Select Location Scope
-                </option>
                 <option value="Inter District">Inter District</option>
                 <option value="Inter State">Inter State</option>
                 <option value="Pan India">Pan India</option>
