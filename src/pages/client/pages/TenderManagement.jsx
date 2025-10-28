@@ -754,42 +754,86 @@ const TenderManagement = () => {
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => handleViewDetails(tender)}
-                      className="flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium text-sm"
-                    >
-                      <Eye className="w-4 h-4" />
-                      View Details
-                    </button>
-
-                    {/* Edit Button */}
-                    <button
-                      onClick={() => handleEditTenderClick(tender)}
-                      className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm"
-                    >
-                      <Edit className="w-4 h-4" />
-                      Edit
-                    </button>
-
-                    {tender.status === "published" && (
+                    {tender.status === "cancelled" ? (
                       <>
-                        <button className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm">
-                          <MessageCircle className="w-4 h-4" />
-                          Manage Q&A
+                        <span className="px-3 py-1 rounded-full bg-red-100 text-red-700 text-xs font-semibold mr-2">
+                          Cancelled
+                        </span>
+                        <button
+                          onClick={() => handleViewDetails(tender)}
+                          className="flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium text-sm"
+                        >
+                          <Eye className="w-4 h-4" />
+                          View Details
                         </button>
-                        {/* <button
-                          onClick={() => handleAmendTenderClick(tender)}
-                          className="flex items-center gap-2 text-green-600 hover:text-green-700 font-medium text-sm"
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => handleViewDetails(tender)}
+                          className="flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium text-sm"
+                        >
+                          <Eye className="w-4 h-4" />
+                          View Details
+                        </button>
+
+                        {/* Edit Button */}
+                        <button
+                          onClick={() => handleEditTenderClick(tender)}
+                          className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm"
                         >
                           <Edit className="w-4 h-4" />
-                          Amend Tender
-                        </button> */}
-                        {/* <button className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors">
-                          Start Evaluation
-                        </button> */}
+                          Edit
+                        </button>
+
+                        {tender.status === "published" && (
+                          <button className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm">
+                            <MessageCircle className="w-4 h-4" />
+                            Manage Q&A
+                          </button>
+                        )}
+                        {(tender.status === "in-progress" ||
+                          tender.status === "published") && (
+                          <button
+                            className="flex items-center gap-2 text-red-600 hover:text-red-700 font-medium text-sm"
+                            onClick={async () => {
+                              try {
+                                const userId = getStoredUserId();
+                                let email = "";
+                                try {
+                                  const raw =
+                                    window.localStorage.getItem("user");
+                                  if (raw) {
+                                    const parsed = JSON.parse(raw);
+                                    email =
+                                      parsed.email || parsed.contact || "";
+                                  }
+                                } catch (e) {
+                                  email = "";
+                                }
+                                await apiService.post("/auth/send-otp", {
+                                  body: {
+                                    type: "email",
+                                    contact: email,
+                                    userId: userId,
+                                  },
+                                });
+                                setShowCancelModal(true);
+                                setSelectedTender(tender);
+                              } catch (err) {
+                                alert(
+                                  "Failed to send OTP: " +
+                                    (err?.message || "Unknown error")
+                                );
+                              }
+                            }}
+                          >
+                            <AlertTriangle className="w-4 h-4" />
+                            Cancel Tender
+                          </button>
+                        )}
                       </>
                     )}
-
                     {/* {tender.status === "evaluation" && (
                       <>
                         <button className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors">
@@ -799,7 +843,7 @@ const TenderManagement = () => {
                           Award Tender
                         </button>
                       </>
-                    )} */}
+                    } */}
                   </div>
                 </div>
               </div>
@@ -885,6 +929,7 @@ const TenderManagement = () => {
         show={showCancelModal}
         onClose={() => setShowCancelModal(false)}
         tender={selectedTender}
+        onCancelSuccess={() => fetchTenders(1, true)}
       />
     </div>
   );

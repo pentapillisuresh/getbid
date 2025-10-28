@@ -28,6 +28,7 @@ export const calculateDaysLeft = (deadlineDate) => {
 };
 
 export const getTenderStatus = (tender) => {
+  if (tender.status == "cancelled") return "cancelled";
   if (!tender.isActive) return "draft";
 
   const daysLeft = calculateDaysLeft(tender.bidDeadline);
