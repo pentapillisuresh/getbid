@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import {
   X,
   Calendar,
@@ -15,6 +16,7 @@ import {
 } from "lucide-react";
 
 const ViewDetailsPopup = ({ tender, isOpen, onClose }) => {
+  const navigate = useNavigate();
   if (!isOpen || !tender) return null;
 
   // Format currency
@@ -441,6 +443,10 @@ const ViewDetailsPopup = ({ tender, isOpen, onClose }) => {
                 ? "Bid submission deadline has passed"
                 : "Submit your bid for this tender"
             }
+            onClick={() => {
+              onClose();
+              navigate("/choose-login-type");
+            }}
           >
             Submit Bid
           </button>
