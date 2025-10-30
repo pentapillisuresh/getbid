@@ -7,14 +7,16 @@ importScripts(
 );
 
 // Initialize Firebase in service worker
-// Note: You need to replace these values with your actual Firebase config
+// NOTE: These values must match the project used by the client app.
+// Service worker cannot read import.meta.env, so we embed the same config here.
 const firebaseConfig = {
-  apiKey: "your-api-key",
-  authDomain: "your-project.firebaseapp.com",
-  projectId: "your-project-id",
-  storageBucket: "your-project.appspot.com",
-  messagingSenderId: "your-messaging-sender-id",
-  appId: "your-app-id",
+  apiKey: "AIzaSyBDre2052Ggn92fKX2qHwit0L4i-65dVM",
+  authDomain: "get-bid.firebaseapp.com",
+  projectId: "get-bid",
+  storageBucket: "get-bid.firebasestorage.app",
+  messagingSenderId: "39548298873",
+  appId: "1:39548298873:web:bf203d681c5dc6c64d56a8",
+  measurementId: "G-J7HVYDKBF6",
 };
 
 firebase.initializeApp(firebaseConfig);

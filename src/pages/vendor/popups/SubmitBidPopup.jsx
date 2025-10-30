@@ -380,6 +380,8 @@ const SubmitBidPopup = ({ tender, onClose, onSubmitted }) => {
     contactPerson: storedUser.contactPerson || storedUser.name || "",
   };
 
+  console.log(tender);
+
   return (
     <>
       <div
@@ -394,6 +396,9 @@ const SubmitBidPopup = ({ tender, onClose, onSubmitted }) => {
                 Submit Bid
               </h2>
               <p className="text-gray-600 text-sm mt-1">{tender?.title}</p>
+              <p className="text-gray-600 text-sm mt-1">
+                ID: {tender?.raw?.tenderId || tender?.tenderId}
+              </p>
             </div>
             <button
               onClick={onClose}

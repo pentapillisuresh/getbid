@@ -19,6 +19,7 @@ import ParticipantsList from "../popups/ParticipantsList";
 import RebidConfirmation from "../popups/RebidConfirmation";
 import ContractDetailsModal from "../popups/ContractDetailsModal";
 import SubmitBidPopup from "../popups/SubmitBidPopup";
+import ViewDetailsPopup from "../popups/ViewDetailsPopup";
 import api from "../../../services/apiService";
 import bidsService from "../../../services/bidsService";
 import toast from "../../../services/toastService";
@@ -27,6 +28,8 @@ const BidManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentView, setCurrentView] = useState("bids");
   const [selectedTender, setSelectedTender] = useState(null);
+  const [showViewDetails, setShowViewDetails] = useState(false);
+  const [selectedTenderForView, setSelectedTenderForView] = useState(null);
   const [showParticipants, setShowParticipants] = useState(false);
   const [showRebid, setShowRebid] = useState(false);
   const [showContract, setShowContract] = useState(false);
@@ -317,9 +320,87 @@ const BidManagement = () => {
   ];
 
   // Handlers
-  const handleViewTender = (tender) => {
-    setSelectedTender(tender);
-    setCurrentView("tender-detail");
+  // Open the ViewDetailsPopup modal with a normalized tender object
+  const handleViewTender = (bid) => {
+    // 'bid' is the normalized bid object from the list. Prefer its tender payload
+    const t = bid?.tender || bid?.raw?.tender || {};
+    const raw = bid?.raw || t || {};
+
+    // Normalize documents to shape expected by vendor popup: { fileName, url }
+    const docsSource =
+      t.documents || t.supportingDocuments || bid.documents || [];
+    const documents = Array.isArray(docsSource)
+      ? docsSource.map((doc, idx) => ({
+          fileName:
+            doc.fileName ||
+            doc.name ||
+            doc.filename ||
+            doc.originalName ||
+            doc.title ||
+            `Document ${idx + 1}`,
+          url:
+            doc.url ||
+            doc.downloadUrl ||
+            doc.fileUrl ||
+            doc.path ||
+            doc.link ||
+            "",
+          _id: doc._id || doc.id || idx,
+        }))
+      : [];
+
+    // Prepare a tender object with common fallback fields so vendor ViewDetailsPopup has stable shape
+    const tenderData = {
+      // identify the tender
+      _id: t._id || raw._id || bid.tenderId || bid.id || "",
+      tenderId: t.tenderId || raw.tenderId || t._id || bid.tenderId || "",
+      title: t.title || bid.title || "Untitled Tender",
+
+      // basic info
+      description: t.description || bid.tenderDescription || "",
+      department: t.organization || t.organisation || bid.department || "",
+      category: t.category || bid.department || "",
+      publishedDate:
+        t.createdAt || t.publishedDate || bid.submittedDate || undefined,
+
+      // location
+      location:
+        t.location ||
+        bid.location ||
+        `${t.district || ""}${t.state ? `, ${t.state}` : ""}`,
+      address: t.address || t.venue || undefined,
+
+      // contact
+      contactPerson: t.contactPerson || bid.contactPerson || "",
+      contactNumber:
+        t.contactNumber || t.contactPhone || bid.contactNumber || undefined,
+      contactEmail: t.contactEmail || t.email || undefined,
+
+      // meeting
+      meetingDate: t.meetingDate || t.preBidMeetingDate || undefined,
+      meetingVenue: t.meetingVenue || t.preBidVenue || undefined,
+
+      // finance
+      estimatedValue:
+        t.estimatedValue || t.value || bid.tenderValue || undefined,
+      documentFee: t.documentFee || t.tenderFee || undefined,
+      emd: t.emd || t.emdAmount || undefined,
+
+      // documents / lists
+      documents,
+
+      // eligibility / technical
+      eligibilityCriteria: t.eligibilityCriteria || t.eligibility || [],
+      technicalSpecifications:
+        t.technicalSpecifications || t.specifications || "",
+
+      // keep original payload for any other lookups
+      raw: raw,
+      originalData: t,
+    };
+
+    setSelectedTenderForView(tenderData);
+    setShowViewDetails(true);
   };
 
   const handleBackToBids = () => {
@@ -901,6 +982,17 @@ const BidManagement = () => {
           onSubmitted={() => {
             setShowSubmitBid(false);
             // Optionally re-fetch bids or show a success message
+          }}
+        />
+      )}
+
+      {showViewDetails && selectedTenderForView && (
+        <ViewDetailsPopup
+          tender={selectedTenderForView}
+          isOpen={showViewDetails}
+          onClose={() => {
+            setShowViewDetails(false);
+            setSelectedTenderForView(null);
           }}
         />
       )}

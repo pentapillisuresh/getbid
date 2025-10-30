@@ -12,6 +12,21 @@ import {
 const ViewDetailsPopup = ({ tender, onClose }) => {
   console.log(tender);
 
+  // Format date strings into DD/MM/YYYY (en-IN) when possible
+  const formatDate = (dateInput) => {
+    if (!dateInput) return "";
+    // If it's already a Date object
+    const date = dateInput instanceof Date ? dateInput : new Date(dateInput);
+    if (isNaN(date.getTime())) return String(dateInput);
+    return date.toLocaleDateString("en-IN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+  };
+
+  console.log(tender);
+
   return (
     <div
       style={{ marginTop: "0px" }}
@@ -52,7 +67,7 @@ const ViewDetailsPopup = ({ tender, onClose }) => {
                   <div>
                     <span className="text-gray-500 text-sm">Organization:</span>
                     <div className="font-medium text-gray-900">
-                      {tender.department}
+                      {tender.raw?.tender?.postedBy?.company?.name || "-"}
                     </div>
                   </div>
                   <div>
@@ -66,7 +81,7 @@ const ViewDetailsPopup = ({ tender, onClose }) => {
                       Published Date:
                     </span>
                     <div className="font-medium text-gray-900">
-                      {tender.publishedDate}
+                      {formatDate(tender.publishedDate)}
                     </div>
                   </div>
                   <div>
