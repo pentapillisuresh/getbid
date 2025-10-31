@@ -110,7 +110,7 @@ button:hover {
 
 /* Custom gradient backgrounds */
 .gradient-orange {
-  background: linear-gradient(135deg, #fd9a00 0%, #ff8c00 100%);
+  background: linear-gradient(135deg, #16A34A 0%, #16A34A 100%);
 }
 
 /* Focus styles */
@@ -159,12 +159,12 @@ textarea:focus {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #fd9a00;
+  background: #16A34A;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #e68a00;
+  background: #16A34A;
 }
 
 /* Table responsive improvements */

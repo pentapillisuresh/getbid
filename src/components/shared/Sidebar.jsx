@@ -37,13 +37,17 @@ const Sidebar = ({ items, basePath, sidebarOpen, setSidebarOpen }) => {
                 <li key={index}>
                   <button
                     onClick={() => handleItemClick(item.path)}
-                    className={`w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 text-sm font-medium transition-all duration-200 ${
+                    className={`w-full text-left px-4 py-3 flex items-center gap-3 text-sm font-medium transition-all duration-200 relative ${
                       isActive
-                        ? "bg-primary-500 text-white shadow-sm"
-                        : "text-gray-700 hover:bg-gray-200 hover:text-gray-900"
+                        ? "text-primary-600 bg-primary-50 border-l-3 border-primary-600"
+                        : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                     }`}
                   >
-                    <span className={isActive ? "text-white" : "text-gray-500"}>
+                    {/* Left border for active item */}
+                    {isActive && (
+                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary-600"></div>
+                    )}
+                    <span className={isActive ? "text-primary-600" : "text-gray-500"}>
                       {item.icon}
                     </span>
                     <span>{item.label}</span>
@@ -51,8 +55,8 @@ const Sidebar = ({ items, basePath, sidebarOpen, setSidebarOpen }) => {
                       <span
                         className={`ml-auto px-2 py-1 text-xs rounded-full ${
                           isActive
-                            ? "bg-white bg-opacity-20 text-white"
-                            : "bg-primary-100 text-primary-700"
+                            ? "bg-primary-100 text-primary-700"
+                            : "bg-gray-200 text-gray-700"
                         }`}
                       >
                         {item.badge}
@@ -91,13 +95,17 @@ const Sidebar = ({ items, basePath, sidebarOpen, setSidebarOpen }) => {
                 <li key={index}>
                   <button
                     onClick={() => handleItemClick(item.path)}
-                    className={`w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 text-sm font-medium transition-all duration-200 ${
+                    className={`w-full text-left px-4 py-3 flex items-center gap-3 text-sm font-medium transition-all duration-200 relative ${
                       isActive
-                        ? "bg-primary-500 text-white shadow-sm"
-                        : "text-gray-700 hover:bg-gray-200 hover:text-gray-900"
+                        ? "text-primary-600 bg-primary-50 border-l-4 border-primary-600"
+                        : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                     }`}
                   >
-                    <span className={isActive ? "text-white" : "text-gray-500"}>
+                    {/* Left border for active item */}
+                    {isActive && (
+                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary-600"></div>
+                    )}
+                    <span className={isActive ? "text-primary-600" : "text-gray-500"}>
                       {item.icon}
                     </span>
                     <span>{item.label}</span>
@@ -105,8 +113,8 @@ const Sidebar = ({ items, basePath, sidebarOpen, setSidebarOpen }) => {
                       <span
                         className={`ml-auto px-2 py-1 text-xs rounded-full ${
                           isActive
-                            ? "bg-white bg-opacity-20 text-white"
-                            : "bg-primary-100 text-primary-700"
+                            ? "bg-primary-100 text-primary-700"
+                            : "bg-gray-200 text-gray-700"
                         }`}
                       >
                         {item.badge}

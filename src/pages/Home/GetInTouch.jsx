@@ -49,10 +49,11 @@ function CTASection() {
                 <div>
                   <p className="font-semibold text-gray-900">Address</p>
                   <p className="text-gray-600">
-                    A-06, Sector 60,<br />
-                    Noida, Uttar Pradesh<br />
-                    India 201301
+                    D No. 48-8/1, Srinagar V-hotel Road Raid,<br />
+                    Dwaraka Nagar,<br />
+                    Visakhapatnam - 530001
                   </p>
+
                 </div>
               </div>
             </div>

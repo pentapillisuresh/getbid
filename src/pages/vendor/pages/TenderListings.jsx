@@ -565,7 +565,7 @@ const TenderListings = () => {
             filteredTenders.map((t) => (
               <div
                 key={t._id}
-                className="bg-white rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-blue-500 hover:shadow-lg transition-all"
+                className="bg-white  shadow-sm border border-gray-100 border-1-4 border-l-primary-500 hover:shadow-lg transition-all"
               >
                 <div className="p-6">
                   <div className="flex items-start justify-between mb-3">

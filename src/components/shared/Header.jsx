@@ -169,7 +169,7 @@ const Header = () => {
           <div className="flex items-center gap-3">
             <div className="">
               {/* <Building2 className="w-6 h-6 text-white" /> */}
-              <img src="/images/getlogo.png" alt="Logo" className="w-20 h-10" />
+              <img src="/images/logo2.png" alt="Logo" className="w-20 h-10" />
             </div>
             {/* <div>
               <h1 className="text-xl font-bold text-gray-900">eTender Portal</h1>

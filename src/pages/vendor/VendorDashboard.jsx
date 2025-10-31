@@ -89,7 +89,7 @@ const VendorDashboard = () => {
 
   return (
     <DashboardLayout
-      title="eTender Portal"
+      title="GetBid Portal"
       subtitle="Secure Procurement Platform"
       userInfo={userInfo}
       userType="vendor"

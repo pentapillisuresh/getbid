@@ -8,31 +8,35 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: "#FD9A00", // main color
-          50: "#FFF4E6",
-          100: "#FFE1BF",
-          200: "#FFC68A",
-          300: "#FFAA54",
-          400: "#FF941F",
-          500: "#FD9A00",  // base
-          600: "#E08B00",
-          700: "#B56D00",
-          800: "#804C00",
-          900: "#4C2B00",
+          DEFAULT: "#16A34A", // main color - green
+          50: "#F0FDF4",
+          100: "#DCFCE7",
+          200: "#BBF7D0",
+          300: "#86EFAC",
+          400: "#4ADE80",
+          500: "#16A34A",  // base
+          600: "#15803D",
+          700: "#166534",
+          800: "#14532D",
+          900: "#104A26",
         },
         secondary: {
-          DEFAULT: "#D3D3D3", // light gray
-          50: "#FAFAFA",
-          100: "#F5F5F5",
-          200: "#E5E5E5",
-          300: "#D3D3D3",
-          400: "#A3A3A3",
-          500: "#737373",
-          600: "#525252",
-          700: "#404040",
-          800: "#262626",
-          900: "#171717",
+          DEFAULT: "#391E60", // deep purple
+          50: "#F5F3F8",
+          100: "#EBE7F2",
+          200: "#D2C7E3",
+          300: "#B9A7D4",
+          400: "#8060B6",
+          500: "#391E60",  // base
+          600: "#331B56",
+          700: "#2A1647",
+          800: "#221238",
+          900: "#7729C6",
         }
+      },
+      // Add the font family here
+      fontFamily: {
+        pacifico: ['Pacifico', 'cursive'],
       }
     },
   },

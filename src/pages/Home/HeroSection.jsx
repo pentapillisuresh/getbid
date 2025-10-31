@@ -79,12 +79,12 @@ export default function HeroCarousel() {
                     : "opacity-0 translate-x-10 absolute top-0 left-0 pointer-events-none"
                 }`}
               >
-                <p className="text-purple-600 font-semibold mb-4 text-lg">
+                <p className="text-purple-600 font-semibold mb-4 text-base">
                   {slide.subtitle}
                 </p>
-                <h1 className="text-5xl font-bold text-gray-900 leading-tight mb-6">
+                <h3 className="text-4xl font-bold text-gray-900 leading-tight mb-6">
                   {slide.title}
-                </h1>
+                </h3>
                 <p className="text-gray-700 text-lg mb-8 leading-relaxed">
                   {slide.description}
                 </p>
