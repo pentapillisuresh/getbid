@@ -40,6 +40,8 @@ const TenderFormModal = ({
     supportingDocuments: [],
   });
 
+  // console.log(tenderData);
+
   // State/District/Category dropdowns
   const [states, setStates] = useState([]);
   const [districts, setDistricts] = useState([]);
@@ -72,8 +74,12 @@ const TenderFormModal = ({
           setDistricts([]);
           setDistrictsLoading(false);
         });
-      // Reset district selection when state changes
-      setFormData((prev) => ({ ...prev, district: "" }));
+
+      // Only reset district if this is a manual state change (not initial load in edit mode)
+      if (!isInitialStateLoad.current) {
+        setFormData((prev) => ({ ...prev, district: "" }));
+      }
+      isInitialStateLoad.current = false;
     } else {
       setDistricts([]);
       setFormData((prev) => ({ ...prev, district: "" }));
@@ -84,6 +90,7 @@ const TenderFormModal = ({
   const [dragActive, setDragActive] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef(null);
+  const isInitialStateLoad = useRef(false);
 
   // Auto-fill user info and tender data when modal opens
   useEffect(() => {
@@ -97,14 +104,77 @@ const TenderFormModal = ({
 
     // If editing or amending, populate form with existing data
     if ((editMode || amendMode) && tenderData) {
+      // Parse estimatedValue - handle formatted strings like "₹7.0 L", "₹1,00,000", etc.
+      const parseEstimatedValue = (value) => {
+        if (!value) return "";
+        // If it's already a number, convert to string
+        if (typeof value === "number") return value.toString();
+
+        if (typeof value === "string") {
+          // Remove currency symbol and extra spaces
+          let cleanValue = value.replace(/₹/g, "").trim();
+
+          // Handle Lakhs (L) - multiply by 100,000
+          if (cleanValue.match(/L$/i)) {
+            const numValue = parseFloat(cleanValue.replace(/[L,\s]/gi, ""));
+            return (numValue * 100000).toString();
+          }
+
+          // Handle Crores (Cr) - multiply by 10,000,000
+          if (cleanValue.match(/Cr$/i)) {
+            const numValue = parseFloat(cleanValue.replace(/[Cr,\s]/gi, ""));
+            return (numValue * 10000000).toString();
+          }
+
+          // Handle thousands (K) - multiply by 1,000
+          if (cleanValue.match(/K$/i)) {
+            const numValue = parseFloat(cleanValue.replace(/[K,\s]/gi, ""));
+            return (numValue * 1000).toString();
+          }
+
+          // Handle regular formatted numbers (e.g., "1,00,000")
+          return cleanValue.replace(/[,\s]/g, "");
+        }
+        return "";
+      };
+
+      // Parse date - handle both raw ISO dates and formatted display dates
+      const parseDeadlineDate = () => {
+        // Try bidDeadline first (from API)
+        if (tenderData.bidDeadline) {
+          return new Date(tenderData.bidDeadline).toISOString().split("T")[0];
+        }
+        // Try submissionDeadline (from mapped data)
+        if (tenderData.submissionDeadline) {
+          // Parse formatted date like "Dec 31, 2024" or "31/12/2024"
+          const parsedDate = new Date(tenderData.submissionDeadline);
+          if (!isNaN(parsedDate.getTime())) {
+            return parsedDate.toISOString().split("T")[0];
+          }
+        }
+        // Try rawData if available
+        if (tenderData.rawData?.bidDeadline) {
+          return new Date(tenderData.rawData.bidDeadline)
+            .toISOString()
+            .split("T")[0];
+        }
+        return "";
+      };
+
+      // Set flag to prevent district reset during initial load
+      if (tenderData.state) {
+        isInitialStateLoad.current = true;
+      }
+
       setFormData((prev) => ({
         ...prev,
         title: tenderData.title || "",
         category: tenderData.category || "",
-        estimatedValue: tenderData.value?.toString() || "",
-        deadline: tenderData.bidDeadline
-          ? new Date(tenderData.bidDeadline).toISOString().split("T")[0]
-          : "",
+        estimatedValue:
+          parseEstimatedValue(tenderData.estimatedValue) ||
+          parseEstimatedValue(tenderData.value) ||
+          "",
+        deadline: parseDeadlineDate(),
         description: tenderData.description || "",
         eligibility:
           tenderData.eligibilityCriteria?.length > 0
@@ -120,17 +190,26 @@ const TenderFormModal = ({
         state: tenderData.state || "",
         district: tenderData.district || "",
         projectAddress: tenderData.address || "",
-        contactPerson: tenderData.contactPerson || "",
-        contactNumbers: tenderData.contactNumber || "",
+        contactPerson:
+          tenderData.contactPerson ||
+          tenderData.createdBy ||
+          tenderData.rawData?.contactPerson ||
+          "",
+        contactNumbers:
+          tenderData.contactNumber || tenderData.rawData?.contactNumber || "",
         supportingDocuments:
           tenderData.documents?.map((doc) => {
             // Handle both string IDs and document objects
             if (typeof doc === "string") {
+              console.log("Loading existing document (string):", doc);
               return { _id: doc, fileName: "Document", url: "#" };
             }
+            console.log("Loading existing document (object):", doc);
             return doc;
           }) || [],
       }));
+
+      console.log("Edit mode - Loaded documents:", tenderData.documents);
     } else if (show && !editMode && !amendMode) {
       // Reset form for new tender
       setFormData({
@@ -290,17 +369,33 @@ const TenderFormModal = ({
 
     setIsSubmitting(true);
 
+    console.log("=== FORM SUBMIT ===");
+    console.log("editMode:", editMode);
+    console.log("amendMode:", amendMode);
+    console.log("tenderData?._id:", tenderData?._id);
+    console.log("tenderData?.id:", tenderData?.id);
+    console.log(
+      "Submitting tender with documents:",
+      formData.supportingDocuments
+    );
+
     try {
       let response;
 
-      if (editMode && tenderData?._id) {
+      // Get tender ID - check both _id and id fields
+      const tenderId = tenderData?._id || tenderData?.id;
+
+      if (editMode && tenderId) {
         // Update existing tender
-        response = await updateTender(tenderData._id, formData);
-      } else if (amendMode && tenderData?._id) {
+        console.log("🔄 Calling UPDATE TENDER with ID:", tenderId);
+        response = await updateTender(tenderId, formData);
+      } else if (amendMode && tenderId) {
         // Amend existing tender
-        response = await amendTender(tenderData._id, formData);
+        console.log("📝 Calling AMEND TENDER with ID:", tenderId);
+        response = await amendTender(tenderId, formData);
       } else {
         // Create new tender
+        console.log("✨ Calling CREATE TENDER");
         response = await createTender(formData);
       }
 

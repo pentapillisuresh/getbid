@@ -118,16 +118,39 @@ export const updateTender = async (tenderId, tenderData) => {
     tenderData.supportingDocuments &&
     tenderData.supportingDocuments.length > 0
   ) {
-    tenderData.supportingDocuments.forEach((doc) => {
-      if (typeof doc === "string") {
-        // Existing document ID
-        existingDocumentIds.push(doc);
-      } else {
-        // New file to upload
+    console.log("Processing documents:", tenderData.supportingDocuments);
+
+    tenderData.supportingDocuments.forEach((doc, index) => {
+      console.log(`Document ${index}:`, {
+        type: typeof doc,
+        isFile: doc instanceof File,
+        hasId: doc && doc._id,
+        doc: doc,
+      });
+
+      // Check for File object first (new files to upload)
+      if (doc instanceof File) {
+        console.log(`Document ${index} is a NEW FILE:`, doc.name);
         newFiles.push(doc);
+      } else if (typeof doc === "string") {
+        // Existing document ID (string format)
+        console.log(`Document ${index} is EXISTING (string ID):`, doc);
+        existingDocumentIds.push(doc);
+      } else if (doc && doc._id) {
+        // Existing document object with _id (from edit mode)
+        console.log(
+          `Document ${index} is EXISTING (object with _id):`,
+          doc._id
+        );
+        existingDocumentIds.push(doc._id);
+      } else {
+        console.warn(`Document ${index} - Unknown format:`, doc);
       }
     });
   }
+
+  console.log("Update Tender - Existing documents:", existingDocumentIds);
+  console.log("Update Tender - New files to upload:", newFiles.length);
 
   // Upload new files if any
   if (newFiles.length > 0) {
