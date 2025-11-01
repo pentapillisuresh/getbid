@@ -11,7 +11,7 @@ const slides = [
     button1Link: "/choose-login-type",
     button2: "Register Now",
     button2Link: "/register",
-    image: "/images/bannerbid1.jpg",
+    video: "/gifs/banner1.mp4", // Replaced image with video
   },
   {
     title: "Streamline Your Bidding Process with Smart Technology",
@@ -20,7 +20,7 @@ const slides = [
       "Maximize your success rate with our intelligent bid tracking system, real-time notifications, and expert guidance that helps you win more private sector contracts and tenders.",
     button1: "Explore Features",
     button2: "Get Started",
-    image: "/images/bgbid2.jpg",
+    video: "/gifs/banner2.mp4", // Replaced image with video
   },
   {
     title: "Ensure Perfect Compliance with Expert Assistance",
@@ -29,7 +29,7 @@ const slides = [
       "Navigate complex tender requirements effortlessly with our compliance verification tools, document management system, and dedicated support team for private companies and contractors.",
     button1: "Try for Free",
     button2: "Contact Sales",
-    image: "/images/bgbid3.jpg",
+    video: "/gifs/banner3.mp4", // Replaced image with video
   },
 ];
 
@@ -114,13 +114,18 @@ export default function HeroCarousel() {
                 </div>
               </div>
 
-              {/* IMAGE SECTION */}
+              {/* VIDEO SECTION */}
               <div className="flex justify-center items-center">
-                <img
-                  src={slide.image}
-                  alt={`slide-${index}`}
-                  className="w-[90%] h-[90%] object-contain rounded-lg"
-                />
+                <video
+                  src={slide.video}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  className="w-[90%] h-[90%] object-contain rounded-lg shadow-lg"
+                >
+                  Your browser does not support the video tag.
+                </video>
               </div>
             </div>
           ))}
