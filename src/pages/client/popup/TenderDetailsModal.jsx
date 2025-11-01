@@ -14,6 +14,7 @@ import {
   Phone,
   FileText,
   Eye,
+  AlertTriangle,
 } from "lucide-react";
 import {
   downloadDocument,
@@ -23,6 +24,8 @@ import {
 
 const TenderDetailsModal = ({ show, onClose, tender, onCancelTender }) => {
   if (!show || !tender) return null;
+
+  console.log(tender);
 
   return (
     <div
@@ -52,26 +55,42 @@ const TenderDetailsModal = ({ show, onClose, tender, onCancelTender }) => {
                 className={`p-2 rounded-lg ${
                   tender.status === "published"
                     ? "bg-green-100"
-                    : tender.status === "evaluation"
+                    : tender.status === "evaluation" ||
+                      tender.status === "technical-evaluation"
                     ? "bg-blue-100"
-                    : tender.status === "awarded"
+                    : tender.status === "awarded" ||
+                      tender.status === "financial-evaluation" ||
+                      tender.status === "completed"
                     ? "bg-purple-100"
+                    : tender.status === "cancelled"
+                    ? "bg-red-100"
+                    : tender.status === "in-progress"
+                    ? "bg-green-100"
                     : "bg-gray-100"
                 }`}
               >
                 {tender.status === "published" ? (
                   <CheckCircle className="w-5 h-5 text-green-600" />
-                ) : tender.status === "evaluation" ? (
+                ) : tender.status === "evaluation" ||
+                  tender.status === "technical-evaluation" ? (
                   <Clock className="w-5 h-5 text-blue-600" />
-                ) : tender.status === "awarded" ? (
+                ) : tender.status === "awarded" ||
+                  tender.status === "financial-evaluation" ||
+                  tender.status === "completed" ? (
                   <Award className="w-5 h-5 text-purple-600" />
+                ) : tender.status === "cancelled" ? (
+                  <AlertTriangle className="w-5 h-5 text-red-600" />
                 ) : (
                   <CheckCircle className="w-5 h-5 text-gray-600" />
                 )}
               </div>
               <div>
                 <p className="font-semibold text-gray-900 capitalize">
-                  {tender.status}
+                  {tender.status == "financial-evaluation"
+                    ? "Completed"
+                    : tender.status === "technical-evaluation"
+                    ? "Evaluation Completed"
+                    : tender.status}
                 </p>
                 <p className="text-sm text-gray-600">{tender.department}</p>
               </div>

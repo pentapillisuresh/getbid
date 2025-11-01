@@ -235,7 +235,7 @@ const TendersSection = ({ isStandalone = false }) => {
   };
 
   const handleChooseLoginType = () => {
-    navigate("/choose-login-type");
+    navigate("/login");
   };
 
   if (loading) {

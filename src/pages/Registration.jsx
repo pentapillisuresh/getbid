@@ -730,7 +730,7 @@ const Registration = () => {
       }
 
       // navigate to login/choose page
-      setTimeout(() => navigate("/choose-login-type"), 800);
+      setTimeout(() => navigate("/login"), 800);
     } catch (err) {
       const message =
         (err && err.data && err.data.message) ||
@@ -1882,7 +1882,7 @@ const Registration = () => {
           <p className="text-gray-700 text-sm">
             Already registered?{" "}
             <button
-              onClick={() => navigate("/choose-login-type")}
+              onClick={() => navigate("/login")}
               className="text-blue-600 hover:text-blue-800 font-semibold underline transition-colors"
             >
               Login here

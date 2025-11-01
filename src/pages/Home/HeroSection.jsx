@@ -8,7 +8,7 @@ const slides = [
     description:
       "Discover private sector opportunities faster with our AI-powered tender search, automated bid management, and comprehensive compliance support designed for modern businesses, companies, and individual contractors.",
     button1: "Login Now",
-    button1Link: "/choose-login-type",
+    button1Link: "/login",
     button2: "Register Now",
     button2Link: "/register",
     image: "/images/bannerbid1.jpg",

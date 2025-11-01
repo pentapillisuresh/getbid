@@ -73,6 +73,9 @@ const createApiClient = (config = {}) => {
     } = opts;
     const mergedHeaders = mergeHeaders(cfg.headers, headers);
 
+    // Track if we're sending an auth token with this request
+    let hasSentAuthToken = false;
+
     // Attach Authorization header dynamically if not already provided.
     // Priority: per-request opts.getAuthToken -> global cfg.getAuthToken -> localStorage fallback.
     try {
@@ -91,6 +94,9 @@ const createApiClient = (config = {}) => {
           mergedHeaders["Authorization"] = token.startsWith("Bearer")
             ? token
             : `Bearer ${token}`;
+          hasSentAuthToken = true;
+        } else {
+          hasSentAuthToken = true;
         }
       }
     } catch (e) {
@@ -202,6 +208,22 @@ const createApiClient = (config = {}) => {
       const error = new Error("HTTP error " + resp.status);
       error.status = resp.status;
       error.data = data;
+
+      // Handle 401 Unauthorized - redirect to login only if we sent a token
+      if (resp.status === 401 && hasSentAuthToken) {
+        // Clear any stored tokens
+        if (typeof window !== "undefined" && window.localStorage) {
+          window.localStorage.removeItem("accessToken");
+          window.localStorage.removeItem("token");
+        }
+
+        // Redirect to login page
+        if (typeof window !== "undefined" && window.location) {
+          window.location.href = "/login";
+        }
+
+        throw error;
+      }
 
       if (
         showToasts &&

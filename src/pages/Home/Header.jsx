@@ -151,7 +151,7 @@ const Header = () => {
         {/* Right Side: Login + Browse Tenders */}
         <div className="hidden md:flex items-center space-x-5">
           <button
-            onClick={() => navigate("/choose-login-type")}
+            onClick={() => navigate("/login")}
             className="text-[#6B21A8] font-semibold hover:text-[#5B1893] transition"
           >
             Login

@@ -445,7 +445,7 @@ const ViewDetailsPopup = ({ tender, isOpen, onClose }) => {
             }
             onClick={() => {
               onClose();
-              navigate("/choose-login-type");
+              navigate("/login");
             }}
           >
             Submit Bid

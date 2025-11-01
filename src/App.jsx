@@ -82,7 +82,7 @@ function App() {
               path="/browse-tenders"
               element={<TendersSection isStandalone={true} />}
             />
-            <Route path="/choose-login-type" element={<ChooseLoginType />} />
+            <Route path="/login" element={<ChooseLoginType />} />
             <Route path="/register" element={<Registration />} />
             <Route path="/otp-verification" element={<OTPVerification />} />
             <Route path="/vendor/*" element={<VendorDashboard />} />

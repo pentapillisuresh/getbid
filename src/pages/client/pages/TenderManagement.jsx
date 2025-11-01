@@ -184,7 +184,7 @@ const TenderManagement = () => {
   // Map API data to component format
   const mapTenderData = (tender) => {
     const daysLeft = calculateDaysLeft(tender.bidDeadline);
-    const status = getTenderStatus(tender);
+    // const status = getTenderStatus(tender);
 
     // Debug logging
     console.log(
@@ -205,7 +205,7 @@ const TenderManagement = () => {
       estimatedValue: formatCurrency(tender.value),
       publishedDate: formatDate(tender.createdAt),
       submissionDeadline: formatDate(tender.bidDeadline),
-      status: status,
+      status: tender.status,
       bidsReceived: tender.bidsCount || 0,
       daysLeft: daysLeft,
       priority: getPriorityLevel(tender.value),
@@ -367,7 +367,7 @@ const TenderManagement = () => {
       case "technical-evaluation":
         return <Clock className="w-5 h-5 text-blue-600" />;
       case "financial-evaluation":
-        return <IndianRupee className="w-5 h-5 text-purple-600" />;
+      // return <IndianRupee className="w-5 h-5 text-purple-600" />;
       case "awarded":
       case "completed":
         return <Award className="w-5 h-5 text-purple-600" />;
@@ -664,9 +664,9 @@ const TenderManagement = () => {
                           {tender.status === "in-progress"
                             ? "In Progress"
                             : tender.status === "technical-evaluation"
-                            ? "Technical Evaluated"
+                            ? "Evaluation Completed"
                             : tender.status === "financial-evaluation"
-                            ? "Financial Evaluated"
+                            ? "Completed"
                             : tender.status === "completed"
                             ? "Completed"
                             : tender.status === "evaluation"
