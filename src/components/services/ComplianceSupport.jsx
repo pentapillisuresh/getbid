@@ -1,8 +1,12 @@
 import React from 'react';
 import { ShieldCheck, FileCheck, Award, AlertCircle, CheckCircle, Users, Briefcase, DollarSign, ClipboardCheck, Scale ,HeadphonesIcon} from 'lucide-react';
+import Header from "../../pages/Home/Header";
+import Footer from "../../pages/Home/Footer";
 
 const ComplianceSupport = () => {
   return (
+    <section>
+      <Header />
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-yellow-50">
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-4 py-16">
@@ -344,6 +348,8 @@ const ComplianceSupport = () => {
         </div>
       </section>
     </div>
+      <Footer/>
+    </section>
   );
 };
 

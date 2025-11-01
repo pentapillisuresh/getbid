@@ -1,8 +1,12 @@
 import React from 'react';
 import { FileText, Lock, Users, Share2, Edit3, Cloud, FolderOpen, CheckCircle, Globe, Mail } from 'lucide-react';
+import Header from "../../pages/Home/Header";
+import Footer from "../../pages/Home/Footer";
 
 const DocumentManagement = () => {
   return (
+    <section>
+      <Header />
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50">
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-4 py-16">
@@ -350,6 +354,8 @@ const DocumentManagement = () => {
         </div>
       </section>
     </div>
+      <Footer/>
+    </section>
   );
 };
 

@@ -43,6 +43,29 @@ const Header = () => {
     }, 200);
   };
 
+  // Smooth scroll to section
+  const scrollToSection = (sectionId) => {
+    // If we're not on the home page, navigate to home first
+    if (location.pathname !== "/") {
+      navigate("/", { state: { scrollTo: sectionId } });
+      return;
+    }
+
+    // If we're already on home page, scroll to section
+    const element = document.getElementById(sectionId);
+    if (element) {
+      const headerOffset = 80; // Adjust based on your header height
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth"
+      });
+    }
+    setMenuOpen(false);
+  };
+
   // Helper: Active link styling
   const isActive = (path) => location.pathname === path;
 
@@ -71,11 +94,11 @@ const Header = () => {
             Home
           </button>
 
-          {/* About */}
+          {/* About - Scrolls to about section */}
           <button
             onClick={() => scrollToSection("about")}
             className={`font-medium transition ${
-              location.search.includes("scroll=about")
+              location.hash === "#about" || location.state?.scrollTo === "about"
                 ? "text-[#6B21A8]"
                 : "text-gray-800 hover:text-[#6B21A8]"
             }`}
@@ -125,21 +148,23 @@ const Header = () => {
 
           {/* Pricing */}
           <button
-            onClick={() => navigate("/pricing")}
+            onClick={() => scrollToSection("pricing")}
             className={`font-medium transition ${
-              isActive("/pricing")
+              // isActive("/pricing")
+               location.hash === "#pricing" || location.state?.scrollTo === "pricing"
                 ? "text-[#6B21A8]"
                 : "text-gray-800 hover:text-[#6B21A8]"
             }`}
+         
           >
             Pricing
           </button>
 
-          {/* Contact */}
+          {/* Contact - Scrolls to contact section */}
           <button
-            onClick={() => navigate("/contact")}
+            onClick={() => scrollToSection("contact")}
             className={`font-medium transition ${
-              isActive("/contact")
+              location.hash === "#contact" || location.state?.scrollTo === "contact"
                 ? "text-[#6B21A8]"
                 : "text-gray-800 hover:text-[#6B21A8]"
             }`}
@@ -190,8 +215,7 @@ const Header = () => {
 
             <button
               onClick={() => {
-                navigate("/about");
-                setMenuOpen(false);
+                scrollToSection("about");
               }}
               className="text-gray-800 text-left"
             >
@@ -238,8 +262,7 @@ const Header = () => {
 
             <button
               onClick={() => {
-                navigate("/contact");
-                setMenuOpen(false);
+                scrollToSection("contact");
               }}
               className="text-gray-800 text-left"
             >
@@ -248,7 +271,7 @@ const Header = () => {
 
             <button
               onClick={() => {
-                navigate("/login");
+                navigate("/choose-login-type");
                 setMenuOpen(false);
               }}
               className="text-[#6B21A8] font-semibold border-t pt-2 text-left"

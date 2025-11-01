@@ -1,51 +1,64 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 function ServicesSection() {
+  const navigate = useNavigate();
+  
   const services = [
     {
       title: "Tender Search & Discovery",
       description:
         "We take a comprehensive approach to tender discovery starting from search algorithms and filters to tender categorization and alerts for private sector opportunities.",
       videoUrl: "/images/why1.mp4",
+      path: "/services/tendersearch"
     },
     {
       title: "Bid Management",
       description:
         "From concept to bid submission, GetBid covers the entire business tender management process for private companies and contractors...",
       videoUrl: "/images/why2.mp4",
+      path: "/services/bid-management"
     },
     {
       title: "Document Management",
       description:
         "GetBid focuses on your document security by increasing the quality and quantity of our Document Services for private sector clients.",
       videoUrl: "/images/why3.mp4",
+      path: "/services/document-management"
     },
     {
       title: "Compliance Support",
       description:
         "Navigate complex tender requirements with confidence. Our compliance tools help you understand regulations, maintain certifications, and ensure submissions meet all criteria.",
       videoUrl: "/images/why4.mp4",
+      path: "/services/compliancesupport"
     },
     {
       title: "Training & Support",
       description:
         "Empower your team with comprehensive training programs and ongoing support. Learn best practices for tender preparation, bidding strategies, and platform use.",
       videoUrl: "/images/why5.mp4",
+      path: "/services/training-support"
     },
     {
       title: "Analytics & Reporting",
       description:
         "Make data-driven decisions with powerful analytics and reporting tools. Track your bidding performance, success rates, and ROI while analyzing market trends.",
       videoUrl: "/images/why6.mp4",
+      path: "/services/analytics-reporting"
     },
   ];
+
+  const handleReadMore = (path) => {
+    navigate(path);
+  };
 
   return (
     <div className="bg-gradient-to-r from-purple-700 via-indigo-700 to-teal-600 py-16 px-4">
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <p className="text-white/90 text-sm uppercase tracking-wide mb-2">
+          <p className="text-white/90 text-sm uppercase tracking-wide mb-2" style={{fontWeight:"bold"}}>
             Why Choose Us
           </p>
           <h2 className="text-4xl font-bold text-white mb-3">Our Services</h2>
@@ -86,7 +99,10 @@ function ServicesSection() {
 
               {/* Button */}
               <div className="mt-auto flex justify-center">
-                <button className="bg-purple-700 text-white w-36 py-2 rounded-md font-semibold hover:bg-purple-800 transition-colors">
+                <button 
+                  onClick={() => handleReadMore(service.path)}
+                  className="bg-purple-700 text-white w-36 py-2 rounded-md font-semibold hover:bg-purple-800 transition-colors"
+                >
                   Read More
                 </button>
               </div>

@@ -296,7 +296,7 @@ const TendersSection = ({ isStandalone = false }) => {
       {isStandalone && <Header />}
 
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-purple-600 via-purple-500 to-blue-500 text-white py-16">
+      <div className="bg-gradient-to-br from-purple-700 to-green-600 py-12 sm:py-16">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             Browse Available Tenders

@@ -1,8 +1,13 @@
 import React from 'react';
 import { Briefcase, Users, Calendar, FileText, DollarSign, BarChart3, CheckSquare, Zap } from 'lucide-react';
-
+import Header from "../../pages/Home/Header";
+import Footer from "../../pages/Home/Footer";
 const BidManagement = () => {
   return (
+
+
+    <section>
+      <Header />
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-4 py-16">
@@ -360,6 +365,8 @@ const BidManagement = () => {
         </div>
       </section>
     </div>
+      <Footer/>
+    </section>
   );
 };
 
