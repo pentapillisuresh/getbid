@@ -1,8 +1,12 @@
 import React from 'react';
 import { BookOpen, Users, Award, TrendingUp, Wrench, HeadphonesIcon } from 'lucide-react';
+import Header from "../../pages/Home/Header";
+import Footer from "../../pages/Home/Footer";
 
 const TrainingSupport = () => {
   return (
+    <section>
+      <Header />
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-4 py-16">
@@ -377,6 +381,8 @@ const TrainingSupport = () => {
         </div>
       </section>
     </div>
+      <Footer/>
+    </section>
   );
 };
 

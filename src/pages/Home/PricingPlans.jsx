@@ -12,6 +12,7 @@ import {
   Calendar,
   IndianRupee,
   Phone,
+  Wallet, Clock, Plus,
   Sparkles
 } from "lucide-react";
 import api from "../../services/apiService";
@@ -101,6 +102,7 @@ function PricingSection() {
   };
 
   return (
+    <section id="pricing" className="">
     <div className="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-24 px-6">
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
@@ -245,75 +247,83 @@ function PricingSection() {
         </div>
 
         {/* Features Section */}
-        <div className="bg-white rounded-3xl p-12 shadow-xl mb-12 border border-gray-100">
-          <div className="flex items-center justify-center gap-3 mb-10">
-            <div className="p-3 bg-blue-100 rounded-2xl">
-              <Lightbulb className="w-8 h-8 text-blue-600" />
-            </div>
-            <h3 className="text-3xl font-bold text-gray-900">
-              Why Choose Our Plans?
-            </h3>
+         <div className=""> {/* ✅ Full section background */}
+      <div className="bg-white rounded-xl p-10 shadow-sm mx-auto max-w-6xl border border-[#E5E7EB]">
+
+        {/* Heading */}
+        <div className="flex items-center justify-center gap-3 mb-10">
+          <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+            <Lightbulb className="w-6 h-6 text-yellow-500" />
           </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center p-6 rounded-2xl hover:bg-blue-50 transition-colors duration-300">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-2xl mb-4">
-                <FileText className="w-8 h-8 text-blue-600" />
-              </div>
-              <h4 className="text-xl font-semibold text-gray-900 mb-3">Pay Per Use</h4>
-              <p className="text-gray-600 leading-relaxed">
-                Only pay for the tenders you actually bid on. No hidden costs or monthly commitments.
-              </p>
-            </div>
-            
-            <div className="text-center p-6 rounded-2xl hover:bg-green-50 transition-colors duration-300">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-2xl mb-4">
-                <Award className="w-8 h-8 text-green-600" />
-              </div>
-              <h4 className="text-xl font-semibold text-gray-900 mb-3">Extended Validity</h4>
-              <p className="text-gray-600 leading-relaxed">
-                Generous validity periods giving you ample time to find the right tenders.
-              </p>
-            </div>
-            
-            <div className="text-center p-6 rounded-2xl hover:bg-purple-50 transition-colors duration-300">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-2xl mb-4">
-                <Target className="w-8 h-8 text-purple-600" />
-              </div>
-              <h4 className="text-xl font-semibold text-gray-900 mb-3">Premium Features</h4>
-              <p className="text-gray-600 leading-relaxed">
-                Access top-tier vendor tools and features to enhance your bidding success rate.
-              </p>
-            </div>
-          </div>
+          <h3 className="text-2xl font-extrabold text-[#1D2739] tracking-tight">
+            Why Choose Our Tender-Wise Plans?
+          </h3>
         </div>
 
-        {/* CTA Section */}
-        <div className="text-center bg-gradient-to-r from-blue-600 to-indigo-700 rounded-3xl p-12 text-white">
-          <h3 className="text-3xl font-bold mb-4">
-            Ready to Transform Your Bidding Process?
-          </h3>
-          <p className="text-blue-100 text-xl mb-8 max-w-2xl mx-auto">
-            Join thousands of vendors who have increased their success rate with our targeted solutions.
-          </p>
-          
-          <div className="flex justify-center gap-4 flex-wrap">
-            <button className="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold hover:bg-blue-50 transition-all duration-300 flex items-center gap-2 shadow-lg hover:shadow-xl">
-              <Sparkles className="w-5 h-5" />
-              Start Free Trial
-            </button>
-            <button className="bg-transparent border-2 border-white text-white px-8 py-4 rounded-xl font-semibold hover:bg-white hover:text-blue-600 transition-all duration-300 flex items-center gap-2">
-              <Phone className="w-5 h-5" />
-              Talk to Sales
-            </button>
+        {/* Feature Points */}
+        <div className="grid md:grid-cols-3 gap-10">
+
+          {/* 1️⃣ Pay Only For Use */}
+          <div className="flex items-center justify-center gap-3">
+            <div className="w-10 h-10 bg-indigo-50 rounded-full flex items-center justify-center">
+              <Wallet className="w-5 h-5 text-indigo-600" />
+            </div>
+            <p className="text-[#445164] font-medium text-lg">
+              Pay only for what you use
+            </p>
           </div>
-          
-          <p className="text-blue-200 mt-6 text-sm">
-            No credit card required • 14-day free trial • Cancel anytime
-          </p>
+
+          {/* 2️⃣ Extended Validity */}
+          <div className="flex items-center justify-center gap-3">
+            <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center">
+              <Clock className="w-5 h-5 text-blue-600" />
+            </div>
+            <p className="text-[#445164] font-medium text-lg">
+              Extended validity periods
+            </p>
+          </div>
+
+          {/* 3️⃣ Top-up Anytime */}
+          <div className="flex items-center justify-center gap-3">
+            <div className="w-10 h-10 bg-purple-50 rounded-full flex items-center justify-center">
+              <Plus className="w-5 h-5 text-purple-600" />
+            </div>
+            <p className="text-[#445164] font-medium text-lg">
+              Top-up credits anytime
+            </p>
+          </div>
+
         </div>
       </div>
     </div>
+
+
+
+        {/* CTA Section */}
+        {/* CTA Section */}
+<div className="text-center mt-10">
+  <p className="text-[#1D2739] text-lg mb-6">
+    Ready to start winning more tenders? Choose your plan and get started today!
+  </p>
+
+  <div className="flex justify-center gap-4 flex-wrap">
+    
+    {/* Start Your Journey Button */}
+    <button className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-green-600 text-white px-7 py-3 rounded-xl font-semibold shadow-md hover:shadow-lg transition-all duration-300">
+      🚀 Start Your Journey
+    </button>
+
+    {/* Call for Custom Plans Button */}
+    <button className="flex items-center gap-2 border border-green-600 text-green-600 px-7 py-3 rounded-xl font-semibold hover:bg-green-50 transition-all duration-300">
+      📞 Call for Custom Plans
+    </button>
+
+  </div>
+</div>
+
+      </div>
+    </div>
+    </section>
   );
 }
 

@@ -45,12 +45,16 @@ export default function HeroCarousel() {
 
   const prevSlide = () =>
     setCurrent((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
+
   const nextSlide = () =>
     setCurrent((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
 
   return (
-    <section className="relative bg-gradient-to-br from-purple-50 via-purple-100 to-green-50 overflow-hidden">
-      {/* Navigation Arrows - Outside the main content */}
+    <section className="relative overflow-hidden bg-gradient-to-r from-purple-700/20 to-green-700/10">
+      {/* New Gradient Background Overlay ✅ */}
+      <div className="absolute inset-0 bg-gradient-to-r from-purple-800/80 to-green-700/80 -z-10"></div>
+
+      {/* Navigation Arrows */}
       <button
         onClick={prevSlide}
         className="absolute left-6 top-1/2 -translate-y-1/2 bg-white text-gray-700 p-2 rounded-full shadow-lg hover:bg-gray-100 transition-all duration-300 hover:scale-110 z-20"
@@ -58,6 +62,7 @@ export default function HeroCarousel() {
       >
         <ChevronLeft size={20} />
       </button>
+
       <button
         onClick={nextSlide}
         className="absolute right-6 top-1/2 -translate-y-1/2 bg-white text-gray-700 p-2 rounded-full shadow-lg hover:bg-gray-100 transition-all duration-300 hover:scale-110 z-20"
@@ -66,28 +71,29 @@ export default function HeroCarousel() {
         <ChevronRight size={20} />
       </button>
 
-      <div className="max-w-7xl mx-auto">
-        <div className="grid md:grid-cols-2 gap-12 items-center relative">
-          {/* LEFT CONTENT */}
-          <div className="relative min-h-[400px]">
-            {slides.map((slide, index) => (
-              <div
-                key={index}
-                className={`transition-all duration-700 ease-in-out ${
-                  index === current
-                    ? "opacity-100 translate-x-0 relative"
-                    : "opacity-0 translate-x-10 absolute top-0 left-0 pointer-events-none"
-                }`}
-              >
-                <p className="text-purple-600 font-semibold mb-4 text-base">
+      <div className="max-w-7xl mx-auto relative overflow-hidden">
+        {/* SLIDER WRAPPER */}
+        <div
+          className="flex transition-transform duration-700 ease-out"
+          style={{ transform: `translateX(-${current * 100}%)` }}
+        >
+          {slides.map((slide, index) => (
+            <div
+              key={index}
+              className="w-full min-h-[500px] grid md:grid-cols-2 gap-12 items-center flex-shrink-0 px-4 py-10"
+            >
+              {/* TEXT SECTION */}
+              <div>
+                <p className="bg-gradient-to-r from-purple-700 to-green-600 bg-clip-text text-transparent font-bold text-xs sm:text-sm lg:text-base">
                   {slide.subtitle}
                 </p>
-                <h3 className="text-4xl font-bold text-gray-900 leading-tight mb-6">
+                <h3 className="text-5xl font-bold text-gray-900 leading-none mb-6">
                   {slide.title}
                 </h3>
                 <p className="text-gray-700 text-lg mb-8 leading-relaxed">
                   {slide.description}
                 </p>
+
                 <div className="flex gap-4">
                   <button
                     className="bg-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl"
@@ -95,55 +101,46 @@ export default function HeroCarousel() {
                   >
                     {slide.button1}
                   </button>
+
                   <button
                     className="bg-white text-green-600 px-8 py-3 rounded-lg font-semibold border-2 border-green-600 hover:bg-green-50 transition-all duration-300 shadow-md hover:shadow-lg"
-                    onClick={() => (window.location.href = slide.button2Link)}
+                    onClick={() =>
+                      slide.button2Link &&
+                      (window.location.href = slide.button2Link)
+                    }
                   >
                     {slide.button2}
                   </button>
                 </div>
               </div>
-            ))}
-          </div>
 
-          {/* RIGHT IMAGE/ILLUSTRATION */}
-          <div className="relative flex justify-center items-center min-h-[500px]">
-            {slides.map((slide, index) => (
-              <div
-                key={index}
-                className={`absolute inset-0 flex justify-center items-center transition-all duration-700 ease-in-out ${
-                  index === current
-                    ? "opacity-100 scale-100"
-                    : "opacity-0 scale-95 pointer-events-none"
-                }`}
-              >
-                <div className="w-full h-[500px]   flex items-center justify-center">
-                  <img
-                    src={slide.image}
-                    alt={`slide-${index}`}
-                    className="w-[90%] h-[90%] object-contain"
-                  />
-                </div>
+              {/* IMAGE SECTION */}
+              <div className="flex justify-center items-center">
+                <img
+                  src={slide.image}
+                  alt={`slide-${index}`}
+                  className="w-[90%] h-[90%] object-contain rounded-lg"
+                />
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Dots Indicator */}
-        <div className="flex justify-center mt-8 gap-3 mb-2">
-          {slides.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrent(index)}
-              className={`transition-all duration-300 rounded-full ${
-                current === index
-                  ? "bg-purple-600 w-8 h-3"
-                  : "bg-gray-400 w-3 h-3 hover:bg-gray-500"
-              }`}
-              aria-label={`Go to slide ${index + 1}`}
-            ></button>
+            </div>
           ))}
         </div>
+      </div>
+
+      {/* Dots */}
+      <div className="flex justify-center mt-8 gap-3 mb-2">
+        {slides.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrent(index)}
+            className={`transition-all duration-300 rounded-full ${
+              current === index
+                ? "bg-purple-600 w-8 h-3"
+                : "bg-gray-400 w-3 h-3 hover:bg-gray-500"
+            }`}
+            aria-label={`Go to slide ${index + 1}`}
+          ></button>
+        ))}
       </div>
     </section>
   );

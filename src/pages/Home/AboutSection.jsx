@@ -3,7 +3,7 @@ import { Target, Eye, Diamond } from "lucide-react";
 
 function AboutSection() {
   return (
-    <section className="about">
+    <section id="about" className="about">
       <div className="bg-white py-20 px-6">
         <div className="max-w-7xl mx-auto">
           {/* Section Header */}

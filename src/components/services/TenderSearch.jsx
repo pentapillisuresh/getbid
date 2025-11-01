@@ -1,7 +1,12 @@
 import { Search, Filter, Bell, Database, Bookmark, TrendingUp, File, Phone, Mail } from 'lucide-react'
+import Header from "../../pages/Home/Header";
+import Footer from "../../pages/Home/Footer";
 
 function TenderSearch() {
   return (
+
+    <section>
+      <Header />
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-blue-50 to-purple-50 px-6 py-16 lg:py-24">
@@ -284,6 +289,8 @@ function TenderSearch() {
       {/* Footer */}
    
     </div>
+      <Footer/>
+    </section>
   )
 }
 

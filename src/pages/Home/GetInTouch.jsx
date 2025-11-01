@@ -1,8 +1,11 @@
 import React from "react";
 import { Phone, Mail, MapPin, Send, Star } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 function CTASection() {
+   const navigate = useNavigate();
   return (
+    <section id="contact">
     <div className="bg-gradient-to-br from-purple-50 to-pink-50 py-20 px-6">
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
@@ -67,7 +70,7 @@ function CTASection() {
                 <button className="bg-white text-purple-600 px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition">
                   View Plans
                 </button>
-                <button className="bg-purple-900 text-white px-6 py-2 rounded-lg font-semibold hover:bg-purple-800 transition">
+                <button  onClick={() => navigate("/choose-login-type")} className="bg-purple-900 text-white px-6 py-2 rounded-lg font-semibold hover:bg-purple-800 transition">
                   Login
                 </button>
               </div>
@@ -136,6 +139,7 @@ function CTASection() {
         </div>
       </div>
     </div>
+    </section>
   );
 }
 

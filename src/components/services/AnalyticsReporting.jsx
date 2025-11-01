@@ -1,8 +1,15 @@
 import React from 'react';
 import { BarChart3, Target, TrendingUp, Layout, FileText, Zap } from 'lucide-react';
+import Header from "../../pages/Home/Header";
+import Footer from "../../pages/Home/Footer";
+
 
 const AnalyticsReporting = () => {
   return (
+
+
+    <section>
+      <Header />
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-teal-50">
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-4 py-16">
@@ -246,6 +253,8 @@ const AnalyticsReporting = () => {
         </div>
       </section>
     </div>
+    <Footer/>
+    </section>
   );
 };
 
