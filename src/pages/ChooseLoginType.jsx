@@ -165,8 +165,11 @@ const ChooseLoginType = () => {
           <div className="flex items-center justify-center flex-1 p-4 sm:p-6 lg:p-8">
             <div className="w-full max-w-md">
               <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 sm:p-8">
-                {/* Header */}
+                {/* Header with Centered Logo */}
                 <div className="text-center mb-8">
+                  <div className="flex justify-center mb-4">
+                    <img src="/images/logo2.png" alt="Logo" className="w-20 h-10" />
+                  </div>
                   <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
                     Choose Login Type
                   </h2>
@@ -237,9 +240,7 @@ const ChooseLoginType = () => {
                     Level
                   </label>
                   <div className="relative">
-                                  <img src="/images/logo2.png" alt="Logo" className="w-20 h-10" />
-
-                    <select className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                    <select className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
                       <option>
                         {loginType === "vendor"
                           ? "Vendor / Supplier"

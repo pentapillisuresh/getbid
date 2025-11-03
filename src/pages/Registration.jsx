@@ -10,7 +10,6 @@ import {
   RefreshCw,
   CheckCircle,
   Send,
-  Phone,
   Check,
   Edit2,
   Upload,
@@ -749,11 +748,15 @@ const Registration = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-6">
-            <h1 className="text-2xl font-bold text-white text-center mb-4">
+    <div className="min-h-screen bg-gray-50 py-4 px-3">
+      <div className="max-w-2xl mx-auto">
+        <div className="bg-white rounded-lg shadow-md border border-gray-100 overflow-hidden">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-4">
+            {/* Centered Logo */}
+            <div className="flex justify-center mb-3">
+              <img src="/images/logo2.png" alt="Logo" className="w-20 h-10" />
+            </div>
+            <h1 className="text-xl font-bold text-white text-center mb-3">
               Registration Portal
             </h1>
 
@@ -761,23 +764,23 @@ const Registration = () => {
               {[1, 2, 3].map((step) => (
                 <div key={step} className="flex items-center">
                   <div
-                    className={`flex items-center justify-center w-10 h-10 rounded-full font-semibold ${
+                    className={`flex items-center justify-center w-8 h-8 rounded-full font-semibold text-sm ${
                       step === currentStep
-                        ? "bg-white text-blue-600 shadow-lg"
+                        ? "bg-white text-blue-600 shadow-md"
                         : step < currentStep
                         ? "bg-blue-200 text-blue-700"
                         : "bg-blue-400 text-blue-100"
                     }`}
                   >
                     {step < currentStep ? (
-                      <CheckCircle className="w-5 h-5" />
+                      <CheckCircle className="w-4 h-4" />
                     ) : (
                       step
                     )}
                   </div>
                   {step < 3 && (
                     <div
-                      className={`w-16 h-1 mx-2 rounded ${
+                      className={`w-12 h-1 mx-1 rounded ${
                         step < currentStep ? "bg-blue-200" : "bg-blue-400"
                       }`}
                     />
@@ -787,28 +790,28 @@ const Registration = () => {
             </div>
           </div>
 
-          <div className="px-6 py-6">
-            <h2 className="text-xl font-bold text-gray-900 text-center mb-6">
+          <div className="px-4 py-4">
+            <h2 className="text-lg font-bold text-gray-900 text-center mb-4">
               {stepTitles[currentStep]}
             </h2>
 
             {currentStep === 1 && (
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  <h3 className="text-base font-semibold text-gray-800 mb-3">
                     Choose Registration Type
                   </h3>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3">
                     <button
                       onClick={() => setRegistrationType("vendor")}
-                      className={`p-6 rounded-xl border-2 transition-all ${
+                      className={`p-4 rounded-lg border transition-all ${
                         registrationType === "vendor"
                           ? "border-blue-500 bg-blue-50 text-blue-700"
                           : "border-gray-200 hover:border-gray-300"
                       }`}
                     >
-                      <Building2 className="w-8 h-8 mx-auto mb-3 text-blue-600" />
-                      <div className="font-semibold mb-1">Vendor</div>
+                      <Building2 className="w-6 h-6 mx-auto mb-2 text-blue-600" />
+                      <div className="font-semibold text-sm mb-1">Vendor</div>
                       <div className="text-xs text-gray-600">
                         Register as vendor
                       </div>
@@ -816,14 +819,14 @@ const Registration = () => {
 
                     <button
                       onClick={() => setRegistrationType("client")}
-                      className={`p-6 rounded-xl border-2 transition-all ${
+                      className={`p-4 rounded-lg border transition-all ${
                         registrationType === "client"
                           ? "border-blue-500 bg-blue-50 text-blue-700"
                           : "border-gray-200 hover:border-gray-300"
                       }`}
                     >
-                      <Building2 className="w-8 h-8 mx-auto mb-3 text-blue-600" />
-                      <div className="font-semibold mb-1">Client</div>
+                      <Building2 className="w-6 h-6 mx-auto mb-2 text-blue-600" />
+                      <div className="font-semibold text-sm mb-1">Client</div>
                       <div className="text-xs text-gray-600">
                         Register as buyer
                       </div>
@@ -832,10 +835,10 @@ const Registration = () => {
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  <h3 className="text-base font-semibold text-gray-800 mb-3">
                     Entity Type
                   </h3>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3">
                     <button
                       onClick={() => {
                         setEntityType("individual");
@@ -858,14 +861,14 @@ const Registration = () => {
                           gstOtp: "",
                         }));
                       }}
-                      className={`p-6 rounded-xl border-2 transition-all ${
+                      className={`p-4 rounded-lg border transition-all ${
                         entityType === "individual"
                           ? "border-gray-500 bg-gray-50"
                           : "border-gray-200 hover:border-gray-300"
                       }`}
                     >
-                      <User className="w-8 h-8 mx-auto mb-3 text-gray-600" />
-                      <div className="font-semibold mb-1">Individual</div>
+                      <User className="w-6 h-6 mx-auto mb-2 text-gray-600" />
+                      <div className="font-semibold text-sm mb-1">Individual</div>
                       <div className="text-xs text-gray-600">
                         Register with PAN
                       </div>
@@ -893,14 +896,14 @@ const Registration = () => {
                           incorporationDate: "",
                         }));
                       }}
-                      className={`p-6 rounded-xl border-2 transition-all ${
+                      className={`p-4 rounded-lg border transition-all ${
                         entityType === "company"
                           ? "border-gray-500 bg-gray-50"
                           : "border-gray-200 hover:border-gray-300"
                       }`}
                     >
-                      <Building2 className="w-8 h-8 mx-auto mb-3 text-gray-600" />
-                      <div className="font-semibold mb-1">Company</div>
+                      <Building2 className="w-6 h-6 mx-auto mb-2 text-gray-600" />
+                      <div className="font-semibold text-sm mb-1">Company</div>
                       <div className="text-xs text-gray-600">
                         Register with GST
                       </div>
@@ -909,8 +912,8 @@ const Registration = () => {
                 </div>
 
                 {entityType === "individual" ? (
-                  <div className="bg-gray-50 rounded-xl p-4">
-                    <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                       PAN Number *
                     </label>
                     <input
@@ -919,7 +922,7 @@ const Registration = () => {
                       value={formData.panNumber}
                       onChange={handleInputChange}
                       placeholder="ABCDE1234F"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                       required
                       disabled={panVerified}
                     />
@@ -967,13 +970,13 @@ const Registration = () => {
 
                     {/* File Upload Section - Only enabled if PAN number is valid */}
                     {!panVerified && (
-                      <div className="mt-4">
+                      <div className="mt-3">
                         <label className="block text-sm font-semibold text-gray-700 mb-2">
                           Upload PAN Document *
                         </label>
                         {formData.panNumber &&
                         validatePanNumber(formData.panNumber) ? (
-                          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-400 transition-colors">
+                          <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center hover:border-blue-400 transition-colors">
                             <input
                               id="pan-file-input"
                               type="file"
@@ -985,8 +988,8 @@ const Registration = () => {
                               htmlFor="pan-file-input"
                               className="cursor-pointer flex flex-col items-center"
                             >
-                              <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                              <span className="text-sm text-gray-600">
+                              <Upload className="w-6 h-6 text-gray-400 mb-1" />
+                              <span className="text-xs text-gray-600">
                                 Click to select PAN document
                               </span>
                               <span className="text-xs text-gray-500 mt-1">
@@ -995,9 +998,9 @@ const Registration = () => {
                             </label>
                           </div>
                         ) : (
-                          <div className="border-2 border-dashed border-gray-200 rounded-lg p-4 text-center bg-gray-50">
-                            <Upload className="w-8 h-8 text-gray-300 mb-2 mx-auto" />
-                            <span className="text-sm text-gray-400">
+                          <div className="border-2 border-dashed border-gray-200 rounded-lg p-3 text-center bg-gray-50">
+                            <Upload className="w-6 h-6 text-gray-300 mb-1 mx-auto" />
+                            <span className="text-xs text-gray-400">
                               Please enter a valid PAN number first
                             </span>
                             <span className="text-xs text-gray-400 block mt-1">
@@ -1007,10 +1010,10 @@ const Registration = () => {
                           </div>
                         )}
                         {panFile && (
-                          <div className="mt-2 bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center justify-between">
+                          <div className="mt-2 bg-blue-50 border border-blue-200 rounded-lg p-2 flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <FileText className="w-4 h-4 text-blue-600" />
-                              <span className="text-sm text-blue-800">
+                              <span className="text-xs text-blue-800">
                                 {panFile.name}
                               </span>
                             </div>
@@ -1027,31 +1030,31 @@ const Registration = () => {
                     )}
 
                     {panVerified && (
-                      <div className="mt-3 bg-blue-50 border-2 border-blue-200 rounded-lg p-3">
+                      <div className="mt-2 bg-blue-50 border-2 border-blue-200 rounded-lg p-2">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2 text-blue-700">
-                            <CheckCircle className="w-5 h-5" />
-                            <span className="font-semibold">
+                            <CheckCircle className="w-4 h-4" />
+                            <span className="font-semibold text-sm">
                               PAN document selected successfully!
                             </span>
                           </div>
                           <div className="relative group">
                             <div
-                              className="p-2 bg-blue-500 text-white rounded-lg cursor-pointer transition-all group-hover:bg-blue-600"
+                              className="p-1 bg-blue-500 text-white rounded cursor-pointer transition-all group-hover:bg-blue-600"
                               onClick={handleEditPan}
                             >
-                              <Check className="w-4 h-4 group-hover:hidden" />
-                              <Edit2 className="w-4 h-4 hidden group-hover:block" />
+                              <Check className="w-3 h-3 group-hover:hidden" />
+                              <Edit2 className="w-3 h-3 hidden group-hover:block" />
                             </div>
-                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                               Click to edit PAN
                             </div>
                           </div>
                         </div>
                         {panFile && (
-                          <div className="mt-2 bg-white border border-blue-200 rounded-lg p-2 flex items-center gap-2">
-                            <FileText className="w-4 h-4 text-blue-600" />
-                            <span className="text-sm text-gray-700">
+                          <div className="mt-1 bg-white border border-blue-200 rounded p-1 flex items-center gap-1">
+                            <FileText className="w-3 h-3 text-blue-600" />
+                            <span className="text-xs text-gray-700">
                               {panFile.name}
                             </span>
                           </div>
@@ -1060,8 +1063,8 @@ const Registration = () => {
                     )}
                   </div>
                 ) : (
-                  <div className="bg-gray-50 rounded-xl p-4">
-                    <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                       GST Number *
                     </label>
                     <input
@@ -1070,7 +1073,7 @@ const Registration = () => {
                       value={formData.gstNumber}
                       onChange={handleInputChange}
                       placeholder="22AAAAA0000A1Z5"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                       required
                       disabled={gstVerified}
                     />
@@ -1118,13 +1121,13 @@ const Registration = () => {
 
                     {/* File Upload Section - Only enabled if GST number is valid */}
                     {!gstVerified && (
-                      <div className="mt-4">
+                      <div className="mt-3">
                         <label className="block text-sm font-semibold text-gray-700 mb-2">
                           Upload GST Document *
                         </label>
                         {formData.gstNumber &&
                         validateGstNumber(formData.gstNumber) ? (
-                          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-400 transition-colors">
+                          <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center hover:border-blue-400 transition-colors">
                             <input
                               id="gst-file-input"
                               type="file"
@@ -1136,8 +1139,8 @@ const Registration = () => {
                               htmlFor="gst-file-input"
                               className="cursor-pointer flex flex-col items-center"
                             >
-                              <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                              <span className="text-sm text-gray-600">
+                              <Upload className="w-6 h-6 text-gray-400 mb-1" />
+                              <span className="text-xs text-gray-600">
                                 Click to select GST document
                               </span>
                               <span className="text-xs text-gray-500 mt-1">
@@ -1146,9 +1149,9 @@ const Registration = () => {
                             </label>
                           </div>
                         ) : (
-                          <div className="border-2 border-dashed border-gray-200 rounded-lg p-4 text-center bg-gray-50">
-                            <Upload className="w-8 h-8 text-gray-300 mb-2 mx-auto" />
-                            <span className="text-sm text-gray-400">
+                          <div className="border-2 border-dashed border-gray-200 rounded-lg p-3 text-center bg-gray-50">
+                            <Upload className="w-6 h-6 text-gray-300 mb-1 mx-auto" />
+                            <span className="text-xs text-gray-400">
                               Please enter a valid GST number first
                             </span>
                             <span className="text-xs text-gray-400 block mt-1">
@@ -1157,10 +1160,10 @@ const Registration = () => {
                           </div>
                         )}
                         {gstFile && (
-                          <div className="mt-2 bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center justify-between">
+                          <div className="mt-2 bg-blue-50 border border-blue-200 rounded-lg p-2 flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <FileText className="w-4 h-4 text-blue-600" />
-                              <span className="text-sm text-blue-800">
+                              <span className="text-xs text-blue-800">
                                 {gstFile.name}
                               </span>
                             </div>
@@ -1177,31 +1180,31 @@ const Registration = () => {
                     )}
 
                     {gstVerified && (
-                      <div className="mt-3 bg-blue-50 border-2 border-blue-200 rounded-lg p-3">
+                      <div className="mt-2 bg-blue-50 border-2 border-blue-200 rounded-lg p-2">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2 text-blue-700">
-                            <CheckCircle className="w-5 h-5" />
-                            <span className="font-semibold">
+                            <CheckCircle className="w-4 h-4" />
+                            <span className="font-semibold text-sm">
                               GST document selected successfully!
                             </span>
                           </div>
                           <div className="relative group">
                             <div
-                              className="p-2 bg-blue-500 text-white rounded-lg cursor-pointer transition-all group-hover:bg-blue-600"
+                              className="p-1 bg-blue-500 text-white rounded cursor-pointer transition-all group-hover:bg-blue-600"
                               onClick={handleEditGst}
                             >
-                              <Check className="w-4 h-4 group-hover:hidden" />
-                              <Edit2 className="w-4 h-4 hidden group-hover:block" />
+                              <Check className="w-3 h-3 group-hover:hidden" />
+                              <Edit2 className="w-3 h-3 hidden group-hover:block" />
                             </div>
-                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                               Click to edit GST
                             </div>
                           </div>
                         </div>
                         {gstFile && (
-                          <div className="mt-2 bg-white border border-blue-200 rounded-lg p-2 flex items-center gap-2">
-                            <FileText className="w-4 h-4 text-blue-600" />
-                            <span className="text-sm text-gray-700">
+                          <div className="mt-1 bg-white border border-blue-200 rounded p-1 flex items-center gap-1">
+                            <FileText className="w-3 h-3 text-blue-600" />
+                            <span className="text-xs text-gray-700">
                               {gstFile.name}
                             </span>
                           </div>
@@ -1214,11 +1217,11 @@ const Registration = () => {
             )}
 
             {currentStep === 2 && (
-              <div className="space-y-6">
-                <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
+              <div className="space-y-4">
+                <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-3">
                   <div className="flex items-center gap-2 text-blue-700">
-                    <CheckCircle className="w-5 h-5" />
-                    <span className="font-semibold">
+                    <CheckCircle className="w-4 h-4" />
+                    <span className="font-semibold text-sm">
                       {entityType === "individual" ? "PAN" : "GST"} verified!
                       Details auto-filled.
                     </span>
@@ -1226,15 +1229,15 @@ const Registration = () => {
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  <h3 className="text-base font-semibold text-gray-800 mb-3">
                     {entityType === "individual"
                       ? "Personal"
                       : "Company & Personal"}{" "}
                     Details
                   </h3>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-semibold text-gray-700 mb-2">
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">
                         First Name *
                       </label>
                       <input
@@ -1242,12 +1245,12 @@ const Registration = () => {
                         name="firstName"
                         value={formData.firstName}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm"
+                        className="w-full px-2 py-1 border border-gray-300 rounded-lg bg-white text-gray-900 text-xs"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-gray-700 mb-2">
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">
                         Last Name *
                       </label>
                       <input
@@ -1255,12 +1258,12 @@ const Registration = () => {
                         name="lastName"
                         value={formData.lastName}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm"
+                        className="w-full px-2 py-1 border border-gray-300 rounded-lg bg-white text-gray-900 text-xs"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-gray-700 mb-2">
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">
                         Father's Name *
                       </label>
                       <input
@@ -1268,12 +1271,12 @@ const Registration = () => {
                         name="fatherName"
                         value={formData.fatherName}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm"
+                        className="w-full px-2 py-1 border border-gray-300 rounded-lg bg-white text-gray-900 text-xs"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-gray-700 mb-2">
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">
                         Date of Birth *
                       </label>
                       <input
@@ -1281,7 +1284,7 @@ const Registration = () => {
                         name="dateOfBirth"
                         value={formData.dateOfBirth}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm"
+                        className="w-full px-2 py-1 border border-gray-300 rounded-lg bg-white text-gray-900 text-xs"
                         required
                       />
                     </div>
@@ -1290,7 +1293,7 @@ const Registration = () => {
                     {/* {entityType === "company" && ( */}
                     <>
                       <div className="col-span-2">
-                        <label className="block text-xs font-semibold text-gray-700 mb-2">
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">
                           Company Name *
                         </label>
                         <input
@@ -1299,19 +1302,19 @@ const Registration = () => {
                           value={formData.companyName}
                           onChange={handleInputChange}
                           placeholder="TechCorp Solutions Private Limited"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm"
+                          className="w-full px-2 py-1 border border-gray-300 rounded-lg bg-white text-gray-900 text-xs"
                           required
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-2">
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">
                           Company Type *
                         </label>
                         <select
                           name="companyType"
                           value={formData.companyType}
                           onChange={handleInputChange}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm"
+                          className="w-full px-2 py-1 border border-gray-300 rounded-lg bg-white text-gray-900 text-xs"
                           required
                         >
                           <option value="">Select Company Type</option>
@@ -1337,7 +1340,7 @@ const Registration = () => {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-2">
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">
                           Incorporation Date *
                         </label>
                         <input
@@ -1345,7 +1348,7 @@ const Registration = () => {
                           name="incorporationDate"
                           value={formData.incorporationDate}
                           onChange={handleInputChange}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm"
+                          className="w-full px-2 py-1 border border-gray-300 rounded-lg bg-white text-gray-900 text-xs"
                           required
                         />
                       </div>
@@ -1353,7 +1356,7 @@ const Registration = () => {
                     {/* )} */}
 
                     <div className="col-span-2">
-                      <label className="block text-xs font-semibold text-gray-700 mb-2">
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">
                         Address
                       </label>
                       <input
@@ -1361,11 +1364,11 @@ const Registration = () => {
                         name="address"
                         value={formData.address}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm"
+                        className="w-full px-2 py-1 border border-gray-300 rounded-lg bg-white text-gray-900 text-xs"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-gray-700 mb-2">
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">
                         City
                       </label>
                       <input
@@ -1373,11 +1376,11 @@ const Registration = () => {
                         name="city"
                         value={formData.city}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm"
+                        className="w-full px-2 py-1 border border-gray-300 rounded-lg bg-white text-gray-900 text-xs"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-gray-700 mb-2">
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">
                         State
                       </label>
                       <input
@@ -1385,36 +1388,36 @@ const Registration = () => {
                         name="state"
                         value={formData.state}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm"
+                        className="w-full px-2 py-1 border border-gray-300 rounded-lg bg-white text-gray-900 text-xs"
                       />
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  <h3 className="text-base font-semibold text-gray-800 mb-3">
                     Contact Information
                   </h3>
 
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <div
-                      className={`p-4 rounded-xl border-2 ${
+                      className={`p-3 rounded-lg border-2 ${
                         emailVerified
                           ? "border-blue-200 bg-blue-50"
                           : "border-gray-200 bg-gray-50"
                       }`}
                     >
-                      <label className="block text-xs font-semibold text-gray-700 mb-2">
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">
                         Email Address *
                       </label>
-                      <div className="flex gap-2 mb-3">
+                      <div className="flex gap-2 mb-2">
                         <input
                           type="email"
                           name="email"
                           value={formData.email}
                           onChange={handleInputChange}
                           placeholder="your.email@example.com"
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+                          className="flex-1 px-2 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-xs"
                           required
                           disabled={emailVerified}
                         />
@@ -1423,25 +1426,25 @@ const Registration = () => {
                             type="button"
                             onClick={sendEmailOtp}
                             disabled={loading}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-gray-700 text-sm font-medium whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-gray-700 text-xs font-medium whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             {loading ? (
-                              <RefreshCw className="w-4 h-4 animate-spin" />
+                              <RefreshCw className="w-3 h-3 animate-spin" />
                             ) : (
-                              <Send className="w-4 h-4" />
+                              <Send className="w-3 h-3" />
                             )}
                           </button>
                         )}
                         {emailVerified && (
                           <div className="relative group">
                             <div
-                              className="px-4 py-2 bg-blue-500 text-white rounded-lg flex items-center gap-2 cursor-pointer transition-all group-hover:bg-blue-600"
+                              className="px-3 py-1 bg-blue-500 text-white rounded-lg flex items-center gap-1 cursor-pointer transition-all group-hover:bg-blue-600"
                               onClick={handleEditEmail}
                             >
-                              <Check className="w-4 h-4 group-hover:hidden" />
-                              <Edit2 className="w-4 h-4 hidden group-hover:block" />
+                              <Check className="w-3 h-3 group-hover:hidden" />
+                              <Edit2 className="w-3 h-3 hidden group-hover:block" />
                             </div>
-                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                               Click to edit email
                             </div>
                           </div>
@@ -1449,7 +1452,7 @@ const Registration = () => {
                       </div>
 
                       {!emailVerified && !showEmailOtp && formData.email && (
-                        <div className="text-xs text-orange-600 mb-3">
+                        <div className="text-xs text-orange-600 mb-2">
                           Please verify your email address
                         </div>
                       )}
@@ -1462,7 +1465,7 @@ const Registration = () => {
                             value={formData.emailOtp}
                             onChange={handleInputChange}
                             placeholder="Enter 6-digit OTP"
-                            className="w-full px-3 py-2 text-center text-lg font-mono bg-white border-2 border-blue-300 rounded-lg tracking-widest"
+                            className="w-full px-2 py-1 text-center font-mono bg-white border-2 border-blue-300 rounded-lg tracking-widest text-sm"
                             maxLength="6"
                           />
                           <div className="flex gap-2">
@@ -1470,7 +1473,7 @@ const Registration = () => {
                               type="button"
                               onClick={verifyEmailOtp}
                               disabled={loading}
-                              className="flex-1 bg-blue-500 text-white py-2 px-3 rounded-lg font-semibold hover:bg-blue-600 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="flex-1 bg-blue-500 text-white py-1 px-2 rounded-lg font-semibold hover:bg-blue-600 text-xs disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               {loading ? "Verifying..." : "Verify"}
                             </button>
@@ -1478,7 +1481,7 @@ const Registration = () => {
                               type="button"
                               onClick={sendEmailOtp}
                               disabled={loading}
-                              className="px-4 py-2 text-blue-600 bg-white border-2 border-blue-300 rounded-lg hover:bg-blue-50 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="px-3 py-1 text-blue-600 bg-white border-2 border-blue-300 rounded-lg hover:bg-blue-50 text-xs disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               {loading ? "Sending..." : "Resend"}
                             </button>
@@ -1488,23 +1491,23 @@ const Registration = () => {
                     </div>
 
                     <div
-                      className={`p-4 rounded-xl border-2 ${
+                      className={`p-3 rounded-lg border-2 ${
                         mobileVerified
                           ? "border-blue-200 bg-blue-50"
                           : "border-gray-200 bg-gray-50"
                       }`}
                     >
-                      <label className="block text-xs font-semibold text-gray-700 mb-2">
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">
                         Mobile Number *
                       </label>
-                      <div className="flex gap-2 mb-3">
+                      <div className="flex gap-2 mb-2">
                         <input
                           type="tel"
                           name="mobile"
                           value={formData.mobile}
                           onChange={handleInputChange}
                           placeholder="10-digit mobile"
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+                          className="flex-1 px-2 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-xs"
                           required
                           disabled={mobileVerified}
                         />
@@ -1513,25 +1516,25 @@ const Registration = () => {
                             type="button"
                             onClick={sendMobileOtp}
                             disabled={loading}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-xs font-medium whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             {loading ? (
-                              <RefreshCw className="w-4 h-4 animate-spin" />
+                              <RefreshCw className="w-3 h-3 animate-spin" />
                             ) : (
-                              <Send className="w-4 h-4" />
+                              <Send className="w-3 h-3" />
                             )}
                           </button>
                         )}
                         {mobileVerified && (
                           <div className="relative group">
                             <div
-                              className="px-4 py-2 bg-blue-500 text-white rounded-lg flex items-center gap-2 cursor-pointer transition-all group-hover:bg-blue-600"
+                              className="px-3 py-1 bg-blue-500 text-white rounded-lg flex items-center gap-1 cursor-pointer transition-all group-hover:bg-blue-600"
                               onClick={handleEditMobile}
                             >
-                              <Check className="w-4 h-4 group-hover:hidden" />
-                              <Edit2 className="w-4 h-4 hidden group-hover:block" />
+                              <Check className="w-3 h-3 group-hover:hidden" />
+                              <Edit2 className="w-3 h-3 hidden group-hover:block" />
                             </div>
-                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                               Click to edit mobile
                             </div>
                           </div>
@@ -1539,7 +1542,7 @@ const Registration = () => {
                       </div>
 
                       {!mobileVerified && !showMobileOtp && formData.mobile && (
-                        <div className="text-xs text-orange-600 mb-3">
+                        <div className="text-xs text-orange-600 mb-2">
                           Please verify your mobile number
                         </div>
                       )}
@@ -1552,7 +1555,7 @@ const Registration = () => {
                             value={formData.mobileOtp}
                             onChange={handleInputChange}
                             placeholder="Enter 6-digit OTP"
-                            className="w-full px-3 py-2 text-center text-lg font-mono bg-white border-2 border-blue-300 rounded-lg tracking-widest"
+                            className="w-full px-2 py-1 text-center font-mono bg-white border-2 border-blue-300 rounded-lg tracking-widest text-sm"
                             maxLength="6"
                           />
                           <div className="flex gap-2">
@@ -1560,7 +1563,7 @@ const Registration = () => {
                               type="button"
                               onClick={verifyMobileOtp}
                               disabled={loading}
-                              className="flex-1 bg-blue-600 text-white py-2 px-3 rounded-lg font-semibold hover:bg-blue-700 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="flex-1 bg-blue-600 text-white py-1 px-2 rounded-lg font-semibold hover:bg-blue-700 text-xs disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               {loading ? "Verifying..." : "Verify"}
                             </button>
@@ -1568,7 +1571,7 @@ const Registration = () => {
                               type="button"
                               onClick={sendMobileOtp}
                               disabled={loading}
-                              className="px-4 py-2 text-blue-600 bg-white border-2 border-blue-300 rounded-lg hover:bg-blue-50 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="px-3 py-1 text-blue-600 bg-white border-2 border-blue-300 rounded-lg hover:bg-blue-50 text-xs disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               {loading ? "Sending..." : "Resend"}
                             </button>
@@ -1577,9 +1580,9 @@ const Registration = () => {
                       )}
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-2">
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">
                           Alternate Phone
                         </label>
                         <input
@@ -1588,11 +1591,11 @@ const Registration = () => {
                           value={formData.alternatePhone}
                           onChange={handleInputChange}
                           placeholder="Optional"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+                          className="w-full px-2 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-xs"
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-semibold text-gray-700 mb-2">
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">
                           Website
                         </label>
                         <input
@@ -1601,13 +1604,13 @@ const Registration = () => {
                           value={formData.website}
                           onChange={handleInputChange}
                           placeholder="Optional"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+                          className="w-full px-2 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-xs"
                         />
                       </div>
                     </div>
 
-                    <div className="mt-4 col-span-2">
-                      <label className="block text-xs font-semibold text-gray-700 mb-2">
+                    <div className="mt-3 col-span-2">
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">
                         Choose a Password *
                       </label>
                       <div className="relative">
@@ -1617,25 +1620,25 @@ const Registration = () => {
                           value={formData.password}
                           onChange={handleInputChange}
                           placeholder="At least 8 characters"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm pr-10"
+                          className="w-full px-2 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-xs pr-8"
                           required
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword((s) => !s)}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 p-1"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 p-0.5"
                           aria-label={
                             showPassword ? "Hide password" : "Show password"
                           }
                         >
                           {showPassword ? (
-                            <EyeOff className="w-5 h-5" />
+                            <EyeOff className="w-4 h-4" />
                           ) : (
-                            <Eye className="w-5 h-5" />
+                            <Eye className="w-4 h-4" />
                           )}
                         </button>
                       </div>
-                      <p className="text-xs text-gray-500 mt-2">
+                      <p className="text-xs text-gray-500 mt-1">
                         Use a strong password. Minimum 8 characters recommended.
                       </p>
                     </div>
@@ -1643,19 +1646,19 @@ const Registration = () => {
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                  <h3 className="text-base font-semibold text-gray-800 mb-3">
                     Business Information
                   </h3>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-semibold text-gray-700 mb-2">
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">
                         Business Category *
                       </label>
                       <select
                         name="businessCategory"
                         value={formData.businessCategory}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+                        className="w-full px-2 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-xs"
                         required
                       >
                         <option value="">Select category</option>
@@ -1666,14 +1669,14 @@ const Registration = () => {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-gray-700 mb-2">
+                      <label className="block text-xs font-semibold text-gray-700 mb-1">
                         Annual Turnover
                       </label>
                       <select
                         name="annualTurnover"
                         value={formData.annualTurnover}
                         onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+                        className="w-full px-2 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-xs"
                       >
                         <option value="">Select turnover</option>
                         <option value="under-1cr">Under ₹1 Cr</option>
@@ -1683,17 +1686,17 @@ const Registration = () => {
                       </select>
                     </div>
                   </div>
-                  <div className="mt-4">
-                    <label className="block text-xs font-semibold text-gray-700 mb-2">
+                  <div className="mt-3">
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
                       Experience
                     </label>
                     <textarea
                       name="experience"
                       value={formData.experience}
                       onChange={handleInputChange}
-                      rows="3"
+                      rows="2"
                       placeholder="Brief description..."
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 resize-none text-sm"
+                      className="w-full px-2 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 resize-none text-xs"
                     />
                   </div>
                 </div>
@@ -1701,37 +1704,37 @@ const Registration = () => {
             )}
 
             {currentStep === 3 && (
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <CheckCircle className="w-10 h-10 text-blue-600" />
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <CheckCircle className="w-8 h-8 text-blue-600" />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-1">
                     Almost Done!
                   </h3>
-                  <p className="text-gray-600">
+                  <p className="text-gray-600 text-sm">
                     Complete verification and accept terms
                   </p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="bg-gray-50 rounded-xl p-4">
-                    <label className="block text-sm font-semibold text-gray-700 mb-3">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                       Security Verification *
                     </label>
-                    <div className="flex gap-3">
+                    <div className="flex gap-2">
                       <input
                         type="text"
                         name="captcha"
                         value={formData.captcha}
                         onChange={handleInputChange}
                         placeholder="Enter captcha"
-                        className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
                         required
                         maxLength="4"
                       />
-                      <div className="flex items-center gap-2">
-                        <div className="bg-gray-100 px-4 py-3 rounded-lg font-mono font-bold text-gray-700 text-lg tracking-wider border-2 border-gray-200 select-all">
+                      <div className="flex items-center gap-1">
+                        <div className="bg-gray-100 px-3 py-2 rounded-lg font-mono font-bold text-gray-700 text-base tracking-wider border-2 border-gray-200 select-all">
                           {captchaCode}
                         </div>
                         <button
@@ -1743,21 +1746,21 @@ const Registration = () => {
                           }}
                           aria-label="Refresh captcha"
                           title="Refresh captcha"
-                          className="p-3 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                          className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                         >
-                          <RefreshCw className="w-5 h-5" />
+                          <RefreshCw className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
                     {captchaError && (
-                      <p className="mt-2 text-sm text-red-600">
+                      <p className="mt-1 text-sm text-red-600">
                         {captchaError}
                       </p>
                     )}
                   </div>
 
-                  <div className="space-y-4">
-                    <label className="flex items-start gap-3 cursor-pointer">
+                  <div className="space-y-3">
+                    <label className="flex items-start gap-2 cursor-pointer">
                       <input
                         type="checkbox"
                         name="agreeTerms"
@@ -1766,7 +1769,7 @@ const Registration = () => {
                         className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mt-0.5"
                         required
                       />
-                      <span className="text-sm text-gray-700">
+                      <span className="text-xs text-gray-700">
                         I agree to the{" "}
                         <button
                           type="button"
@@ -1778,7 +1781,7 @@ const Registration = () => {
                       </span>
                     </label>
 
-                    <label className="flex items-start gap-3 cursor-pointer">
+                    <label className="flex items-start gap-2 cursor-pointer">
                       <input
                         type="checkbox"
                         name="agreePrivacy"
@@ -1787,7 +1790,7 @@ const Registration = () => {
                         className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mt-0.5"
                         required
                       />
-                      <span className="text-sm text-gray-700">
+                      <span className="text-xs text-gray-700">
                         I agree to the{" "}
                         <button
                           type="button"
@@ -1800,16 +1803,16 @@ const Registration = () => {
                     </label>
                   </div>
 
-                  <div className="bg-gray-50 border-2 border-gray-200 rounded-xl p-4">
-                    <div className="flex items-start gap-3">
-                      <div className="w-6 h-6 bg-gray-500 rounded-full flex items-center justify-center mt-0.5">
+                  <div className="bg-gray-50 border-2 border-gray-200 rounded-lg p-3">
+                    <div className="flex items-start gap-2">
+                      <div className="w-5 h-5 bg-gray-500 rounded-full flex items-center justify-center mt-0.5">
                         <span className="text-white text-xs font-bold">!</span>
                       </div>
                       <div>
-                        <h4 className="font-semibold text-gray-900 mb-2">
+                        <h4 className="font-semibold text-gray-900 text-sm mb-1">
                           Important
                         </h4>
-                        <ul className="text-xs text-gray-700 space-y-1">
+                        <ul className="text-xs text-gray-700 space-y-0.5">
                           <li>• Registration reviewed within 24-48 hours</li>
                           <li>• Email confirmation upon verification</li>
                           <li>• Ensure all information is accurate</li>
@@ -1818,18 +1821,18 @@ const Registration = () => {
                     </div>
                   </div>
 
-                  <div className="flex gap-3">
+                  <div className="flex gap-2">
                     <button
                       type="button"
                       onClick={handleBack}
-                      className="flex items-center gap-2 px-6 py-3 border-2 border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-semibold"
+                      className="flex items-center gap-1 px-4 py-2 border-2 border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-semibold text-sm"
                     >
-                      <ArrowLeft className="w-4 h-4" />
+                      <ArrowLeft className="w-3 h-3" />
                       Back
                     </button>
                     <button
                       type="submit"
-                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-all shadow-lg"
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-all shadow text-sm"
                     >
                       Complete Registration
                     </button>
@@ -1839,38 +1842,38 @@ const Registration = () => {
             )}
 
             {currentStep < 3 && (
-              <div className="flex justify-between mt-8 pt-6 border-t border-gray-200">
+              <div className="flex justify-between mt-6 pt-4 border-t border-gray-200">
                 {currentStep > 1 && (
                   <button
                     onClick={handleBack}
-                    className="flex items-center gap-2 px-6 py-3 border-2 border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-semibold"
+                    className="flex items-center gap-1 px-4 py-2 border-2 border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-semibold text-sm"
                   >
-                    <ArrowLeft className="w-4 h-4" />
+                    <ArrowLeft className="w-3 h-3" />
                     Back
                   </button>
                 )}
                 <button
                   onClick={handleNext}
-                  className={`flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold shadow-lg ${
+                  className={`flex items-center gap-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold shadow text-sm ${
                     currentStep === 1 ? "ml-auto" : ""
                   }`}
                 >
                   Continue
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight className="w-3 h-3" />
                 </button>
               </div>
             )}
           </div>
         </div>
 
-        <div className="mt-6 bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
-          <div className="flex items-start gap-3">
-            <Shield className="w-5 h-5 text-blue-600 mt-0.5" />
+        <div className="mt-4 bg-blue-50 border-2 border-blue-200 rounded-lg p-3">
+          <div className="flex items-start gap-2">
+            <Shield className="w-4 h-4 text-blue-600 mt-0.5" />
             <div>
-              <h4 className="font-semibold text-blue-900 mb-1">
+              <h4 className="font-semibold text-blue-900 text-sm mb-0.5">
                 Secure Registration
               </h4>
-              <p className="text-sm text-blue-700">
+              <p className="text-xs text-blue-700">
                 Your information is encrypted and securely stored. We use
                 government-verified APIs.
               </p>
@@ -1878,8 +1881,8 @@ const Registration = () => {
           </div>
         </div>
 
-        <div className="mt-8 text-center">
-          <p className="text-gray-700 text-sm">
+        <div className="mt-6 text-center">
+          <p className="text-gray-700 text-xs">
             Already registered?{" "}
             <button
               onClick={() => navigate("/login")}
@@ -1890,8 +1893,8 @@ const Registration = () => {
           </p>
         </div>
 
-        <div className="mt-6 text-center text-sm text-gray-600">
-          <div className="flex justify-center gap-6 mb-2">
+        <div className="mt-4 text-center text-xs text-gray-600">
+          <div className="flex justify-center gap-4 mb-1">
             <button className="hover:text-blue-600 font-medium">Terms</button>
             <button className="hover:text-blue-600 font-medium">Privacy</button>
             <button className="hover:text-blue-600 font-medium">Support</button>
