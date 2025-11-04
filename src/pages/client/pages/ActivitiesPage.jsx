@@ -17,6 +17,15 @@ import {
   Settings,
   Loader2,
   RefreshCw,
+  Award,
+  XCircle,
+  TrendingUp,
+  CreditCard,
+  DollarSign,
+  Key,
+  PackagePlus,
+  PackageMinus,
+  Ban,
 } from "lucide-react";
 import activitiesService from "../../../services/activitiesService";
 
@@ -52,15 +61,24 @@ const ActivitiesPage = () => {
 
   const actionTypes = [
     { value: "all", label: "All Actions" },
+    { value: "profile_update", label: "Profile Update" },
     { value: "tender_created", label: "Tender Created" },
     { value: "tender_updated", label: "Tender Updated" },
+    { value: "tender_deleted", label: "Tender Deleted" },
     { value: "tender_published", label: "Tender Published" },
-    { value: "bid_received", label: "Bid Received" },
-    { value: "evaluation_started", label: "Evaluation Started" },
-    { value: "tender_awarded", label: "Tender Awarded" },
-    { value: "user_login", label: "User Login" },
+    { value: "bid_submitted", label: "Bid Submitted" },
+    { value: "bid_updated", label: "Bid Updated" },
+    { value: "bid_withdrawn", label: "Bid Withdrawn" },
+    { value: "bid_approved", label: "Bid Approved" },
+    { value: "bid_rejected", label: "Bid Rejected" },
+    { value: "bid_awarded", label: "Bid Awarded" },
     { value: "document_uploaded", label: "Document Uploaded" },
-    { value: "settings_changed", label: "Settings Changed" },
+    { value: "document_deleted", label: "Document Deleted" },
+    { value: "subscription_purchased", label: "Subscription Purchased" },
+    { value: "subscription_cancelled", label: "Subscription Cancelled" },
+    { value: "payment_success", label: "Payment Success" },
+    { value: "payment_failed", label: "Payment Failed" },
+    { value: "password_reset", label: "Password Reset" },
   ];
 
   const users = [
@@ -218,22 +236,48 @@ const ActivitiesPage = () => {
   // Helper function to get activity icon
   const getActivityIcon = (action, severity) => {
     switch (action) {
+      case "profile_update":
+        return <User className="w-4 h-4 text-gray-600" />;
       case "tender_created":
         return <Plus className="w-4 h-4 text-green-600" />;
       case "tender_updated":
         return <Edit className="w-4 h-4 text-blue-600" />;
+      case "tender_deleted":
+        return <Trash2 className="w-4 h-4 text-red-600" />;
       case "tender_published":
-        return <FileText className="w-4 h-4 text-blue-600" />;
+        return <TrendingUp className="w-4 h-4 text-green-600" />;
+      case "bid_submitted":
+        return <CheckCircle className="w-4 h-4 text-green-600" />;
+      case "bid_updated":
+        return <Edit className="w-4 h-4 text-blue-600" />;
+      case "bid_withdrawn":
+        return <XCircle className="w-4 h-4 text-orange-600" />;
+      case "bid_approved":
+        return <CheckCircle className="w-4 h-4 text-green-600" />;
+      case "bid_rejected":
+        return <Ban className="w-4 h-4 text-red-600" />;
+      case "bid_awarded":
+        return <Award className="w-4 h-4 text-yellow-600" />;
+      case "document_uploaded":
+        return <FileText className="w-4 h-4 text-indigo-600" />;
+      case "document_deleted":
+        return <Trash2 className="w-4 h-4 text-red-600" />;
+      case "subscription_purchased":
+        return <PackagePlus className="w-4 h-4 text-green-600" />;
+      case "subscription_cancelled":
+        return <PackageMinus className="w-4 h-4 text-red-600" />;
+      case "payment_success":
+        return <DollarSign className="w-4 h-4 text-green-600" />;
+      case "payment_failed":
+        return <XCircle className="w-4 h-4 text-red-600" />;
+      case "password_reset":
+        return <Key className="w-4 h-4 text-blue-600" />;
       case "bid_received":
         return <Clock className="w-4 h-4 text-orange-600" />;
       case "evaluation_started":
         return <Eye className="w-4 h-4 text-purple-600" />;
-      case "tender_awarded":
-        return <CheckCircle className="w-4 h-4 text-green-600" />;
       case "user_login":
         return <User className="w-4 h-4 text-gray-600" />;
-      case "document_uploaded":
-        return <Download className="w-4 h-4 text-indigo-600" />;
       case "settings_changed":
         return <Settings className="w-4 h-4 text-gray-600" />;
       default:
@@ -411,7 +455,7 @@ const ActivitiesPage = () => {
           </div>
 
           {/* User Filter */}
-          <div>
+          {/* <div>
             <select
               value={selectedUser}
               onChange={(e) => setSelectedUser(e.target.value)}
@@ -423,7 +467,7 @@ const ActivitiesPage = () => {
                 </option>
               ))}
             </select>
-          </div>
+          </div> */}
 
           {/* Date Range Filter */}
           <div>

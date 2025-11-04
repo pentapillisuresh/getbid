@@ -22,6 +22,12 @@ import {
   XCircle,
   Users,
   TrendingUp,
+  CreditCard,
+  DollarSign,
+  Key,
+  PackagePlus,
+  PackageMinus,
+  Ban,
 } from "lucide-react";
 import activitiesService from "../../../services/activitiesService";
 
@@ -57,60 +63,99 @@ const VendorActivitiesPage = () => {
 
   const actionTypes = [
     { value: "all", label: "All Actions" },
+    { value: "profile_update", label: "Profile Update" },
+    { value: "tender_created", label: "Tender Created" },
+    { value: "tender_updated", label: "Tender Updated" },
+    { value: "tender_deleted", label: "Tender Deleted" },
+    { value: "tender_published", label: "Tender Published" },
     { value: "bid_submitted", label: "Bid Submitted" },
     { value: "bid_updated", label: "Bid Updated" },
-    { value: "tender_viewed", label: "Tender Viewed" },
+    { value: "bid_withdrawn", label: "Bid Withdrawn" },
+    { value: "bid_approved", label: "Bid Approved" },
+    { value: "bid_rejected", label: "Bid Rejected" },
+    { value: "bid_awarded", label: "Bid Awarded" },
     { value: "document_uploaded", label: "Document Uploaded" },
-    { value: "clarification_asked", label: "Clarification Asked" },
-    { value: "profile_updated", label: "Profile Updated" },
-    { value: "evaluation_received", label: "Evaluation Received" },
-    { value: "contract_awarded", label: "Contract Awarded" },
-    { value: "user_login", label: "User Login" },
+    { value: "document_deleted", label: "Document Deleted" },
+    { value: "subscription_purchased", label: "Subscription Purchased" },
+    { value: "subscription_cancelled", label: "Subscription Cancelled" },
+    { value: "payment_success", label: "Payment Success" },
+    { value: "payment_failed", label: "Payment Failed" },
+    { value: "password_reset", label: "Password Reset" },
   ];
 
   // Function to get activity icon based on action type
   const getActivityIcon = (action) => {
     switch (action?.toLowerCase()) {
-      case "bid_submitted":
-      case "submit":
-      case "submitted":
-        return <CheckCircle className="w-5 h-5 text-green-600" />;
-      case "bid_updated":
+      case "profile_update":
+      case "profile_updated":
+      case "profile":
+        return <User className="w-5 h-5 text-gray-600" />;
+      case "tender_created":
+      case "create":
+      case "created":
+        return <Plus className="w-5 h-5 text-green-600" />;
+      case "tender_updated":
       case "update":
       case "updated":
       case "edit":
       case "edited":
         return <Edit className="w-5 h-5 text-blue-600" />;
-      case "tender_viewed":
-      case "view":
-      case "viewed":
-        return <Eye className="w-5 h-5 text-purple-600" />;
-      case "document_uploaded":
-      case "upload":
-      case "uploaded":
-        return <FileText className="w-5 h-5 text-indigo-600" />;
-      case "clarification_asked":
-      case "clarification":
-        return <AlertTriangle className="w-5 h-5 text-yellow-600" />;
-      case "profile_updated":
-      case "profile":
-        return <User className="w-5 h-5 text-gray-600" />;
-      case "evaluation_received":
-      case "evaluation":
-        return <Clock className="w-5 h-5 text-orange-600" />;
+      case "tender_deleted":
+      case "delete":
+      case "deleted":
+        return <Trash2 className="w-5 h-5 text-red-600" />;
+      case "tender_published":
+      case "published":
+        return <TrendingUp className="w-5 h-5 text-green-600" />;
+      case "bid_submitted":
+      case "submit":
+      case "submitted":
+        return <CheckCircle className="w-5 h-5 text-green-600" />;
+      case "bid_updated":
+        return <Edit className="w-5 h-5 text-blue-600" />;
+      case "bid_withdrawn":
+      case "withdrawn":
+        return <XCircle className="w-5 h-5 text-orange-600" />;
+      case "bid_approved":
+      case "approved":
+        return <CheckCircle className="w-5 h-5 text-green-600" />;
+      case "bid_rejected":
+      case "rejected":
+        return <Ban className="w-5 h-5 text-red-600" />;
+      case "bid_awarded":
       case "contract_awarded":
       case "award":
       case "awarded":
         return <Award className="w-5 h-5 text-yellow-600" />;
+      case "document_uploaded":
+      case "upload":
+      case "uploaded":
+        return <FileText className="w-5 h-5 text-indigo-600" />;
+      case "document_deleted":
+        return <Trash2 className="w-5 h-5 text-red-600" />;
+      case "subscription_purchased":
+        return <PackagePlus className="w-5 h-5 text-green-600" />;
+      case "subscription_cancelled":
+        return <PackageMinus className="w-5 h-5 text-red-600" />;
+      case "payment_success":
+        return <DollarSign className="w-5 h-5 text-green-600" />;
+      case "payment_failed":
+        return <XCircle className="w-5 h-5 text-red-600" />;
+      case "password_reset":
+        return <Key className="w-5 h-5 text-blue-600" />;
+      case "tender_viewed":
+      case "view":
+      case "viewed":
+        return <Eye className="w-5 h-5 text-purple-600" />;
+      case "clarification_asked":
+      case "clarification":
+        return <AlertTriangle className="w-5 h-5 text-yellow-600" />;
+      case "evaluation_received":
+      case "evaluation":
+        return <Clock className="w-5 h-5 text-orange-600" />;
       case "user_login":
       case "login":
         return <Shield className="w-5 h-5 text-blue-600" />;
-      case "create":
-      case "created":
-        return <Plus className="w-5 h-5 text-green-600" />;
-      case "delete":
-      case "deleted":
-        return <Trash2 className="w-5 h-5 text-red-600" />;
       case "download":
       case "downloaded":
         return <Download className="w-5 h-5 text-indigo-600" />;
