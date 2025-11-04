@@ -86,7 +86,7 @@ const VendorManagement = () => {
     async (p = 1, replace = false) => {
       setLoading(true);
       try {
-        const resp = await api.get("/v1/users", {
+        const resp = await api.get("/v1/users/client", {
           queryParams: { page: p, limit, role: "vendor" },
         });
         const data = resp && resp.data ? resp.data : [];

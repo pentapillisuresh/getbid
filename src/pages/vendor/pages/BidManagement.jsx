@@ -226,7 +226,7 @@ const BidManagement = () => {
         console.log("Fetching bids with params:", queryParams);
         console.log("User ID available:", userId);
 
-        const resp = await api.get("/v1/bids", {
+        const resp = await api.get("/v1/bids/vendor", {
           queryParams,
         });
 
@@ -830,14 +830,14 @@ const BidManagement = () => {
                   </div>
 
                   <div className="flex items-center gap-3">
-                    {/* {bid.canRebid && (
+                    {bid.canRebid && (
                       <button
                         onClick={() => handleShowRebid(bid)}
                         className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors"
                       >
                         Re-Bid
                       </button>
-                    )} */}
+                    )}
                     {bid.status === "awarded" && (
                       <button
                         onClick={() => handleShowContract(bid)}
