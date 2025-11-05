@@ -261,14 +261,6 @@ const Registration = () => {
   const handlePanFileUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
-      // Validate PAN number first
-      if (!validatePanNumber(formData.panNumber)) {
-        toastService.showError(
-          "Please enter a valid PAN number in format ABCDE1234F"
-        );
-        return;
-      }
-
       // Validate file type (PDF, JPG, PNG)
       const allowedTypes = [
         "application/pdf",
@@ -288,7 +280,6 @@ const Registration = () => {
       }
 
       setPanFile(file);
-      setPanVerified(true);
       toastService.showSuccess("PAN document selected successfully!");
     }
   };
@@ -296,14 +287,6 @@ const Registration = () => {
   const handleGstFileUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
-      // Validate GST number first
-      if (!validateGstNumber(formData.gstNumber)) {
-        toastService.showError(
-          "Please enter a valid GST number in format 22AAAAA0000A1Z5"
-        );
-        return;
-      }
-
       // Validate file type (PDF, JPG, PNG)
       const allowedTypes = [
         "application/pdf",
@@ -323,7 +306,6 @@ const Registration = () => {
       }
 
       setGstFile(file);
-      setGstVerified(true);
       toastService.showSuccess("GST document selected successfully!");
     }
   };
@@ -331,7 +313,6 @@ const Registration = () => {
   const removePanFile = () => {
     setPanFile(null);
     setPanFileId(null);
-    setPanVerified(false);
     // Reset the file input
     const fileInput = document.getElementById("pan-file-input");
     if (fileInput) fileInput.value = "";
@@ -340,7 +321,6 @@ const Registration = () => {
   const removeGstFile = () => {
     setGstFile(null);
     setGstFileId(null);
-    setGstVerified(false);
     // Reset the file input
     const fileInput = document.getElementById("gst-file-input");
     if (fileInput) fileInput.value = "";
@@ -516,6 +496,116 @@ const Registration = () => {
     toastService.showSuccess(
       "GST field is now editable. Please verify again after making changes."
     );
+  };
+
+  // PAN Verification API
+  const verifyPanNumber = async () => {
+    if (!formData.panNumber || !validatePanNumber(formData.panNumber)) {
+      toastService.showError(
+        "Please enter a valid PAN number in format ABCDE1234F"
+      );
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await api.post("/auth/verify-pan", {
+        body: {
+          panNumber: formData.panNumber,
+        },
+      });
+
+      if (response.success && response.data?.verified) {
+        setPanVerified(true);
+
+        // Auto-fill name details from PAN response
+        if (response.data?.nameOnCard) {
+          const nameParts = response.data.nameOnCard.trim().split(" ");
+          const firstName = nameParts[0] || "";
+          const lastName = nameParts.slice(1).join(" ") || "";
+
+          setFormData((prev) => ({
+            ...prev,
+            firstName: firstName,
+            lastName: lastName,
+          }));
+        }
+
+        toastService.showSuccess(
+          response.data?.message ||
+            response.message ||
+            "PAN verified successfully!"
+        );
+      } else {
+        toastService.showError(
+          response.data?.message ||
+            response.message ||
+            "PAN verification failed"
+        );
+      }
+    } catch (error) {
+      const message =
+        error?.data?.message ||
+        error.message ||
+        "Failed to verify PAN. Please try again.";
+      toastService.showError(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // GST Verification API
+  const verifyGstNumber = async () => {
+    if (!formData.gstNumber || !validateGstNumber(formData.gstNumber)) {
+      toastService.showError(
+        "Please enter a valid GST number in format 22AAAAA0000A1Z5"
+      );
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await api.post("/auth/verify-gst", {
+        body: {
+          gstNumber: formData.gstNumber,
+        },
+      });
+
+      if (response.success && response.data?.verified) {
+        setGstVerified(true);
+
+        // Auto-fill company and address details from GST response
+        const gstData = response.data;
+        setFormData((prev) => ({
+          ...prev,
+          companyName: gstData.legalName || prev.companyName,
+          companyType: gstData.businessType || prev.companyType,
+          address: gstData.principalPlaceAddress || prev.address,
+          city: gstData.stateJurisdiction || prev.city,
+          state: gstData.state || prev.state,
+        }));
+
+        toastService.showSuccess(
+          response.data?.message ||
+            response.message ||
+            "GST verified successfully!"
+        );
+      } else {
+        toastService.showError(
+          response.data?.message ||
+            response.message ||
+            "GST verification failed"
+        );
+      }
+    } catch (error) {
+      const message =
+        error?.data?.message ||
+        error.message ||
+        "Failed to verify GST. Please try again.";
+      toastService.showError(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleNext = () => {
@@ -868,7 +958,9 @@ const Registration = () => {
                       }`}
                     >
                       <User className="w-6 h-6 mx-auto mb-2 text-gray-600" />
-                      <div className="font-semibold text-sm mb-1">Individual</div>
+                      <div className="font-semibold text-sm mb-1">
+                        Individual
+                      </div>
                       <div className="text-xs text-gray-600">
                         Register with PAN
                       </div>
@@ -916,150 +1008,110 @@ const Registration = () => {
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
                       PAN Number *
                     </label>
-                    <input
-                      type="text"
-                      name="panNumber"
-                      value={formData.panNumber}
-                      onChange={handleInputChange}
-                      placeholder="ABCDE1234F"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                      required
-                      disabled={panVerified}
-                    />
-
-                    {/* OTP Verification - Commented out for now */}
-                    {/* {!panVerified && !showPanOtp && (
-                      <button
-                        type="button"
-                        onClick={sendPanOtp}
-                        className="w-full mt-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition-all"
-                      >
-                        Send OTP
-                      </button>
-                    )}
-
-                    {showPanOtp && !panVerified && (
-                      <div className="mt-4 space-y-3">
-                        <input
-                          type="text"
-                          name="panOtp"
-                          value={formData.panOtp}
-                          onChange={handleInputChange}
-                          placeholder="Enter 6-digit OTP"
-                          className="w-full px-4 py-3 text-center text-xl font-mono bg-white border-2 border-blue-300 rounded-lg tracking-widest"
-                          maxLength="6"
-                        />
-                        <div className="flex gap-3">
-                          <button
-                            type="button"
-                            onClick={verifyPanOtp}
-                            className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-600"
+                    <div className="flex gap-2 mb-2">
+                      <input
+                        type="text"
+                        name="panNumber"
+                        value={formData.panNumber}
+                        onChange={handleInputChange}
+                        placeholder="ABCDE1234F"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        required
+                        disabled={panVerified}
+                      />
+                      {!panVerified && (
+                        <button
+                          type="button"
+                          onClick={verifyPanNumber}
+                          disabled={loading}
+                          className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {loading ? (
+                            <RefreshCw className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Send className="w-4 h-4" />
+                          )}
+                        </button>
+                      )}
+                      {panVerified && (
+                        <div className="relative group">
+                          <div
+                            className="px-3 py-2 bg-blue-500 text-white rounded-lg flex items-center gap-1 cursor-pointer transition-all group-hover:bg-blue-600"
+                            onClick={handleEditPan}
                           >
-                            Verify
-                          </button>
-                          <button
-                            type="button"
-                            onClick={sendPanOtp}
-                            className="px-4 py-2 text-blue-600 bg-white border-2 border-blue-300 rounded-lg hover:bg-blue-50"
-                          >
-                            Resend
-                          </button>
+                            <Check className="w-4 h-4 group-hover:hidden" />
+                            <Edit2 className="w-4 h-4 hidden group-hover:block" />
+                          </div>
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                            Click to edit PAN
+                          </div>
                         </div>
-                      </div>
-                    )} */}
+                      )}
+                    </div>
 
-                    {/* File Upload Section - Only enabled if PAN number is valid */}
-                    {!panVerified && (
-                      <div className="mt-3">
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                          Upload PAN Document *
-                        </label>
-                        {formData.panNumber &&
-                        validatePanNumber(formData.panNumber) ? (
-                          <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center hover:border-blue-400 transition-colors">
-                            <input
-                              id="pan-file-input"
-                              type="file"
-                              accept=".pdf,.jpg,.jpeg,.png"
-                              onChange={handlePanFileUpload}
-                              className="hidden"
-                            />
-                            <label
-                              htmlFor="pan-file-input"
-                              className="cursor-pointer flex flex-col items-center"
-                            >
-                              <Upload className="w-6 h-6 text-gray-400 mb-1" />
-                              <span className="text-xs text-gray-600">
-                                Click to select PAN document
-                              </span>
-                              <span className="text-xs text-gray-500 mt-1">
-                                PDF, JPG, PNG (Max 5MB)
-                              </span>
-                            </label>
-                          </div>
-                        ) : (
-                          <div className="border-2 border-dashed border-gray-200 rounded-lg p-3 text-center bg-gray-50">
-                            <Upload className="w-6 h-6 text-gray-300 mb-1 mx-auto" />
-                            <span className="text-xs text-gray-400">
-                              Please enter a valid PAN number first
-                            </span>
-                            <span className="text-xs text-gray-400 block mt-1">
-                              Format: ABCDE1234F (5 letters + 4 digits + 1
-                              letter)
-                            </span>
-                          </div>
-                        )}
-                        {panFile && (
-                          <div className="mt-2 bg-blue-50 border border-blue-200 rounded-lg p-2 flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <FileText className="w-4 h-4 text-blue-600" />
-                              <span className="text-xs text-blue-800">
-                                {panFile.name}
-                              </span>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={removePanFile}
-                              className="text-red-500 hover:text-red-700"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
-                          </div>
-                        )}
+                    {!panVerified && formData.panNumber && (
+                      <div className="text-xs text-orange-600 mb-2">
+                        Please verify your PAN number
                       </div>
                     )}
 
                     {panVerified && (
-                      <div className="mt-2 bg-blue-50 border-2 border-blue-200 rounded-lg p-2">
-                        <div className="flex items-center justify-between">
+                      <>
+                        <div className="mt-2 bg-blue-50 border-2 border-blue-200 rounded-lg p-2">
                           <div className="flex items-center gap-2 text-blue-700">
                             <CheckCircle className="w-4 h-4" />
                             <span className="font-semibold text-sm">
-                              PAN document selected successfully!
+                              PAN verified successfully!
                             </span>
-                          </div>
-                          <div className="relative group">
-                            <div
-                              className="p-1 bg-blue-500 text-white rounded cursor-pointer transition-all group-hover:bg-blue-600"
-                              onClick={handleEditPan}
-                            >
-                              <Check className="w-3 h-3 group-hover:hidden" />
-                              <Edit2 className="w-3 h-3 hidden group-hover:block" />
-                            </div>
-                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                              Click to edit PAN
-                            </div>
                           </div>
                         </div>
-                        {panFile && (
-                          <div className="mt-1 bg-white border border-blue-200 rounded p-1 flex items-center gap-1">
-                            <FileText className="w-3 h-3 text-blue-600" />
-                            <span className="text-xs text-gray-700">
-                              {panFile.name}
-                            </span>
-                          </div>
-                        )}
-                      </div>
+
+                        {/* File Upload Section - Shows after verification */}
+                        <div className="mt-3">
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Upload PAN Document *
+                          </label>
+                          {!panFile ? (
+                            <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center hover:border-blue-400 transition-colors">
+                              <input
+                                id="pan-file-input"
+                                type="file"
+                                accept=".pdf,.jpg,.jpeg,.png"
+                                onChange={handlePanFileUpload}
+                                className="hidden"
+                              />
+                              <label
+                                htmlFor="pan-file-input"
+                                className="cursor-pointer flex flex-col items-center"
+                              >
+                                <Upload className="w-6 h-6 text-gray-400 mb-1" />
+                                <span className="text-xs text-gray-600">
+                                  Click to select PAN document
+                                </span>
+                                <span className="text-xs text-gray-500 mt-1">
+                                  PDF, JPG, PNG (Max 5MB)
+                                </span>
+                              </label>
+                            </div>
+                          ) : (
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <FileText className="w-4 h-4 text-blue-600" />
+                                <span className="text-xs text-blue-800">
+                                  {panFile.name}
+                                </span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={removePanFile}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </>
                     )}
                   </div>
                 ) : (
@@ -1067,149 +1119,110 @@ const Registration = () => {
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
                       GST Number *
                     </label>
-                    <input
-                      type="text"
-                      name="gstNumber"
-                      value={formData.gstNumber}
-                      onChange={handleInputChange}
-                      placeholder="22AAAAA0000A1Z5"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                      required
-                      disabled={gstVerified}
-                    />
-
-                    {/* OTP Verification - Commented out for now */}
-                    {/* {!gstVerified && !showGstOtp && (
-                      <button
-                        type="button"
-                        onClick={sendGstOtp}
-                        className="w-full mt-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition-all"
-                      >
-                        Send OTP
-                      </button>
-                    )}
-
-                    {showGstOtp && !gstVerified && (
-                      <div className="mt-4 space-y-3">
-                        <input
-                          type="text"
-                          name="gstOtp"
-                          value={formData.gstOtp}
-                          onChange={handleInputChange}
-                          placeholder="Enter 6-digit OTP"
-                          className="w-full px-4 py-3 text-center text-xl font-mono bg-white border-2 border-blue-300 rounded-lg tracking-widest"
-                          maxLength="6"
-                        />
-                        <div className="flex gap-3">
-                          <button
-                            type="button"
-                            onClick={verifyGstOtp}
-                            className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-600"
+                    <div className="flex gap-2 mb-2">
+                      <input
+                        type="text"
+                        name="gstNumber"
+                        value={formData.gstNumber}
+                        onChange={handleInputChange}
+                        placeholder="22AAAAA0000A1Z5"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        required
+                        disabled={gstVerified}
+                      />
+                      {!gstVerified && (
+                        <button
+                          type="button"
+                          onClick={verifyGstNumber}
+                          disabled={loading}
+                          className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {loading ? (
+                            <RefreshCw className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Send className="w-4 h-4" />
+                          )}
+                        </button>
+                      )}
+                      {gstVerified && (
+                        <div className="relative group">
+                          <div
+                            className="px-3 py-2 bg-blue-500 text-white rounded-lg flex items-center gap-1 cursor-pointer transition-all group-hover:bg-blue-600"
+                            onClick={handleEditGst}
                           >
-                            Verify
-                          </button>
-                          <button
-                            type="button"
-                            onClick={sendGstOtp}
-                            className="px-4 py-2 text-blue-600 bg-white border-2 border-blue-300 rounded-lg hover:bg-blue-50"
-                          >
-                            Resend
-                          </button>
+                            <Check className="w-4 h-4 group-hover:hidden" />
+                            <Edit2 className="w-4 h-4 hidden group-hover:block" />
+                          </div>
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                            Click to edit GST
+                          </div>
                         </div>
-                      </div>
-                    )} */}
+                      )}
+                    </div>
 
-                    {/* File Upload Section - Only enabled if GST number is valid */}
-                    {!gstVerified && (
-                      <div className="mt-3">
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                          Upload GST Document *
-                        </label>
-                        {formData.gstNumber &&
-                        validateGstNumber(formData.gstNumber) ? (
-                          <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center hover:border-blue-400 transition-colors">
-                            <input
-                              id="gst-file-input"
-                              type="file"
-                              accept=".pdf,.jpg,.jpeg,.png"
-                              onChange={handleGstFileUpload}
-                              className="hidden"
-                            />
-                            <label
-                              htmlFor="gst-file-input"
-                              className="cursor-pointer flex flex-col items-center"
-                            >
-                              <Upload className="w-6 h-6 text-gray-400 mb-1" />
-                              <span className="text-xs text-gray-600">
-                                Click to select GST document
-                              </span>
-                              <span className="text-xs text-gray-500 mt-1">
-                                PDF, JPG, PNG (Max 5MB)
-                              </span>
-                            </label>
-                          </div>
-                        ) : (
-                          <div className="border-2 border-dashed border-gray-200 rounded-lg p-3 text-center bg-gray-50">
-                            <Upload className="w-6 h-6 text-gray-300 mb-1 mx-auto" />
-                            <span className="text-xs text-gray-400">
-                              Please enter a valid GST number first
-                            </span>
-                            <span className="text-xs text-gray-400 block mt-1">
-                              Format: 22AAAAA0000A1Z5 (15 characters)
-                            </span>
-                          </div>
-                        )}
-                        {gstFile && (
-                          <div className="mt-2 bg-blue-50 border border-blue-200 rounded-lg p-2 flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <FileText className="w-4 h-4 text-blue-600" />
-                              <span className="text-xs text-blue-800">
-                                {gstFile.name}
-                              </span>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={removeGstFile}
-                              className="text-red-500 hover:text-red-700"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
-                          </div>
-                        )}
+                    {!gstVerified && formData.gstNumber && (
+                      <div className="text-xs text-orange-600 mb-2">
+                        Please verify your GST number
                       </div>
                     )}
 
                     {gstVerified && (
-                      <div className="mt-2 bg-blue-50 border-2 border-blue-200 rounded-lg p-2">
-                        <div className="flex items-center justify-between">
+                      <>
+                        <div className="mt-2 bg-blue-50 border-2 border-blue-200 rounded-lg p-2">
                           <div className="flex items-center gap-2 text-blue-700">
                             <CheckCircle className="w-4 h-4" />
                             <span className="font-semibold text-sm">
-                              GST document selected successfully!
+                              GST verified successfully!
                             </span>
-                          </div>
-                          <div className="relative group">
-                            <div
-                              className="p-1 bg-blue-500 text-white rounded cursor-pointer transition-all group-hover:bg-blue-600"
-                              onClick={handleEditGst}
-                            >
-                              <Check className="w-3 h-3 group-hover:hidden" />
-                              <Edit2 className="w-3 h-3 hidden group-hover:block" />
-                            </div>
-                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                              Click to edit GST
-                            </div>
                           </div>
                         </div>
-                        {gstFile && (
-                          <div className="mt-1 bg-white border border-blue-200 rounded p-1 flex items-center gap-1">
-                            <FileText className="w-3 h-3 text-blue-600" />
-                            <span className="text-xs text-gray-700">
-                              {gstFile.name}
-                            </span>
-                          </div>
-                        )}
-                      </div>
+
+                        {/* File Upload Section - Shows after verification */}
+                        <div className="mt-3">
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Upload GST Document *
+                          </label>
+                          {!gstFile ? (
+                            <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center hover:border-blue-400 transition-colors">
+                              <input
+                                id="gst-file-input"
+                                type="file"
+                                accept=".pdf,.jpg,.jpeg,.png"
+                                onChange={handleGstFileUpload}
+                                className="hidden"
+                              />
+                              <label
+                                htmlFor="gst-file-input"
+                                className="cursor-pointer flex flex-col items-center"
+                              >
+                                <Upload className="w-6 h-6 text-gray-400 mb-1" />
+                                <span className="text-xs text-gray-600">
+                                  Click to select GST document
+                                </span>
+                                <span className="text-xs text-gray-500 mt-1">
+                                  PDF, JPG, PNG (Max 5MB)
+                                </span>
+                              </label>
+                            </div>
+                          ) : (
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <FileText className="w-4 h-4 text-blue-600" />
+                                <span className="text-xs text-blue-800">
+                                  {gstFile.name}
+                                </span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={removeGstFile}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </>
                     )}
                   </div>
                 )}
