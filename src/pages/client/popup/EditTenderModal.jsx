@@ -17,7 +17,8 @@ const EditTenderModal = ({ show, onClose, tender, onSave }) => {
         title: tender.title || "",
         description: tender.description || "",
         estimatedValue: tender.estimatedValue || "",
-        submissionDeadline: tender.submissionDeadline || "",
+        submissionDeadline:
+          tender.submissionDeadlineRaw || tender.submissionDeadline || "",
         category: tender.category || "",
         department: tender.department || "",
       });

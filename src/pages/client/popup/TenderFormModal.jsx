@@ -140,23 +140,28 @@ const TenderFormModal = ({
 
       // Parse date - handle both raw ISO dates and formatted display dates
       const parseDeadlineDate = () => {
-        // Try bidDeadline first (from API)
+        // Try submissionDeadlineRaw first (YYYY-MM-DD format, most reliable)
+        if (tenderData.submissionDeadlineRaw) {
+          return tenderData.submissionDeadlineRaw;
+        }
+        // Try bidDeadline (from API)
         if (tenderData.bidDeadline) {
           return new Date(tenderData.bidDeadline).toISOString().split("T")[0];
-        }
-        // Try submissionDeadline (from mapped data)
-        if (tenderData.submissionDeadline) {
-          // Parse formatted date like "Dec 31, 2024" or "31/12/2024"
-          const parsedDate = new Date(tenderData.submissionDeadline);
-          if (!isNaN(parsedDate.getTime())) {
-            return parsedDate.toISOString().split("T")[0];
-          }
         }
         // Try rawData if available
         if (tenderData.rawData?.bidDeadline) {
           return new Date(tenderData.rawData.bidDeadline)
             .toISOString()
             .split("T")[0];
+        }
+        // Last resort: try to parse submissionDeadline (DD/MM/YYYY format)
+        if (tenderData.submissionDeadline) {
+          // Parse DD/MM/YYYY format
+          const parts = tenderData.submissionDeadline.split("/");
+          if (parts.length === 3) {
+            const [day, month, year] = parts;
+            return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+          }
         }
         return "";
       };

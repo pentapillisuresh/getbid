@@ -168,7 +168,11 @@ const ChooseLoginType = () => {
                 {/* Header with Centered Logo */}
                 <div className="text-center mb-8">
                   <div className="flex justify-center mb-4">
-                    <img src="/images/logo2.png" alt="Logo" className="w-20 h-10" />
+                    <img
+                      src="/images/logo2.png"
+                      alt="Logo"
+                      className="w-20 h-10"
+                    />
                   </div>
                   <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
                     Choose Login Type
@@ -353,6 +357,7 @@ const ChooseLoginType = () => {
                     </label>
                     <button
                       type="button"
+                      onClick={() => navigate("/forget-password")}
                       className="text-sm text-primary-600 hover:text-primary-700"
                     >
                       Forgot password?

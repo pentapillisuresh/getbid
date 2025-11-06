@@ -210,7 +210,21 @@ const createApiClient = (config = {}) => {
       error.data = data;
 
       // Handle 401 Unauthorized - redirect to login only if we sent a token
-      if (resp.status === 401 && hasSentAuthToken) {
+      // and it's not an auth-related endpoint
+      const authEndpoints = [
+        "/auth/login",
+        "/auth/register",
+        "/auth/verify-otp",
+        "/auth/forget-password",
+        "/auth/forgot-password",
+        "/auth/verify-forgot-password-otp",
+        "/auth/reset-password",
+      ];
+      const isAuthEndpoint = authEndpoints.some((endpoint) =>
+        fullUrl.includes(endpoint)
+      );
+
+      if (resp.status === 401 && hasSentAuthToken && !isAuthEndpoint) {
         // Clear any stored tokens
         if (typeof window !== "undefined" && window.localStorage) {
           window.localStorage.removeItem("accessToken");

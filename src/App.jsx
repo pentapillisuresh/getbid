@@ -15,6 +15,7 @@ import HomePage from "./pages/Home/HomeMain";
 import ChooseLoginType from "./pages/ChooseLoginType";
 import Registration from "./pages/Registration";
 import OTPVerification from "./pages/OTPVerification";
+import ForgetPassword from "./pages/ForgetPassword";
 import VendorDashboard from "./pages/vendor/VendorDashboard";
 import ClientDashboard from "./pages/client/ClientDashboard";
 import TendersSection from "./pages/Home/TendersSection";
@@ -84,6 +85,7 @@ function App() {
             />
             <Route path="/login" element={<ChooseLoginType />} />
             <Route path="/register" element={<Registration />} />
+            <Route path="/forget-password" element={<ForgetPassword />} />
             <Route path="/otp-verification" element={<OTPVerification />} />
             <Route path="/vendor/*" element={<VendorDashboard />} />
             <Route path="/client/*" element={<ClientDashboard />} />

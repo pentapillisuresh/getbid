@@ -205,6 +205,9 @@ const TenderManagement = () => {
       estimatedValue: formatCurrency(tender.value),
       publishedDate: formatDate(tender.createdAt),
       submissionDeadline: formatDate(tender.bidDeadline),
+      submissionDeadlineRaw: tender.bidDeadline
+        ? new Date(tender.bidDeadline).toISOString().split("T")[0]
+        : "", // For date input
       status: tender.status,
       bidsReceived: tender.bidsCount || 0,
       daysLeft: daysLeft,
