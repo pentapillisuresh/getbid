@@ -444,6 +444,18 @@ const TenderManagement = () => {
     setShowDetails(true);
   };
 
+  // Check if deadline has passed (considering EOD)
+  const isDeadlinePassed = (tender) => {
+    if (!tender.rawData?.bidDeadline) return false;
+
+    const deadlineDate = new Date(tender.rawData.bidDeadline);
+    // Set to end of day (23:59:59.999)
+    deadlineDate.setHours(23, 59, 59, 999);
+
+    const now = new Date();
+    return now > deadlineDate;
+  };
+
   const handleEditTenderClick = (tender) => {
     setSelectedTender(tender);
     setModalMode("edit");
@@ -780,14 +792,16 @@ const TenderManagement = () => {
                           View Details
                         </button>
 
-                        {/* Edit Button */}
-                        <button
-                          onClick={() => handleEditTenderClick(tender)}
-                          className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm"
-                        >
-                          <Edit className="w-4 h-4" />
-                          Edit
-                        </button>
+                        {/* Edit Button - Only show if deadline hasn't passed */}
+                        {!isDeadlinePassed(tender) && (
+                          <button
+                            onClick={() => handleEditTenderClick(tender)}
+                            className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm"
+                          >
+                            <Edit className="w-4 h-4" />
+                            Edit
+                          </button>
+                        )}
 
                         {tender.status === "published" && (
                           <button className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm">

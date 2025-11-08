@@ -18,6 +18,15 @@ const TenderFormModal = ({
   amendMode = false,
   tenderData = null,
 }) => {
+  // Get today's date in YYYY-MM-DD format for min date validation
+  const getTodayDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   const [formData, setFormData] = useState({
     title: "",
     category: "",
@@ -166,6 +175,28 @@ const TenderFormModal = ({
         return "";
       };
 
+      // Parse meeting date - handle various formats and check validity
+      const parseMeetingDate = () => {
+        // Try tenderData.meetingDate first
+        if (tenderData.meetingDate && tenderData.meetingDate !== "") {
+          const date = new Date(tenderData.meetingDate);
+          if (!isNaN(date.getTime()) && date.getTime() > 0) {
+            return date.toISOString().split("T")[0];
+          }
+        }
+        // Try rawData if available
+        if (
+          tenderData.rawData?.meetingDate &&
+          tenderData.rawData.meetingDate !== ""
+        ) {
+          const date = new Date(tenderData.rawData.meetingDate);
+          if (!isNaN(date.getTime()) && date.getTime() > 0) {
+            return date.toISOString().split("T")[0];
+          }
+        }
+        return "";
+      };
+
       // Set flag to prevent district reset during initial load
       if (tenderData.state) {
         isInitialStateLoad.current = true;
@@ -187,10 +218,8 @@ const TenderFormModal = ({
             : [""],
         specifications: tenderData.technicalSpecifications || "",
         locationScope: tenderData.locationScope || "",
-        preBidMeeting: !!(tenderData.meetingDate && tenderData.meetingVenue),
-        meetingDate: tenderData.meetingDate
-          ? new Date(tenderData.meetingDate).toISOString().split("T")[0]
-          : "",
+        preBidMeeting: !!(parseMeetingDate() && tenderData.meetingVenue),
+        meetingDate: parseMeetingDate(),
         venue: tenderData.meetingVenue || "",
         state: tenderData.state || "",
         district: tenderData.district || "",
@@ -245,6 +274,57 @@ const TenderFormModal = ({
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+
+    // Validate date fields to prevent past dates
+    if ((name === "deadline" || name === "meetingDate") && type === "date") {
+      const selectedDate = new Date(value);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (selectedDate < today) {
+        toastService.showError(
+          `${
+            name === "deadline" ? "Bid Submission Deadline" : "Meeting Date"
+          } cannot be in the past`
+        );
+        return;
+      }
+
+      // Additional validation for meeting date: must be between today and deadline (inclusive)
+      if (name === "meetingDate" && formData.deadline) {
+        const deadlineDate = new Date(formData.deadline);
+        deadlineDate.setHours(23, 59, 59, 999); // Set to end of deadline day
+        selectedDate.setHours(0, 0, 0, 0);
+
+        if (selectedDate > deadlineDate) {
+          toastService.showError(
+            "Meeting Date cannot be after the Bid Submission Deadline"
+          );
+          return;
+        }
+      }
+
+      // If deadline is changed and meeting date exists, validate meeting date
+      if (name === "deadline" && formData.meetingDate) {
+        const meetingDate = new Date(formData.meetingDate);
+        meetingDate.setHours(0, 0, 0, 0);
+        const newDeadline = new Date(value);
+        newDeadline.setHours(23, 59, 59, 999); // Set to end of deadline day
+
+        if (meetingDate > newDeadline) {
+          toastService.showError(
+            "Meeting Date has been cleared as it exceeds the new deadline"
+          );
+          setFormData({
+            ...formData,
+            [name]: value,
+            meetingDate: "", // Clear meeting date
+          });
+          return;
+        }
+      }
+    }
+
     setFormData({
       ...formData,
       [name]: type === "checkbox" ? checked : value,
@@ -371,6 +451,45 @@ const TenderFormModal = ({
     e.preventDefault();
 
     if (isSubmitting) return;
+
+    // Validate deadline is not in the past
+    if (formData.deadline) {
+      const deadlineDate = new Date(formData.deadline);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (deadlineDate < today) {
+        toastService.showError("Bid Submission Deadline cannot be in the past");
+        return;
+      }
+    }
+
+    // Validate meeting date is not in the past (if pre-bid meeting is enabled)
+    if (formData.preBidMeeting && formData.meetingDate) {
+      const meetingDate = new Date(formData.meetingDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (meetingDate < today) {
+        toastService.showError("Meeting Date cannot be in the past");
+        return;
+      }
+
+      // Validate meeting date is not after deadline (inclusive of deadline day)
+      if (formData.deadline) {
+        const deadlineDate = new Date(formData.deadline);
+        deadlineDate.setHours(23, 59, 59, 999); // Set to end of deadline day
+        const meetingDateTime = new Date(formData.meetingDate);
+        meetingDateTime.setHours(0, 0, 0, 0);
+
+        if (meetingDateTime > deadlineDate) {
+          toastService.showError(
+            "Meeting Date cannot be after the Bid Submission Deadline"
+          );
+          return;
+        }
+      }
+    }
 
     setIsSubmitting(true);
 
@@ -531,6 +650,7 @@ const TenderFormModal = ({
                 name="deadline"
                 value={formData.deadline}
                 onChange={handleChange}
+                min={getTodayDate()}
                 className="mt-1 w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500"
                 required
               />
@@ -960,6 +1080,8 @@ const TenderFormModal = ({
                       name="meetingDate"
                       value={formData.meetingDate || ""}
                       onChange={handleChange}
+                      min={getTodayDate()}
+                      // max={formData.deadline || undefined}
                       className="mt-1 w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500"
                       required
                     />

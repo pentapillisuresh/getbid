@@ -7,9 +7,30 @@ import {
   TrendingUp,
   TrendingDown,
 } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import * as XLSX from "xlsx";
 
 const FullReportModal = ({ tender, onClose }) => {
   const currentDate = new Date().toLocaleDateString("en-GB");
+
+  // Helper function to format date as "Nov 28th, 2025"
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    const date = new Date(dateString);
+    const month = date.toLocaleString("en-US", { month: "short" });
+    const day = date.getDate();
+    const year = date.getFullYear();
+
+    // Add ordinal suffix (st, nd, rd, th)
+    const getOrdinal = (n) => {
+      const s = ["th", "st", "nd", "rd"];
+      const v = n % 100;
+      return n + (s[(v - 20) % 10] || s[v] || s[0]);
+    };
+
+    return `${month} ${getOrdinal(day)}, ${year}`;
+  };
 
   // Validate tender value
   const tenderValue = tender?.value && !isNaN(tender.value) ? tender.value : 0;
@@ -140,11 +161,226 @@ const FullReportModal = ({ tender, onClose }) => {
       : true;
 
   const handleDownloadPDF = () => {
-    console.log("Downloading Full Report PDF...");
+    const doc = new jsPDF();
+
+    // Helper to replace rupee symbol with Rs.
+    const formatCurrencyForPDF = (amount) => {
+      if (!amount) return "N/A";
+      return String(amount).replace(/₹/g, "Rs. ");
+    };
+
+    // Add title
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+    doc.text("Complete Evaluation Report", 105, 20, { align: "center" });
+
+    // Add tender title
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "normal");
+    doc.text(tender.title || "Tender Title", 105, 30, { align: "center" });
+
+    // Add date
+    doc.setFontSize(10);
+    doc.text(`Generated on: ${currentDate}`, 105, 37, { align: "center" });
+
+    // Add summary statistics
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text("Summary Statistics", 14, 50);
+
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Total Bids: ${summaryStats.totalBids}`, 14, 58);
+    doc.text(`Technical Approved: ${summaryStats.technicalApproved}`, 14, 65);
+    doc.text(`Financial Evaluated: ${summaryStats.financialEvaluated}`, 14, 72);
+    doc.text(`Awarded: ${summaryStats.awarded}`, 14, 79);
+
+    // Add financial summary
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text("Financial Summary", 14, 92);
+
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text(
+      `Estimated Value: ${formatCurrencyForPDF(estimatedValue)}`,
+      14,
+      100
+    );
+    doc.text(`Lowest Bid: ${formatCurrencyForPDF(lowestBid)}`, 14, 107);
+    doc.text(
+      `${savingsPositive ? "Savings" : "Excess"}: ${formatCurrencyForPDF(
+        savings
+      )}`,
+      14,
+      114
+    );
+
+    // Add tender details
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text("Tender Information", 14, 127);
+
+    // Map tender status for display
+    let tenderStatus = tender.status || "N/A";
+    if (tender.status === "in-progress") tenderStatus = "In Progress";
+    else if (tender.status === "technical-evaluation")
+      tenderStatus = "Technical Evaluation Completed";
+    else if (
+      tender.status === "financial-evaluation" ||
+      tender.status === "completed"
+    )
+      tenderStatus = "Completed";
+    else if (tender.status === "cancelled") tenderStatus = "Cancelled";
+
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    const tenderInfo = [
+      ["Tender ID", tender.tenderId || tender.id || "N/A"],
+      ["Tender Title", tender.title || "N/A"],
+      ["Category", tender.category || "N/A"],
+      ["Status", tenderStatus],
+    ];
+
+    autoTable(doc, {
+      startY: 130,
+      head: [["Field", "Value"]],
+      body: tenderInfo,
+      theme: "grid",
+      headStyles: {
+        fillColor: [59, 130, 246],
+        font: "helvetica",
+        fontStyle: "bold",
+      },
+      bodyStyles: { font: "helvetica" },
+      margin: { left: 14, right: 14 },
+    });
+
+    // Add complete evaluation table
+    const tableData = processedBids.map((bid) => {
+      const submittedDate = formatDate(bid.createdAt);
+      return [
+        bid.vendorName,
+        formatCurrencyForPDF(bid.bidAmount),
+        bid.variance,
+        `${bid.technicalScore}/100`,
+        bid.status,
+        submittedDate,
+      ];
+    });
+
+    autoTable(doc, {
+      startY: doc.previousAutoTable ? doc.previousAutoTable.finalY + 10 : 180,
+      head: [
+        [
+          "Vendor",
+          "Bid Amount",
+          "Variance",
+          "Tech Score",
+          "Status",
+          "Submitted",
+        ],
+      ],
+      body: tableData,
+      theme: "grid",
+      headStyles: {
+        fillColor: [59, 130, 246],
+        font: "helvetica",
+        fontStyle: "bold",
+      },
+      bodyStyles: { font: "helvetica" },
+      margin: { left: 14, right: 14 },
+      styles: { fontSize: 8 },
+      columnStyles: {
+        0: { cellWidth: 35 },
+        1: { cellWidth: 30 },
+        2: { cellWidth: 22 },
+        3: { cellWidth: 28 },
+        4: { cellWidth: 28 },
+        5: { cellWidth: 35 },
+      },
+    });
+
+    // Save the PDF
+    doc.save(
+      `Complete_Report_${tender.title.replace(
+        /[^a-z0-9]/gi,
+        "_"
+      )}_${new Date().getTime()}.pdf`
+    );
   };
 
   const handleExportExcel = () => {
-    console.log("Exporting Full Report to Excel...");
+    // Prepare data for Excel
+    const excelData = processedBids.map((bid) => {
+      return {
+        "Vendor Name": bid.vendorName,
+        "Contact Person": bid.contactPerson,
+        "Bid Amount": bid.bidAmount,
+        Variance: bid.variance,
+        "Technical Score": bid.technicalScore,
+        // "Financial Score": bid.financialScore,
+        // "Overall Score": bid.overallScore,
+        Status: bid.status,
+        "Technical Status": bid.technicalStatus,
+        "Financial Status": bid.financialStatus,
+        "Submitted Date": formatDate(bid.createdAt),
+      };
+    });
+
+    // Create workbook and worksheet
+    const wb = XLSX.utils.book_new();
+
+    // Map tender status for display
+    let tenderStatus = tender.status || "N/A";
+    if (tender.status === "in-progress") tenderStatus = "In Progress";
+    else if (tender.status === "technical-evaluation")
+      tenderStatus = "Technical Evaluation Completed";
+    else if (
+      tender.status === "financial-evaluation" ||
+      tender.status === "completed"
+    )
+      tenderStatus = "Completed";
+    else if (tender.status === "cancelled") tenderStatus = "Cancelled";
+
+    // Add summary sheet
+    const summaryData = [
+      ["Complete Evaluation Report"],
+      ["Tender Title", tender.title || "N/A"],
+      ["Generated On", currentDate],
+      [""],
+      ["Summary Statistics"],
+      ["Total Bids", summaryStats.totalBids],
+      ["Technical Approved", summaryStats.technicalApproved],
+      ["Financial Evaluated", summaryStats.financialEvaluated],
+      ["Awarded", summaryStats.awarded],
+      [""],
+      ["Financial Summary"],
+      ["Estimated Value", estimatedValue],
+      ["Lowest Bid", lowestBid],
+      [savingsPositive ? "Savings" : "Excess", savings],
+      [""],
+      ["Tender Information"],
+      ["Tender ID", tender.tenderId || tender.id || "N/A"],
+      ["Category", tender.category || "N/A"],
+      ["Status", tenderStatus],
+    ];
+
+    const summaryWs = XLSX.utils.aoa_to_sheet(summaryData);
+    XLSX.utils.book_append_sheet(wb, summaryWs, "Summary");
+
+    // Add bid details sheet
+    const bidWs = XLSX.utils.json_to_sheet(excelData);
+    XLSX.utils.book_append_sheet(wb, bidWs, "Bid Details");
+
+    // Save the Excel file
+    XLSX.writeFile(
+      wb,
+      `Complete_Report_${tender.title.replace(
+        /[^a-z0-9]/gi,
+        "_"
+      )}_${new Date().getTime()}.xlsx`
+    );
   };
 
   return (
