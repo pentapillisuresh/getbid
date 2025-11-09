@@ -574,6 +574,11 @@ const BidManagement = () => {
                           Open
                         </span>
                       )}
+                      {bid.tender?.status === "cancelled" && (
+                        <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-medium">
+                          Tender Cancelled
+                        </span>
+                      )}
                     </div>
 
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">
@@ -830,46 +835,54 @@ const BidManagement = () => {
                   </div>
 
                   <div className="flex items-center gap-3">
-                    {bid.canRebid && (
-                      <button
-                        onClick={() => handleShowRebid(bid)}
-                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors"
-                      >
-                        Re-Bid
-                      </button>
-                    )}
-                    {bid.status === "awarded" && (
-                      <button
-                        onClick={() => handleShowContract(bid)}
-                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors"
-                      >
-                        View Contract
-                      </button>
-                    )}
-                    {bid.status === "pending" && (
-                      <button
-                        onClick={() => handleDeleteBid(bid)}
-                        className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center gap-2"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                        Delete Bid
-                      </button>
-                    )}
-                    {(bid.status === "rejected" ||
-                      bid.status === "disqualified") && (
-                      <button className="bg-primary-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors">
-                        View Feedback
-                      </button>
-                    )}
-                    {bid.status === "approved" && (
-                      <span className="text-green-600 font-medium text-sm">
-                        ✓ Bid Approved
+                    {bid.tender?.status === "cancelled" ? (
+                      <span className="text-red-600 font-medium text-sm">
+                        Tender Cancelled by Client
                       </span>
-                    )}
-                    {bid.status === "deleted" && (
-                      <span className="text-gray-600 font-medium text-sm">
-                        🗑️ Bid Deleted
-                      </span>
+                    ) : (
+                      <>
+                        {bid.canRebid && (
+                          <button
+                            onClick={() => handleShowRebid(bid)}
+                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors"
+                          >
+                            Re-Bid
+                          </button>
+                        )}
+                        {bid.status === "awarded" && (
+                          <button
+                            onClick={() => handleShowContract(bid)}
+                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors"
+                          >
+                            View Contract
+                          </button>
+                        )}
+                        {bid.status === "pending" && (
+                          <button
+                            onClick={() => handleDeleteBid(bid)}
+                            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center gap-2"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            Delete Bid
+                          </button>
+                        )}
+                        {(bid.status === "rejected" ||
+                          bid.status === "disqualified") && (
+                          <button className="bg-primary-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors">
+                            View Feedback
+                          </button>
+                        )}
+                        {bid.status === "approved" && (
+                          <span className="text-green-600 font-medium text-sm">
+                            ✓ Bid Approved
+                          </span>
+                        )}
+                        {bid.status === "deleted" && (
+                          <span className="text-gray-600 font-medium text-sm">
+                            🗑️ Bid Deleted
+                          </span>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>

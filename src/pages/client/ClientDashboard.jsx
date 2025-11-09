@@ -8,6 +8,7 @@ import {
   BarChart3,
   History,
   Activity,
+  MessageSquare,
 } from "lucide-react";
 import DashboardLayout from "../../components/shared/DashboardLayout";
 import Sidebar from "../../components/shared/Sidebar";
@@ -20,6 +21,7 @@ import ActivitiesPage from "./pages/ActivitiesPage";
 import ProfilePage from "./pages/ProfilePage";
 import TenderDashboard from "./pages/TenderDashboard";
 import NotificationsPage from "./pages/NotificationsPage";
+import ClientClarifications from "./pages/ClientClarifications";
 
 const ClientDashboard = () => {
   const location = useLocation();
@@ -69,6 +71,11 @@ const ClientDashboard = () => {
       // badge: "248",
     },
     {
+      icon: <MessageSquare className="w-5 h-5" />,
+      label: "Clarifications",
+      path: "/clarifications",
+    },
+    {
       icon: <BarChart3 className="w-5 h-5" />,
       label: "Reports & Analytics",
       path: "/reports-analytics",
@@ -102,6 +109,7 @@ const ClientDashboard = () => {
           <Route path="/tender-management" element={<TenderManagement />} />
           <Route path="/bid-evaluation" element={<BidEvaluation />} />
           <Route path="/vendor-management" element={<VendorManagement />} />
+          <Route path="/clarifications" element={<ClientClarifications />} />
           <Route path="/reports-analytics" element={<ReportsAnalytics />} />
           <Route path="/activities" element={<ActivitiesPage />} />
           <Route

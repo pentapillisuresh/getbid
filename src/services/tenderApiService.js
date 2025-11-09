@@ -478,6 +478,22 @@ export const getVendorClosingSoonTenders = async () => {
   }
 };
 
+/**
+ * Get tender names for dropdown/selection purposes
+ * @returns {Promise} - Response with tender names list
+ */
+export const getTenderNames = async () => {
+  try {
+    const response = await api.get("/v1/tenders/names", {
+      showToasts: false,
+    });
+    return response;
+  } catch (error) {
+    console.error("Error fetching tender names:", error);
+    throw error;
+  }
+};
+
 export default {
   uploadTenderDocument,
   uploadMultipleTenderDocuments,
@@ -497,4 +513,5 @@ export default {
   awardContract,
   getClosingSoonTenders,
   getVendorClosingSoonTenders,
+  getTenderNames,
 };

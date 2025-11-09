@@ -20,8 +20,11 @@ import {
   TrendingUp,
   Download,
   MessageSquare,
+  Ban,
+  X,
 } from "lucide-react";
 import VendorDetails from "../popup/VendorDetails";
+import RateVendorModal from "../popup/RateVendorModal";
 import api from "../../../services/apiService";
 import toastService from "../../../services/toastService";
 
@@ -31,6 +34,14 @@ const VendorManagement = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedVendor, setSelectedVendor] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [vendorToRate, setVendorToRate] = useState(null);
+  const [showSuspendModal, setShowSuspendModal] = useState(false);
+  const [vendorToSuspend, setVendorToSuspend] = useState(null);
+  const [suspendReason, setSuspendReason] = useState("");
+  const [showUnsuspendModal, setShowUnsuspendModal] = useState(false);
+  const [vendorToUnsuspend, setVendorToUnsuspend] = useState(null);
+  const [unsuspendNotes, setUnsuspendNotes] = useState("");
 
   const tabs = [
     { id: "all", label: "All Vendors", count: 248 },
@@ -64,6 +75,45 @@ const VendorManagement = () => {
   const [hasMore, setHasMore] = useState(true);
   const sentinelRef = useRef(null);
 
+  const formatLastActive = (dateString) => {
+    if (!dateString) return "—";
+    const date = new Date(dateString);
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+    const day = date.getDate();
+    const month = months[date.getMonth()];
+    const year = date.getFullYear();
+
+    // Add suffix to day (1st, 2nd, 3rd, 4th, etc.)
+    const suffix = (day) => {
+      if (day > 3 && day < 21) return "th";
+      switch (day % 10) {
+        case 1:
+          return "st";
+        case 2:
+          return "nd";
+        case 3:
+          return "rd";
+        default:
+          return "th";
+      }
+    };
+
+    return `${month} ${day}${suffix(day)}, ${year}`;
+  };
+
   const normalize = (item) => ({
     id: item._id,
     name: item.name,
@@ -77,8 +127,19 @@ const VendorManagement = () => {
     location: item.address || "",
     status: item.isActive ? "verified" : "pending",
     rating: item.rating || 0,
-    totalProjects: item.totalProjects || 0,
+    totalProjects: item.totalBids || 0,
+    tendersWon: item.awardedBids || 0,
+    successRate: item.successRate || 0,
+    lastActivity: formatLastActive(item.lastActive),
     company: item.company || {},
+    isSuspended: item.isSuspended || false,
+    // Average ratings from vendor object
+    technicalRating: item.averageRatings?.averageTechnicalRating || 0,
+    financialRating: item.averageRatings?.averageFinancialRating || 0,
+    deliveryRating: item.averageRatings?.averageDeliveryRating || 0,
+    overallRating: item.averageRatings?.averageOverallRating || 0,
+    totalRatings: item.averageRatings?.totalRatings || 0,
+    hasRating: (item.averageRatings?.totalRatings || 0) > 0,
     raw: item,
   });
 
@@ -95,6 +156,7 @@ const VendorManagement = () => {
         setTotalPages(tp);
         setHasMore(p < tp);
         setPage(p);
+
         const norm = data.map(normalize);
         setVendors((prev) => (replace ? norm : [...prev, ...norm]));
       } catch (err) {
@@ -194,6 +256,114 @@ const VendorManagement = () => {
     setSelectedVendor(null);
   };
 
+  const handleRateVendor = (vendor) => {
+    setVendorToRate(vendor);
+    setShowRatingModal(true);
+  };
+
+  const handleCloseRatingModal = () => {
+    setShowRatingModal(false);
+    setVendorToRate(null);
+  };
+
+  const handleSubmitRating = async (ratingData) => {
+    try {
+      await api.post("/v1/ratings", {
+        body: {
+          ratedTo: ratingData.vendorId,
+          technicalRating: ratingData.ratings.technical,
+          financialRating: ratingData.ratings.financial,
+          deliveryRating: ratingData.ratings.delivery,
+          overallRating: ratingData.ratings.overall,
+          additionalFeedback: ratingData.feedback || "",
+        },
+      });
+
+      // Optionally refresh the vendor list to show updated ratings
+      fetchVendors(1, true);
+
+      return Promise.resolve();
+    } catch (error) {
+      return Promise.reject(error);
+    }
+  };
+
+  const handleSuspendVendor = (vendor) => {
+    setVendorToSuspend(vendor);
+    setShowSuspendModal(true);
+  };
+
+  const handleCloseSuspendModal = () => {
+    setShowSuspendModal(false);
+    setVendorToSuspend(null);
+    setSuspendReason("");
+  };
+
+  const handleSubmitSuspend = async () => {
+    if (!suspendReason.trim()) {
+      toastService.showError("Please provide a reason for suspension");
+      return;
+    }
+
+    try {
+      await api.post("/v1/suspends", {
+        body: {
+          user: vendorToSuspend.raw._id || vendorToSuspend.raw.id,
+          reason: suspendReason,
+        },
+      });
+
+      toastService.showSuccess("Vendor suspended successfully");
+      handleCloseSuspendModal();
+
+      // Refresh the vendor list
+      fetchVendors(1, true);
+    } catch (error) {
+      // Extract error message from response data
+      const errorMessage =
+        error?.data?.message || error?.message || "Failed to suspend vendor";
+      toastService.showError(errorMessage);
+    }
+  };
+
+  const handleUnsuspendVendor = (vendor) => {
+    setVendorToUnsuspend(vendor);
+    setShowUnsuspendModal(true);
+  };
+
+  const handleCloseUnsuspendModal = () => {
+    setShowUnsuspendModal(false);
+    setVendorToUnsuspend(null);
+    setUnsuspendNotes("");
+  };
+
+  const handleSubmitUnsuspend = async () => {
+    if (!unsuspendNotes.trim()) {
+      toastService.showError("Please provide notes for unsuspension");
+      return;
+    }
+
+    try {
+      const vendorId = vendorToUnsuspend.raw._id || vendorToUnsuspend.raw.id;
+      await api.put(`/v1/suspends/${vendorId}/unsuspend`, {
+        body: {
+          notes: unsuspendNotes,
+        },
+      });
+
+      toastService.showSuccess("Vendor unsuspended successfully");
+      handleCloseUnsuspendModal();
+
+      // Refresh the vendor list
+      fetchVendors(1, true);
+    } catch (error) {
+      // Extract error message from response data
+      const errorMessage =
+        error?.data?.message || error?.message || "Failed to unsuspend vendor";
+      toastService.showError(errorMessage);
+    }
+  };
+
   const filteredVendors = vendors.filter((vendor) => {
     const matchesTab = activeTab === "all" || vendor.status === activeTab;
     const matchesCategory =
@@ -229,14 +399,20 @@ const VendorManagement = () => {
     },
   ];
 
-  if (showDetails && selectedVendor) {
-    return (
-      <VendorDetails vendor={selectedVendor} onClose={handleCloseDetails} />
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Rating Modal */}
+      {showRatingModal && vendorToRate && (
+        <RateVendorModal
+          vendor={vendorToRate}
+          onClose={handleCloseRatingModal}
+          onSubmit={handleSubmitRating}
+        />
+      )}
+      {/* Vendor Details Modal */}
+      {showDetails && selectedVendor && (
+        <VendorDetails vendor={selectedVendor} onClose={handleCloseDetails} />
+      )}
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="flex items-center justify-between">
@@ -320,203 +496,177 @@ const VendorManagement = () => {
               key={vendor.id}
               className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow"
             >
-              <div className="flex items-start justify-between mb-6">
-                <div className="flex items-start gap-4 flex-1">
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="p-2 bg-gray-100 rounded-full">
-                      {getStatusIcon(vendor.status)}
-                    </div>
-                    {vendor.status === "verified" && (
-                      <span className="px-2 py-1 bg-green-100 text-green-600 rounded text-xs font-medium">
-                        Verified
-                      </span>
-                    )}
-                    {vendor.status === "suspended" && (
-                      <span className="px-2 py-1 bg-red-100 text-red-600 rounded text-xs font-medium">
-                        Suspended
-                      </span>
-                    )}
-                    {vendor.status === "pending" && (
-                      <span className="px-2 py-1 bg-orange-100 text-orange-600 rounded text-xs font-medium">
-                        Pending
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-xl font-bold text-gray-900">
-                        {vendor.name}
-                      </h3>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-                      <div>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex items-center gap-2">
-                            <User className="w-4 h-4 text-gray-400" />
-                            <span className="text-gray-600">
-                              Contact Person
-                            </span>
-                          </div>
-                          <div className="font-medium text-gray-900">
-                            {vendor.contactPerson}
-                          </div>
-
-                          <div className="flex items-center gap-2 mt-3">
-                            <Building2 className="w-4 h-4 text-gray-400" />
-                            <span className="text-gray-600">Category</span>
-                          </div>
-                          <div className="font-medium text-gray-900">
-                            {vendor.category}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex items-center gap-2">
-                            <Award className="w-4 h-4 text-gray-400" />
-                            <span className="text-gray-600">Experience</span>
-                          </div>
-                          <div className="font-medium text-gray-900">
-                            {vendor.experience}
-                          </div>
-
-                          <div className="flex items-center gap-2 mt-3">
-                            <span className="text-gray-600">
-                              ID: {vendor.id}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                      <div className="text-center">
-                        <div className="text-sm text-gray-500">Tenders</div>
-                        <div className="font-bold text-lg text-blue-600">
-                          {vendor.totalProjects}
-                        </div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-sm text-gray-500">Won</div>
-                        <div className="font-bold text-lg text-green-600">
-                          {vendor.tendersWon}
-                        </div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-sm text-gray-500">
-                          Success Rate
-                        </div>
-                        <div
-                          className={`font-bold text-lg ${getPerformanceColor(
-                            vendor.successRate
-                          )}`}
-                        >
-                          {vendor.successRate}%
-                        </div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-sm text-gray-500">Last Active</div>
-                        <div className="font-medium text-sm text-gray-900">
-                          {vendor.lastActivity}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Rating Section */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                      <div className="text-center">
-                        <div className="text-xs text-gray-500 mb-1">
-                          Technical Rating
-                        </div>
-                        <div className="flex items-center justify-center gap-1">
-                          {getRatingStars(vendor.technicalRating)}
-                          <span className="text-sm text-gray-600 ml-1">
-                            ({vendor.technicalRating})
-                          </span>
-                        </div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-xs text-gray-500 mb-1">
-                          Financial Rating
-                        </div>
-                        <div className="flex items-center justify-center gap-1">
-                          {getRatingStars(vendor.financialRating)}
-                          <span className="text-sm text-gray-600 ml-1">
-                            ({vendor.financialRating})
-                          </span>
-                        </div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-xs text-gray-500 mb-1">
-                          Delivery Rating
-                        </div>
-                        <div className="flex items-center justify-center gap-1">
-                          {getRatingStars(vendor.deliveryRating)}
-                          <span className="text-sm text-gray-600 ml-1">
-                            ({vendor.deliveryRating})
-                          </span>
-                        </div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-xs text-gray-500 mb-1">
-                          Overall Rating
-                        </div>
-                        <div className="flex items-center justify-center gap-1">
-                          {getRatingStars(vendor.overallRating)}
-                          <span className="text-sm text-gray-600 ml-1">
-                            ({vendor.overallRating})
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {vendor.suspensionReason && (
-                      <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                        <div className="flex items-center gap-2 text-red-800">
-                          <AlertTriangle className="w-4 h-4" />
-                          <span className="font-medium">Suspension Reason</span>
-                        </div>
-                        <p className="text-red-700 text-sm mt-1">
-                          {vendor.suspensionReason}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+              {/* Header Section */}
+              <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
+                  <h3 className="text-xl font-bold text-gray-900">
+                    {vendor.name}
+                  </h3>
+                  {vendor.status === "verified" && (
+                    <span className="px-3 py-1 bg-green-100 text-green-600 rounded-full text-xs font-medium">
+                      Verified
+                    </span>
+                  )}
+                  {vendor.status === "pending" && (
+                    <span className="px-3 py-1 bg-orange-100 text-orange-600 rounded-full text-xs font-medium">
+                      Active
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
                   <button
                     onClick={() => handleViewDetails(vendor)}
-                    className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors"
+                    className="text-blue-600 hover:text-blue-700 font-medium text-sm flex items-center gap-1 px-4 py-1.5 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors"
                   >
                     <Eye className="w-4 h-4" />
                     View Details
                   </button>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  {vendor.status === "suspended" && (
-                    <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors">
-                      Activate
+                  <button
+                    onClick={() => handleRateVendor(vendor)}
+                    className="text-blue-600 hover:text-blue-700 font-medium text-sm flex items-center gap-1 px-4 py-1.5 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors"
+                  >
+                    <Star className="w-4 h-4" />
+                    Rate Vendor
+                  </button>
+                  {vendor.isSuspended ? (
+                    <button
+                      onClick={() => handleUnsuspendVendor(vendor)}
+                      className="text-green-600 hover:text-green-700 text-sm font-medium px-4 py-1.5 border border-green-200 rounded-lg hover:bg-green-50 transition-colors flex items-center gap-1"
+                    >
+                      <CheckCircle className="w-4 h-4" />
+                      Unsuspend
                     </button>
-                  )}
-                  {vendor.status === "verified" && (
-                    <>
-                      <button className="text-red-600 hover:text-red-700 text-sm font-medium transition-colors">
-                        Suspend
-                      </button>
-                      <button className="bg-primary-500 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors">
-                        Send Message
-                      </button>
-                    </>
+                  ) : (
+                    <button
+                      onClick={() => handleSuspendVendor(vendor)}
+                      className="text-red-600 hover:text-red-700 text-sm font-medium px-4 py-1.5 border border-red-200 rounded-lg hover:bg-red-50 transition-colors flex items-center gap-1"
+                    >
+                      <Ban className="w-4 h-4" />
+                      Suspend
+                    </button>
                   )}
                 </div>
               </div>
+
+              {/* Info Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
+                <div>
+                  <div className="text-sm text-gray-600 mb-1">
+                    Contact Person
+                  </div>
+                  <div className="font-medium text-gray-900">
+                    {vendor.contactPerson || vendor.name}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-sm text-gray-600 mb-1">Category</div>
+                  <div className="font-medium text-gray-900">
+                    {vendor.category}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-sm text-gray-600 mb-1">Experience</div>
+                  <div className="font-medium text-gray-900">
+                    {vendor.experience}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-sm text-gray-600 mb-1">ID</div>
+                  <div className="font-medium text-gray-900">{vendor.id}</div>
+                </div>
+              </div>
+
+              {/* Stats Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+                <div className="text-center">
+                  <div className="text-sm text-gray-500">Tenders</div>
+                  <div className="font-bold text-lg text-blue-600">
+                    {vendor.totalProjects}
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="text-sm text-gray-500">Won</div>
+                  <div className="font-bold text-lg text-green-600">
+                    {vendor.tendersWon}
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="text-sm text-gray-500">Success Rate</div>
+                  <div
+                    className={`font-bold text-lg ${getPerformanceColor(
+                      vendor.successRate
+                    )}`}
+                  >
+                    {vendor.successRate}%
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="text-sm text-gray-500">Last Active</div>
+                  <div className="font-medium text-sm text-gray-900">
+                    {vendor.lastActivity}
+                  </div>
+                </div>
+              </div>
+
+              {/* Rating Section */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                <div className="text-center">
+                  <div className="text-xs text-gray-500 mb-2">
+                    Technical Rating
+                  </div>
+                  <div className="flex items-center justify-center gap-1">
+                    {getRatingStars(vendor.technicalRating)}
+                  </div>
+                  <span className="text-sm text-gray-600 mt-1 block">
+                    ({vendor.technicalRating})
+                  </span>
+                </div>
+                <div className="text-center">
+                  <div className="text-xs text-gray-500 mb-2">
+                    Financial Rating
+                  </div>
+                  <div className="flex items-center justify-center gap-1">
+                    {getRatingStars(vendor.financialRating)}
+                  </div>
+                  <span className="text-sm text-gray-600 mt-1 block">
+                    ({vendor.financialRating})
+                  </span>
+                </div>
+                <div className="text-center">
+                  <div className="text-xs text-gray-500 mb-2">
+                    Delivery Rating
+                  </div>
+                  <div className="flex items-center justify-center gap-1">
+                    {getRatingStars(vendor.deliveryRating)}
+                  </div>
+                  <span className="text-sm text-gray-600 mt-1 block">
+                    ({vendor.deliveryRating})
+                  </span>
+                </div>
+                <div className="text-center">
+                  <div className="text-xs text-gray-500 mb-2">
+                    Overall Rating
+                  </div>
+                  <div className="flex items-center justify-center gap-1">
+                    {getRatingStars(vendor.overallRating)}
+                  </div>
+                  <span className="text-sm text-gray-600 mt-1 block">
+                    ({vendor.overallRating})
+                  </span>
+                </div>
+              </div>
+
+              {vendor.suspensionReason && (
+                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="flex items-center gap-2 text-red-800">
+                    <AlertTriangle className="w-4 h-4" />
+                    <span className="font-medium">Suspension Reason</span>
+                  </div>
+                  <p className="text-red-700 text-sm mt-1">
+                    {vendor.suspensionReason}
+                  </p>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -549,6 +699,147 @@ const VendorManagement = () => {
           </div>
         )}
       </div>
+
+      {/* Modals */}
+      {showDetails && (
+        <VendorDetails vendor={selectedVendor} onClose={handleCloseDetails} />
+      )}
+
+      {showRatingModal && (
+        <RateVendorModal
+          vendor={vendorToRate}
+          onClose={handleCloseRatingModal}
+          onSubmit={handleSubmitRating}
+        />
+      )}
+
+      {showSuspendModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-red-100 rounded-full">
+                  <Ban className="w-6 h-6 text-red-600" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-900">
+                  Suspend Vendor
+                </h2>
+              </div>
+              <button
+                onClick={handleCloseSuspendModal}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="mb-4">
+                <p className="text-gray-700 mb-2">
+                  You are about to suspend{" "}
+                  <span className="font-semibold">{vendorToSuspend?.name}</span>
+                </p>
+                <p className="text-sm text-gray-600">
+                  Please provide a reason for this action.
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Suspension Reason *
+                </label>
+                <textarea
+                  value={suspendReason}
+                  onChange={(e) => setSuspendReason(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
+                  rows="4"
+                  placeholder="Enter the reason for suspending this vendor..."
+                  required
+                />
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
+              <button
+                onClick={handleCloseSuspendModal}
+                className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmitSuspend}
+                disabled={!suspendReason.trim()}
+                className="px-6 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                <Ban className="w-5 h-5" />
+                Suspend Vendor
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showUnsuspendModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-green-100 rounded-full">
+                  <CheckCircle className="w-6 h-6 text-green-600" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-900">
+                  Unsuspend Vendor
+                </h2>
+              </div>
+              <button
+                onClick={handleCloseUnsuspendModal}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="p-6">
+              <div className="mb-4">
+                <p className="text-gray-700 mb-2">
+                  You are about to unsuspend{" "}
+                  <span className="font-semibold">
+                    {vendorToUnsuspend?.name}
+                  </span>
+                </p>
+                <p className="text-sm text-gray-600">
+                  Please provide notes for this action.
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Unsuspension Notes *
+                </label>
+                <textarea
+                  value={unsuspendNotes}
+                  onChange={(e) => setUnsuspendNotes(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
+                  rows="4"
+                  placeholder="Enter notes for unsuspending this vendor..."
+                  required
+                />
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
+              <button
+                onClick={handleCloseUnsuspendModal}
+                className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmitUnsuspend}
+                disabled={!unsuspendNotes.trim()}
+                className="px-6 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                <CheckCircle className="w-5 h-5" />
+                Unsuspend Vendor
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
