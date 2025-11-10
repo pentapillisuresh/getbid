@@ -660,12 +660,12 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                 {eligibleBids.map((bid, index) => {
                   const totalScore = bid.technicalEvaluation
                     ? Object.values({
-                        experience: bid.technicalEvaluation.experience || 0,
-                        expertise: bid.technicalEvaluation.expertise || 0,
-                        resources: bid.technicalEvaluation.resources || 0,
-                        timeline: bid.technicalEvaluation.timeline || 0,
-                        quality: bid.technicalEvaluation.quality || 0,
-                      }).reduce((sum, score) => sum + score, 0)
+                      experience: bid.technicalEvaluation.experience || 0,
+                      expertise: bid.technicalEvaluation.expertise || 0,
+                      resources: bid.technicalEvaluation.resources || 0,
+                      timeline: bid.technicalEvaluation.timeline || 0,
+                      quality: bid.technicalEvaluation.quality || 0,
+                    }).reduce((sum, score) => sum + score, 0)
                     : 0;
 
                   return (
@@ -690,20 +690,18 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                       <td className="px-4 py-4 whitespace-nowrap">
                         <div className="flex flex-col gap-1">
                           <span
-                            className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                              index === 0
+                            className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${index === 0
                                 ? "bg-green-100 text-green-800"
                                 : "bg-blue-100 text-blue-800"
-                            }`}
+                              }`}
                           >
                             {index === 0 ? "L1 (Lowest)" : `L${index + 1}`}
                           </span>
                           <span
-                            className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                              bid.status === "awarded"
+                            className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${bid.status === "awarded"
                                 ? "bg-purple-100 text-purple-800"
                                 : "bg-green-100 text-green-800"
-                            }`}
+                              }`}
                           >
                             {bid.status === "awarded" ? "Awarded" : "Approved"}
                           </span>
@@ -789,29 +787,28 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
 
           <div className="flex items-center gap-2">
             <span
-              className={`px-3 py-1 rounded-full text-sm font-medium ${
-                selectedBid?.status === "pending"
+              className={`px-3 py-1 rounded-full text-sm font-medium ${selectedBid?.status === "pending"
                   ? "bg-yellow-100 text-yellow-800"
                   : selectedBid?.status === "approved"
-                  ? "bg-green-100 text-green-800"
-                  : selectedBid?.status === "rejected" ||
-                    selectedBid?.status === "disqualified"
-                  ? "bg-red-100 text-red-800"
-                  : selectedBid?.status === "deleted"
-                  ? "bg-gray-100 text-gray-800"
-                  : "bg-gray-100 text-gray-800"
-              }`}
+                    ? "bg-green-100 text-green-800"
+                    : selectedBid?.status === "rejected" ||
+                      selectedBid?.status === "disqualified"
+                      ? "bg-red-100 text-red-800"
+                      : selectedBid?.status === "deleted"
+                        ? "bg-gray-100 text-gray-800"
+                        : "bg-gray-100 text-gray-800"
+                }`}
             >
               {selectedBid?.status === "pending"
                 ? "Pending"
                 : selectedBid?.status === "approved"
-                ? "Approved"
-                : selectedBid?.status === "rejected" ||
-                  selectedBid?.status === "disqualified"
-                ? "Disqualified"
-                : selectedBid?.status === "deleted"
-                ? "Deleted"
-                : "Unknown"}
+                  ? "Approved"
+                  : selectedBid?.status === "rejected" ||
+                    selectedBid?.status === "disqualified"
+                    ? "Disqualified"
+                    : selectedBid?.status === "deleted"
+                      ? "Deleted"
+                      : "Unknown"}
             </span>
           </div>
         </div>
@@ -991,11 +988,10 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
           <button
             onClick={handleApprove}
             disabled={!selectedBid || submitting || loading || isDeleted}
-            className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
-              isApproved
+            className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${isApproved
                 ? "bg-green-600 hover:bg-green-700 text-white"
                 : "bg-green-50 border border-green-200 text-green-700 hover:bg-green-100"
-            }`}
+              }`}
           >
             {submitting ? (
               <>
@@ -1012,11 +1008,10 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
           <button
             onClick={handleDisqualify}
             disabled={submitting || loading || isDeleted}
-            className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
-              isDisqualified
+            className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${isDisqualified
                 ? "bg-red-600 hover:bg-red-700 text-white"
                 : "bg-red-50 border border-red-200 text-red-700 hover:bg-red-100"
-            }`}
+              }`}
           >
             <X className="w-4 h-4" />
             Disqualify Bid
@@ -1029,125 +1024,130 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
   return (
     <>
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] flex flex-col">
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-800 mt-2">
-                {tender.title}
-              </h3>
-              <p className="text-sm text-gray-600 mt-1">
-                Bid Evaluation -{" "}
-                {currentEvaluationType === "technical"
-                  ? "Technical Assessment"
-                  : "Financial Assessment"}
-              </p>
-              <div className="flex mt-2">
-                <button
-                  onClick={() =>
-                    canAccessTechnical && setCurrentEvaluationType("technical")
-                  }
-                  disabled={!canAccessTechnical}
-                  className={`mr-4 font-medium ${
-                    currentEvaluationType === "technical"
-                      ? "text-blue-600"
-                      : canAccessTechnical
-                      ? "text-gray-400 hover:text-gray-600"
-                      : "text-gray-300 cursor-not-allowed"
-                  }`}
-                >
-                  Technical Evaluation
-                </button>
-                <button
-                  onClick={() =>
-                    canAccessFinancial && setCurrentEvaluationType("financial")
-                  }
-                  disabled={!canAccessFinancial}
-                  className={`font-medium ${
-                    currentEvaluationType === "financial"
-                      ? "text-blue-600"
-                      : canAccessFinancial
-                      ? "text-gray-400 hover:text-gray-600"
-                      : "text-gray-300 cursor-not-allowed"
-                  }`}
-                >
-                  Financial Evaluation
-                </button>
+        <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl h-[95vh] flex flex-col">
+          {/* Header - Scrollable with content */}
+          <div className="flex-1 overflow-hidden">
+            <div className="h-full overflow-y-auto">
+              {/* Header Section */}
+              <div className="p-6 border-b border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mt-2">
+                      {tender.title}
+                    </h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Bid Evaluation -{" "}
+                      {currentEvaluationType === "technical"
+                        ? "Technical Assessment"
+                        : "Financial Assessment"}
+                    </p>
+                    <div className="flex mt-2">
+                      <button
+                        onClick={() =>
+                          canAccessTechnical && setCurrentEvaluationType("technical")
+                        }
+                        disabled={!canAccessTechnical}
+                        className={`mr-4 font-medium ${currentEvaluationType === "technical"
+                            ? "text-blue-600"
+                            : canAccessTechnical
+                              ? "text-gray-400 hover:text-gray-600"
+                              : "text-gray-300 cursor-not-allowed"
+                          }`}
+                      >
+                        Technical Evaluation
+                      </button>
+                      <button
+                        onClick={() =>
+                          canAccessFinancial && setCurrentEvaluationType("financial")
+                        }
+                        disabled={!canAccessFinancial}
+                        className={`font-medium ${currentEvaluationType === "financial"
+                            ? "text-blue-600"
+                            : canAccessFinancial
+                              ? "text-gray-400 hover:text-gray-600"
+                              : "text-gray-300 cursor-not-allowed"
+                          }`}
+                      >
+                        Financial Evaluation
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={handleGenerateTechnicalReport}
+                      disabled={!canAccessTechnical}
+                      className={`px-3 py-1.5 rounded text-sm font-medium ${!canAccessTechnical
+                          ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                          : "bg-orange-50 text-orange-700 hover:bg-orange-100"
+                        }`}
+                    >
+                      Technical Report
+                    </button>
+                    <button
+                      onClick={handleGenerateFinancialReport}
+                      disabled={!canAccessFinancial}
+                      className={`px-3 py-1.5 rounded text-sm font-medium ${!canAccessFinancial
+                          ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                          : "bg-blue-50 text-blue-700 hover:bg-blue-100"
+                        }`}
+                    >
+                      Financial Report
+                    </button>
+                    <button
+                      onClick={handleGenerateFullReport}
+                      disabled={!canAccessFinancial}
+                      className={`px-3 py-1.5 rounded text-sm font-medium ${!canAccessFinancial
+                          ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                          : "bg-green-50 text-green-700 hover:bg-green-100"
+                        }`}
+                    >
+                      Full Report
+                    </button>
+                    <button
+                      onClick={onClose}
+                      className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                    >
+                      <X className="w-5 h-5 text-gray-500" />
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={handleGenerateTechnicalReport}
-                disabled={!canAccessTechnical}
-                className={`px-3 py-1.5 rounded text-sm font-medium ${
-                  !canAccessTechnical
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-orange-50 text-orange-700 hover:bg-orange-100"
-                }`}
-              >
-                Technical Report
-              </button>
-              <button
-                onClick={handleGenerateFinancialReport}
-                disabled={!canAccessFinancial}
-                className={`px-3 py-1.5 rounded text-sm font-medium ${
-                  !canAccessFinancial
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-blue-50 text-blue-700 hover:bg-blue-100"
-                }`}
-              >
-                Financial Report
-              </button>
-              <button
-                onClick={handleGenerateFullReport}
-                disabled={!canAccessFinancial}
-                className={`px-3 py-1.5 rounded text-sm font-medium ${
-                  !canAccessFinancial
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-green-50 text-green-700 hover:bg-green-100"
-                }`}
-              >
-                Full Report
-              </button>
-              <button
-                onClick={onClose}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <X className="w-5 h-5 text-gray-500" />
-              </button>
+
+              {/* Content Area */}
+              <div className="p-6">
+                {loading ? (
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      Loading Bids...
+                    </h3>
+                    <p className="text-gray-600 text-center">
+                      Please wait while we fetch the bid information.
+                    </p>
+                  </div>
+                ) : bids.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <FileText className="w-16 h-16 text-gray-400 mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      No Bids Available
+                    </h3>
+                    <p className="text-gray-600 text-center">
+                      There are no bids submitted for this tender yet.
+                      <br />
+                      Please wait for vendors to submit their bids.
+                    </p>
+                  </div>
+                ) : currentEvaluationType === "financial" ? (
+                  renderFinancialEvaluation()
+                ) : (
+                  renderTechnicalEvaluation()
+                )}
+              </div>
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-6">
-            {loading ? (
-              <div className="flex flex-col items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  Loading Bids...
-                </h3>
-                <p className="text-gray-600 text-center">
-                  Please wait while we fetch the bid information.
-                </p>
-              </div>
-            ) : bids.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12">
-                <FileText className="w-16 h-16 text-gray-400 mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  No Bids Available
-                </h3>
-                <p className="text-gray-600 text-center">
-                  There are no bids submitted for this tender yet.
-                  <br />
-                  Please wait for vendors to submit their bids.
-                </p>
-              </div>
-            ) : currentEvaluationType === "financial" ? (
-              renderFinancialEvaluation()
-            ) : (
-              renderTechnicalEvaluation()
-            )}
-          </div>
-
-          <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
+          {/* Footer - Fixed */}
+          <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50 flex-shrink-0">
             <button
               onClick={onClose}
               className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium"
@@ -1192,11 +1192,11 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                 {submitting
                   ? "Submitting..."
                   : currentEvaluationType === "technical"
-                  ? "Complete Technical Evaluation"
-                  : tender.status === "financial-evaluation" ||
-                    tender.status === "completed"
-                  ? "Evaluation Complete"
-                  : "Complete Financial Evaluation"}
+                    ? "Complete Technical Evaluation"
+                    : tender.status === "financial-evaluation" ||
+                      tender.status === "completed"
+                      ? "Evaluation Complete"
+                      : "Complete Financial Evaluation"}
               </button>
             </div>
           </div>
@@ -1237,294 +1237,300 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
 
       {bidDetailsModalOpen && selectedBidForDetails && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col">
-            {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Bid Details
-                </h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  Complete information for{" "}
-                  {selectedBidForDetails.user?.company?.name ||
-                    selectedBidForDetails.user?.name ||
-                    "N/A"}
-                </p>
-              </div>
-              <button
-                onClick={() => setBidDetailsModalOpen(false)}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <X className="w-5 h-5 text-gray-500" />
-              </button>
-            </div>
-
-            {/* Content - Scrollable */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
-              {/* Bid Overview */}
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                <h4 className="font-medium text-gray-900 mb-3">Bid Overview</h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">
-                      Vendor Name
-                    </p>
-                    <p className="text-sm text-gray-900">
-                      {selectedBidForDetails.user?.name || "N/A"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Company</p>
-                    <p className="text-sm text-gray-900">
-                      {selectedBidForDetails.user?.company?.name || "N/A"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">
-                      Bid Amount
-                    </p>
-                    <p className="text-sm text-gray-900 font-semibold">
-                      {selectedBidForDetails.amount
-                        ? `₹${selectedBidForDetails.amount.toLocaleString()}`
-                        : "N/A"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Status</p>
-                    <span
-                      className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                        selectedBidForDetails.status === "pending"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : selectedBidForDetails.status === "approved"
-                          ? "bg-green-100 text-green-800"
-                          : selectedBidForDetails.status === "rejected" ||
-                            selectedBidForDetails.status === "disqualified"
-                          ? "bg-red-100 text-red-800"
-                          : "bg-gray-100 text-gray-800"
-                      }`}
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl h-[95vh] flex flex-col">
+            {/* Header - Scrollable with content */}
+            <div className="flex-1 overflow-hidden">
+              <div className="h-full overflow-y-auto">
+                {/* Header */}
+                <div className="p-6 border-b border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        Bid Details
+                      </h3>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Complete information for{" "}
+                        {selectedBidForDetails.user?.company?.name ||
+                          selectedBidForDetails.user?.name ||
+                          "N/A"}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setBidDetailsModalOpen(false)}
+                      className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                     >
-                      {selectedBidForDetails.status === "pending"
-                        ? "Pending"
-                        : selectedBidForDetails.status === "approved"
-                        ? "Approved"
-                        : selectedBidForDetails.status === "rejected" ||
-                          selectedBidForDetails.status === "disqualified"
-                        ? "Disqualified"
-                        : "Unknown"}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">
-                      Timeline
-                    </p>
-                    <p className="text-sm text-gray-900">
-                      {selectedBidForDetails.timeline || "N/A"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">
-                      Submitted Date
-                    </p>
-                    <p className="text-sm text-gray-900">
-                      {selectedBidForDetails.createdAt
-                        ? new Date(
-                            selectedBidForDetails.createdAt
-                          ).toLocaleDateString()
-                        : "N/A"}
-                    </p>
+                      <X className="w-5 h-5 text-gray-500" />
+                    </button>
                   </div>
                 </div>
-              </div>
 
-              {/* Bid Summary */}
-              {selectedBidForDetails.summary && (
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
-                  <h4 className="font-medium text-gray-900 mb-3">
-                    Bid Summary
-                  </h4>
-                  <p className="text-sm text-gray-700 leading-relaxed">
-                    {selectedBidForDetails.summary}
-                  </p>
-                </div>
-              )}
-
-              {/* Technical Evaluation */}
-              {selectedBidForDetails.technicalEvaluation && (
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
-                  <h4 className="font-medium text-gray-900 mb-3">
-                    Technical Evaluation
-                  </h4>
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div>
-                      <p className="text-sm font-medium text-gray-500">
-                        Experience
-                      </p>
-                      <p className="text-sm text-gray-900">
-                        {selectedBidForDetails.technicalEvaluation.experience ||
-                          0}
-                        /25
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-500">
-                        Expertise
-                      </p>
-                      <p className="text-sm text-gray-900">
-                        {selectedBidForDetails.technicalEvaluation.expertise ||
-                          0}
-                        /25
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-500">
-                        Resources
-                      </p>
-                      <p className="text-sm text-gray-900">
-                        {selectedBidForDetails.technicalEvaluation.resources ||
-                          0}
-                        /20
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-500">
-                        Timeline
-                      </p>
-                      <p className="text-sm text-gray-900">
-                        {selectedBidForDetails.technicalEvaluation.timeline ||
-                          0}
-                        /15
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-500">
-                        Quality
-                      </p>
-                      <p className="text-sm text-gray-900">
-                        {selectedBidForDetails.technicalEvaluation.quality || 0}
-                        /15
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-500">
-                        Total Score
-                      </p>
-                      <p className="text-sm text-gray-900 font-semibold">
-                        {Object.values({
-                          experience:
-                            selectedBidForDetails.technicalEvaluation
-                              .experience || 0,
-                          expertise:
-                            selectedBidForDetails.technicalEvaluation
-                              .expertise || 0,
-                          resources:
-                            selectedBidForDetails.technicalEvaluation
-                              .resources || 0,
-                          timeline:
-                            selectedBidForDetails.technicalEvaluation
-                              .timeline || 0,
-                          quality:
-                            selectedBidForDetails.technicalEvaluation.quality ||
-                            0,
-                        }).reduce((sum, score) => sum + score, 0)}
-                        /100
-                      </p>
+                {/* Content */}
+                <div className="p-6 space-y-6">
+                  {/* Bid Overview */}
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                    <h4 className="font-medium text-gray-900 mb-3">Bid Overview</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm font-medium text-gray-500">
+                          Vendor Name
+                        </p>
+                        <p className="text-sm text-gray-900">
+                          {selectedBidForDetails.user?.name || "N/A"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-500">Company</p>
+                        <p className="text-sm text-gray-900">
+                          {selectedBidForDetails.user?.company?.name || "N/A"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-500">
+                          Bid Amount
+                        </p>
+                        <p className="text-sm text-gray-900 font-semibold">
+                          {selectedBidForDetails.amount
+                            ? `₹${selectedBidForDetails.amount.toLocaleString()}`
+                            : "N/A"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-500">Status</p>
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${selectedBidForDetails.status === "pending"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : selectedBidForDetails.status === "approved"
+                                ? "bg-green-100 text-green-800"
+                                : selectedBidForDetails.status === "rejected" ||
+                                  selectedBidForDetails.status === "disqualified"
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-800"
+                            }`}
+                        >
+                          {selectedBidForDetails.status === "pending"
+                            ? "Pending"
+                            : selectedBidForDetails.status === "approved"
+                              ? "Approved"
+                              : selectedBidForDetails.status === "rejected" ||
+                                selectedBidForDetails.status === "disqualified"
+                                ? "Disqualified"
+                                : "Unknown"}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-500">
+                          Timeline
+                        </p>
+                        <p className="text-sm text-gray-900">
+                          {selectedBidForDetails.timeline || "N/A"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-500">
+                          Submitted Date
+                        </p>
+                        <p className="text-sm text-gray-900">
+                          {selectedBidForDetails.createdAt
+                            ? new Date(
+                              selectedBidForDetails.createdAt
+                            ).toLocaleDateString()
+                            : "N/A"}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                  {selectedBidForDetails.technicalEvaluation.notes && (
-                    <div>
-                      <p className="text-sm font-medium text-gray-500 mb-2">
-                        Evaluation Notes
-                      </p>
-                      <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded">
-                        {selectedBidForDetails.technicalEvaluation.notes}
+
+                  {/* Bid Summary */}
+                  {selectedBidForDetails.summary && (
+                    <div className="bg-white border border-gray-200 rounded-lg p-4">
+                      <h4 className="font-medium text-gray-900 mb-3">
+                        Bid Summary
+                      </h4>
+                      <p className="text-sm text-gray-700 leading-relaxed">
+                        {selectedBidForDetails.summary}
                       </p>
                     </div>
                   )}
-                </div>
-              )}
 
-              {/* Contact Information */}
-              {selectedBidForDetails.user && (
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
-                  <h4 className="font-medium text-gray-900 mb-3">
-                    Contact Information
-                  </h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm font-medium text-gray-500">Email</p>
-                      <p className="text-sm text-gray-900">
-                        {selectedBidForDetails.user.email || "N/A"}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-500">Phone</p>
-                      <p className="text-sm text-gray-900">
-                        {selectedBidForDetails.user.phone || "N/A"}
-                      </p>
-                    </div>
-                    {selectedBidForDetails.user.company && (
-                      <>
+                  {/* Technical Evaluation */}
+                  {selectedBidForDetails.technicalEvaluation && (
+                    <div className="bg-white border border-gray-200 rounded-lg p-4">
+                      <h4 className="font-medium text-gray-900 mb-3">
+                        Technical Evaluation
+                      </h4>
+                      <div className="grid grid-cols-2 gap-4 mb-4">
                         <div>
                           <p className="text-sm font-medium text-gray-500">
-                            Company Address
+                            Experience
                           </p>
                           <p className="text-sm text-gray-900">
-                            {selectedBidForDetails.user.company.address ||
-                              "N/A"}
+                            {selectedBidForDetails.technicalEvaluation.experience ||
+                              0}
+                            /25
                           </p>
                         </div>
                         <div>
                           <p className="text-sm font-medium text-gray-500">
-                            Registration Number
+                            Expertise
                           </p>
                           <p className="text-sm text-gray-900">
-                            {selectedBidForDetails.user.company
-                              .registrationNumber || "N/A"}
+                            {selectedBidForDetails.technicalEvaluation.expertise ||
+                              0}
+                            /25
                           </p>
                         </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-              )}
+                        <div>
+                          <p className="text-sm font-medium text-gray-500">
+                            Resources
+                          </p>
+                          <p className="text-sm text-gray-900">
+                            {selectedBidForDetails.technicalEvaluation.resources ||
+                              0}
+                            /20
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-500">
+                            Timeline
+                          </p>
+                          <p className="text-sm text-gray-900">
+                            {selectedBidForDetails.technicalEvaluation.timeline ||
+                              0}
+                            /15
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-500">
+                            Quality
+                          </p>
+                          <p className="text-sm text-gray-900">
+                            {selectedBidForDetails.technicalEvaluation.quality || 0}
+                            /15
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-500">
+                            Total Score
+                          </p>
+                          <p className="text-sm text-gray-900 font-semibold">
+                            {Object.values({
+                              experience:
+                                selectedBidForDetails.technicalEvaluation
+                                  .experience || 0,
+                              expertise:
+                                selectedBidForDetails.technicalEvaluation
+                                  .expertise || 0,
+                              resources:
+                                selectedBidForDetails.technicalEvaluation
+                                  .resources || 0,
+                              timeline:
+                                selectedBidForDetails.technicalEvaluation
+                                  .timeline || 0,
+                              quality:
+                                selectedBidForDetails.technicalEvaluation.quality ||
+                                0,
+                            }).reduce((sum, score) => sum + score, 0)}
+                            /100
+                          </p>
+                        </div>
+                      </div>
+                      {selectedBidForDetails.technicalEvaluation.notes && (
+                        <div>
+                          <p className="text-sm font-medium text-gray-500 mb-2">
+                            Evaluation Notes
+                          </p>
+                          <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded">
+                            {selectedBidForDetails.technicalEvaluation.notes}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
-              {/* Documents */}
-              {selectedBidForDetails.documents &&
-                selectedBidForDetails.documents.length > 0 && (
-                  <div className="bg-white border border-gray-200 rounded-lg p-4">
-                    <h4 className="font-medium text-gray-900 mb-3">
-                      Submitted Documents
-                    </h4>
-                    <div className="space-y-2">
-                      {selectedBidForDetails.documents.map((doc, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center justify-between p-3 bg-gray-50 rounded border"
-                        >
-                          <div className="flex items-center gap-3">
-                            <FileText className="w-5 h-5 text-gray-400" />
+                  {/* Contact Information */}
+                  {selectedBidForDetails.user && (
+                    <div className="bg-white border border-gray-200 rounded-lg p-4">
+                      <h4 className="font-medium text-gray-900 mb-3">
+                        Contact Information
+                      </h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm font-medium text-gray-500">Email</p>
+                          <p className="text-sm text-gray-900">
+                            {selectedBidForDetails.user.email || "N/A"}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-500">Phone</p>
+                          <p className="text-sm text-gray-900">
+                            {selectedBidForDetails.user.phone || "N/A"}
+                          </p>
+                        </div>
+                        {selectedBidForDetails.user.company && (
+                          <>
                             <div>
-                              <p className="text-sm font-medium text-gray-900">
-                                {doc.name || `Document ${index + 1}`}
+                              <p className="text-sm font-medium text-gray-500">
+                                Company Address
                               </p>
-                              <p className="text-xs text-gray-500">
-                                {doc.type || "Unknown type"}
+                              <p className="text-sm text-gray-900">
+                                {selectedBidForDetails.user.company.address ||
+                                  "N/A"}
                               </p>
                             </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <button className="p-1 text-gray-400 hover:text-gray-600">
-                              <Eye className="w-4 h-4" />
-                            </button>
-                            <button className="p-1 text-gray-400 hover:text-gray-600">
-                              <Download className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
+                            <div>
+                              <p className="text-sm font-medium text-gray-500">
+                                Registration Number
+                              </p>
+                              <p className="text-sm text-gray-900">
+                                {selectedBidForDetails.user.company
+                                  .registrationNumber || "N/A"}
+                              </p>
+                            </div>
+                          </>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+
+                  {/* Documents */}
+                  {selectedBidForDetails.documents &&
+                    selectedBidForDetails.documents.length > 0 && (
+                      <div className="bg-white border border-gray-200 rounded-lg p-4">
+                        <h4 className="font-medium text-gray-900 mb-3">
+                          Submitted Documents
+                        </h4>
+                        <div className="space-y-2">
+                          {selectedBidForDetails.documents.map((doc, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center justify-between p-3 bg-gray-50 rounded border"
+                            >
+                              <div className="flex items-center gap-3">
+                                <FileText className="w-5 h-5 text-gray-400" />
+                                <div>
+                                  <p className="text-sm font-medium text-gray-900">
+                                    {doc.name || `Document ${index + 1}`}
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    {doc.type || "Unknown type"}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <button className="p-1 text-gray-400 hover:text-gray-600">
+                                  <Eye className="w-4 h-4" />
+                                </button>
+                                <button className="p-1 text-gray-400 hover:text-gray-600">
+                                  <Download className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                </div>
+              </div>
             </div>
 
             {/* Footer */}
@@ -1542,171 +1548,178 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
 
       {completeTechnicalModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-            {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0">
-              <h3 className="text-lg font-semibold text-gray-900">
-                Complete Technical Evaluation
-              </h3>
-              <button
-                onClick={() => setCompleteTechnicalModalOpen(false)}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <X className="w-5 h-5 text-gray-500" />
-              </button>
-            </div>
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl h-[95vh] flex flex-col">
+            {/* Header - Scrollable with content */}
+            <div className="flex-1 overflow-hidden">
+              <div className="h-full overflow-y-auto">
+                {/* Header */}
+                <div className="p-6 border-b border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Complete Technical Evaluation
+                    </h3>
+                    <button
+                      onClick={() => setCompleteTechnicalModalOpen(false)}
+                      className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                    >
+                      <X className="w-5 h-5 text-gray-500" />
+                    </button>
+                  </div>
+                </div>
 
-            {/* Content - Scrollable */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
-              {/* Technical Evaluation Summary */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div className="flex items-center gap-3 mb-3">
-                  <FileText className="w-5 h-5 text-blue-600" />
+                {/* Content */}
+                <div className="p-6 space-y-6">
+                  {/* Technical Evaluation Summary */}
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-center gap-3 mb-3">
+                      <FileText className="w-5 h-5 text-blue-600" />
+                      <div>
+                        <h4 className="font-medium text-blue-900">
+                          Technical Evaluation Summary
+                        </h4>
+                        <p className="text-sm text-blue-700">
+                          Review and confirm technical evaluation completion
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 mt-4">
+                      <div>
+                        <p className="text-sm font-medium text-blue-900">Tender:</p>
+                        <p className="text-sm text-blue-700">{tender.title}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-blue-900">
+                          Total Bids:
+                        </p>
+                        <p className="text-sm text-blue-700">{bids.length}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-blue-900">
+                          Approved Bids:
+                        </p>
+                        <p className="text-sm text-blue-700">
+                          {bids.filter((bid) => bid.status === "approved").length}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-blue-900">
+                          Disqualified Bids:
+                        </p>
+                        <p className="text-sm text-blue-700">
+                          {
+                            bids.filter(
+                              (bid) =>
+                                bid.status === "rejected" ||
+                                bid.status === "disqualified"
+                            ).length
+                          }
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Technical Scores Summary */}
                   <div>
-                    <h4 className="font-medium text-blue-900">
-                      Technical Evaluation Summary
+                    <h4 className="font-medium text-gray-900 mb-4">
+                      Technical Scores Summary
                     </h4>
-                    <p className="text-sm text-blue-700">
-                      Review and confirm technical evaluation completion
-                    </p>
-                  </div>
-                </div>
+                    <div className="space-y-3">
+                      {bids
+                        .filter((bid) => bid.status === "approved")
+                        .map((bid, index) => {
+                          const totalScore = bid.technicalEvaluation
+                            ? Object.values({
+                              experience: bid.technicalEvaluation.experience || 0,
+                              expertise: bid.technicalEvaluation.expertise || 0,
+                              resources: bid.technicalEvaluation.resources || 0,
+                              timeline: bid.technicalEvaluation.timeline || 0,
+                              quality: bid.technicalEvaluation.quality || 0,
+                            }).reduce((sum, score) => sum + score, 0)
+                            : 0;
+                          const percentage = ((totalScore / 100) * 100).toFixed(1);
 
-                <div className="grid grid-cols-2 gap-4 mt-4">
-                  <div>
-                    <p className="text-sm font-medium text-blue-900">Tender:</p>
-                    <p className="text-sm text-blue-700">{tender.title}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-blue-900">
-                      Total Bids:
-                    </p>
-                    <p className="text-sm text-blue-700">{bids.length}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-blue-900">
-                      Approved Bids:
-                    </p>
-                    <p className="text-sm text-blue-700">
-                      {bids.filter((bid) => bid.status === "approved").length}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-blue-900">
-                      Disqualified Bids:
-                    </p>
-                    <p className="text-sm text-blue-700">
-                      {
-                        bids.filter(
-                          (bid) =>
-                            bid.status === "rejected" ||
-                            bid.status === "disqualified"
-                        ).length
-                      }
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Technical Scores Summary */}
-              <div>
-                <h4 className="font-medium text-gray-900 mb-4">
-                  Technical Scores Summary
-                </h4>
-                <div className="space-y-3">
-                  {bids
-                    .filter((bid) => bid.status === "approved")
-                    .map((bid, index) => {
-                      const totalScore = bid.technicalEvaluation
-                        ? Object.values({
-                            experience: bid.technicalEvaluation.experience || 0,
-                            expertise: bid.technicalEvaluation.expertise || 0,
-                            resources: bid.technicalEvaluation.resources || 0,
-                            timeline: bid.technicalEvaluation.timeline || 0,
-                            quality: bid.technicalEvaluation.quality || 0,
-                          }).reduce((sum, score) => sum + score, 0)
-                        : 0;
-                      const percentage = ((totalScore / 100) * 100).toFixed(1);
-
-                      return (
-                        <div
-                          key={bid._id}
-                          className="flex items-center justify-between p-3 border border-gray-200 rounded-lg"
-                        >
-                          <div>
-                            <h5 className="font-medium text-gray-900">
-                              {bid.user?.company?.name ||
-                                bid.user?.name ||
-                                `Bidder ${index + 1}`}
-                            </h5>
-                            <p className="text-sm text-gray-600">
-                              {bid.user?.name}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-lg font-semibold text-gray-900">
-                              {totalScore}/100
+                          return (
+                            <div
+                              key={bid._id}
+                              className="flex items-center justify-between p-3 border border-gray-200 rounded-lg"
+                            >
+                              <div>
+                                <h5 className="font-medium text-gray-900">
+                                  {bid.user?.company?.name ||
+                                    bid.user?.name ||
+                                    `Bidder ${index + 1}`}
+                                </h5>
+                                <p className="text-sm text-gray-600">
+                                  {bid.user?.name}
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-lg font-semibold text-gray-900">
+                                  {totalScore}/100
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                  {percentage}%
+                                </div>
+                              </div>
                             </div>
-                            <div className="text-sm text-gray-600">
-                              {percentage}%
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                </div>
-              </div>
+                          );
+                        })}
+                    </div>
+                  </div>
 
-              {/* Next Steps */}
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <div className="flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
-                  <div>
-                    <h4 className="font-medium text-green-900 mb-2">
-                      Next Steps:
-                    </h4>
-                    <ul className="space-y-1 text-sm text-green-800">
-                      <li>
-                        • Technical evaluation will be marked as completed
-                      </li>
-                      <li>
-                        • System will automatically move to financial evaluation
-                        phase
-                      </li>
-                      <li>
-                        • Only approved bidders will be considered for financial
-                        evaluation
-                      </li>
-                      <li>
-                        • Technical scores will be finalized and cannot be
-                        modified
-                      </li>
-                    </ul>
+                  {/* Next Steps */}
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div className="flex items-start gap-3">
+                      <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
+                      <div>
+                        <h4 className="font-medium text-green-900 mb-2">
+                          Next Steps:
+                        </h4>
+                        <ul className="space-y-1 text-sm text-green-800">
+                          <li>
+                            • Technical evaluation will be marked as completed
+                          </li>
+                          <li>
+                            • System will automatically move to financial evaluation
+                            phase
+                          </li>
+                          <li>
+                            • Only approved bidders will be considered for financial
+                            evaluation
+                          </li>
+                          <li>
+                            • Technical scores will be finalized and cannot be
+                            modified
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Confirmation */}
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={confirmationChecked}
+                        onChange={(e) => setConfirmationChecked(e.target.checked)}
+                        className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                      <div>
+                        <p className="font-medium text-yellow-900">
+                          Confirmation Required:
+                        </p>
+                        <p className="text-sm text-yellow-800 mt-1">
+                          I confirm that all technical evaluations have been
+                          completed accurately and I have the authority to finalize
+                          this evaluation phase. This action cannot be reversed once
+                          submitted.
+                        </p>
+                      </div>
+                    </label>
                   </div>
                 </div>
-              </div>
-
-              {/* Confirmation */}
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <label className="flex items-start gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={confirmationChecked}
-                    onChange={(e) => setConfirmationChecked(e.target.checked)}
-                    className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <div>
-                    <p className="font-medium text-yellow-900">
-                      Confirmation Required:
-                    </p>
-                    <p className="text-sm text-yellow-800 mt-1">
-                      I confirm that all technical evaluations have been
-                      completed accurately and I have the authority to finalize
-                      this evaluation phase. This action cannot be reversed once
-                      submitted.
-                    </p>
-                  </div>
-                </label>
               </div>
             </div>
 
@@ -1742,74 +1755,81 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
 
       {completeFinancialModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-            {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0">
-              <h3 className="text-lg font-semibold text-gray-900">
-                Complete Financial Evaluation
-              </h3>
-              <button
-                onClick={() => setCompleteFinancialModalOpen(false)}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <X className="w-5 h-5 text-gray-500" />
-              </button>
-            </div>
-
-            {/* Content - Scrollable */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
-              {/* Financial Evaluation Summary */}
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <div className="flex items-center gap-3 mb-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <div>
-                    <h4 className="font-medium text-green-900">
-                      Complete Evaluation Process
-                    </h4>
-                    <p className="text-sm text-green-700">
-                      Finalize the entire tender evaluation
-                    </p>
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl h-[95vh] flex flex-col">
+            {/* Header - Scrollable with content */}
+            <div className="flex-1 overflow-hidden">
+              <div className="h-full overflow-y-auto">
+                {/* Header */}
+                <div className="p-6 border-b border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Complete Financial Evaluation
+                    </h3>
+                    <button
+                      onClick={() => setCompleteFinancialModalOpen(false)}
+                      className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                    >
+                      <X className="w-5 h-5 text-gray-500" />
+                    </button>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 mt-4">
-                  <div>
-                    <p className="text-sm font-medium text-green-900">
-                      Tender:
-                    </p>
-                    <p className="text-sm text-green-700">{tender.title}</p>
+                {/* Content */}
+                <div className="p-6 space-y-6">
+                  {/* Financial Evaluation Summary */}
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div className="flex items-center gap-3 mb-3">
+                      <CheckCircle className="w-5 h-5 text-green-600" />
+                      <div>
+                        <h4 className="font-medium text-green-900">
+                          Complete Evaluation Process
+                        </h4>
+                        <p className="text-sm text-green-700">
+                          Finalize the entire tender evaluation
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 mt-4">
+                      <div>
+                        <p className="text-sm font-medium text-green-900">
+                          Tender:
+                        </p>
+                        <p className="text-sm text-green-700">{tender.title}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-green-900">
+                          Awards Made:
+                        </p>
+                        <p className="text-sm text-green-700">
+                          {bids.filter((bid) => bid.status === "awarded").length}
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-green-900">
-                      Awards Made:
-                    </p>
-                    <p className="text-sm text-green-700">
-                      {bids.filter((bid) => bid.status === "awarded").length}
-                    </p>
+
+                  {/* Confirmation */}
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={confirmationChecked}
+                        onChange={(e) => setConfirmationChecked(e.target.checked)}
+                        className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                      <div>
+                        <p className="font-medium text-yellow-900">
+                          Final Confirmation:
+                        </p>
+                        <p className="text-sm text-yellow-800 mt-1">
+                          I confirm that the financial evaluation is complete and
+                          all contract awards have been finalized. This will close
+                          the evaluation process.
+                        </p>
+                      </div>
+                    </label>
                   </div>
                 </div>
-              </div>
-
-              {/* Confirmation */}
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <label className="flex items-start gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={confirmationChecked}
-                    onChange={(e) => setConfirmationChecked(e.target.checked)}
-                    className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <div>
-                    <p className="font-medium text-yellow-900">
-                      Final Confirmation:
-                    </p>
-                    <p className="text-sm text-yellow-800 mt-1">
-                      I confirm that the financial evaluation is complete and
-                      all contract awards have been finalized. This will close
-                      the evaluation process.
-                    </p>
-                  </div>
-                </label>
               </div>
             </div>
 

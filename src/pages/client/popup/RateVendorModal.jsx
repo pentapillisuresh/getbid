@@ -74,11 +74,10 @@ const RateVendorModal = ({ vendor, onClose, onSubmit }) => {
             className="focus:outline-none transition-transform hover:scale-110"
           >
             <Star
-              className={`w-8 h-8 ${
-                star <= (hovered || currentRating)
+              className={`w-8 h-8 ${star <= (hovered || currentRating)
                   ? "text-yellow-400 fill-current"
                   : "text-gray-300"
-              }`}
+                }`}
             />
           </button>
         ))}
@@ -91,7 +90,7 @@ const RateVendorModal = ({ vendor, onClose, onSubmit }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 sticky top-0 bg-white">
           <div>
@@ -233,8 +232,8 @@ const RateVendorModal = ({ vendor, onClose, onSubmit }) => {
                   ? "Updating..."
                   : "Submitting..."
                 : vendor?.hasRating
-                ? "Update Rating"
-                : "Submit Rating"}
+                  ? "Update Rating"
+                  : "Submit Rating"}
             </button>
           </div>
         </form>

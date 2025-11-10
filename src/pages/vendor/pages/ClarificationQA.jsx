@@ -381,11 +381,10 @@ const ClarificationQA = () => {
           </div>
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center gap-2 px-4 py-2 border rounded-lg transition-colors ${
-              activeFiltersCount > 0
+            className={`flex items-center gap-2 px-4 py-2 border rounded-lg transition-colors ${activeFiltersCount > 0
                 ? "border-primary-500 bg-primary-50 text-primary-700"
                 : "border-gray-300 hover:bg-gray-50"
-            }`}
+              }`}
           >
             <Filter className="w-4 h-4" />
             Filters
@@ -395,9 +394,8 @@ const ClarificationQA = () => {
               </span>
             )}
             <ChevronDown
-              className={`w-4 h-4 transition-transform ${
-                showFilters ? "rotate-180" : ""
-              }`}
+              className={`w-4 h-4 transition-transform ${showFilters ? "rotate-180" : ""
+                }`}
             />
           </button>
         </div>
@@ -479,7 +477,7 @@ const ClarificationQA = () => {
           style={{ marginTop: "0px" }}
           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
         >
-          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+          <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] flex flex-col">
             <div className="p-6 border-b border-gray-200 flex-shrink-0">
               <h3 className="text-xl font-semibold text-gray-900">
                 Ask New Question

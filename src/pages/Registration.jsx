@@ -533,14 +533,14 @@ const Registration = () => {
 
         toastService.showSuccess(
           response.data?.message ||
-            response.message ||
-            "PAN verified successfully!"
+          response.message ||
+          "PAN verified successfully!"
         );
       } else {
         toastService.showError(
           response.data?.message ||
-            response.message ||
-            "PAN verification failed"
+          response.message ||
+          "PAN verification failed"
         );
       }
     } catch (error) {
@@ -587,14 +587,14 @@ const Registration = () => {
 
         toastService.showSuccess(
           response.data?.message ||
-            response.message ||
-            "GST verified successfully!"
+          response.message ||
+          "GST verified successfully!"
         );
       } else {
         toastService.showError(
           response.data?.message ||
-            response.message ||
-            "GST verification failed"
+          response.message ||
+          "GST verification failed"
         );
       }
     } catch (error) {
@@ -854,13 +854,12 @@ const Registration = () => {
               {[1, 2, 3].map((step) => (
                 <div key={step} className="flex items-center">
                   <div
-                    className={`flex items-center justify-center w-8 h-8 rounded-full font-semibold text-sm ${
-                      step === currentStep
+                    className={`flex items-center justify-center w-8 h-8 rounded-full font-semibold text-sm ${step === currentStep
                         ? "bg-white text-blue-600 shadow-md"
                         : step < currentStep
-                        ? "bg-blue-200 text-blue-700"
-                        : "bg-blue-400 text-blue-100"
-                    }`}
+                          ? "bg-blue-200 text-blue-700"
+                          : "bg-blue-400 text-blue-100"
+                      }`}
                   >
                     {step < currentStep ? (
                       <CheckCircle className="w-4 h-4" />
@@ -870,9 +869,8 @@ const Registration = () => {
                   </div>
                   {step < 3 && (
                     <div
-                      className={`w-12 h-1 mx-1 rounded ${
-                        step < currentStep ? "bg-blue-200" : "bg-blue-400"
-                      }`}
+                      className={`w-12 h-1 mx-1 rounded ${step < currentStep ? "bg-blue-200" : "bg-blue-400"
+                        }`}
                     />
                   )}
                 </div>
@@ -894,11 +892,10 @@ const Registration = () => {
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       onClick={() => setRegistrationType("vendor")}
-                      className={`p-4 rounded-lg border transition-all ${
-                        registrationType === "vendor"
+                      className={`p-4 rounded-lg border transition-all ${registrationType === "vendor"
                           ? "border-blue-500 bg-blue-50 text-blue-700"
                           : "border-gray-200 hover:border-gray-300"
-                      }`}
+                        }`}
                     >
                       <Building2 className="w-6 h-6 mx-auto mb-2 text-blue-600" />
                       <div className="font-semibold text-sm mb-1">Vendor</div>
@@ -909,11 +906,10 @@ const Registration = () => {
 
                     <button
                       onClick={() => setRegistrationType("client")}
-                      className={`p-4 rounded-lg border transition-all ${
-                        registrationType === "client"
+                      className={`p-4 rounded-lg border transition-all ${registrationType === "client"
                           ? "border-blue-500 bg-blue-50 text-blue-700"
                           : "border-gray-200 hover:border-gray-300"
-                      }`}
+                        }`}
                     >
                       <Building2 className="w-6 h-6 mx-auto mb-2 text-blue-600" />
                       <div className="font-semibold text-sm mb-1">Client</div>
@@ -951,11 +947,10 @@ const Registration = () => {
                           gstOtp: "",
                         }));
                       }}
-                      className={`p-4 rounded-lg border transition-all ${
-                        entityType === "individual"
+                      className={`p-4 rounded-lg border transition-all ${entityType === "individual"
                           ? "border-gray-500 bg-gray-50"
                           : "border-gray-200 hover:border-gray-300"
-                      }`}
+                        }`}
                     >
                       <User className="w-6 h-6 mx-auto mb-2 text-gray-600" />
                       <div className="font-semibold text-sm mb-1">
@@ -988,11 +983,10 @@ const Registration = () => {
                           incorporationDate: "",
                         }));
                       }}
-                      className={`p-4 rounded-lg border transition-all ${
-                        entityType === "company"
+                      className={`p-4 rounded-lg border transition-all ${entityType === "company"
                           ? "border-gray-500 bg-gray-50"
                           : "border-gray-200 hover:border-gray-300"
-                      }`}
+                        }`}
                     >
                       <Building2 className="w-6 h-6 mx-auto mb-2 text-gray-600" />
                       <div className="font-semibold text-sm mb-1">Company</div>
@@ -1414,11 +1408,10 @@ const Registration = () => {
 
                   <div className="space-y-3">
                     <div
-                      className={`p-3 rounded-lg border-2 ${
-                        emailVerified
+                      className={`p-3 rounded-lg border-2 ${emailVerified
                           ? "border-blue-200 bg-blue-50"
                           : "border-gray-200 bg-gray-50"
-                      }`}
+                        }`}
                     >
                       <label className="block text-xs font-semibold text-gray-700 mb-1">
                         Email Address *
@@ -1504,11 +1497,10 @@ const Registration = () => {
                     </div>
 
                     <div
-                      className={`p-3 rounded-lg border-2 ${
-                        mobileVerified
+                      className={`p-3 rounded-lg border-2 ${mobileVerified
                           ? "border-blue-200 bg-blue-50"
                           : "border-gray-200 bg-gray-50"
-                      }`}
+                        }`}
                     >
                       <label className="block text-xs font-semibold text-gray-700 mb-1">
                         Mobile Number *
@@ -1867,9 +1859,8 @@ const Registration = () => {
                 )}
                 <button
                   onClick={handleNext}
-                  className={`flex items-center gap-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold shadow text-sm ${
-                    currentStep === 1 ? "ml-auto" : ""
-                  }`}
+                  className={`flex items-center gap-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold shadow text-sm ${currentStep === 1 ? "ml-auto" : ""
+                    }`}
                 >
                   Continue
                   <ChevronRight className="w-3 h-3" />

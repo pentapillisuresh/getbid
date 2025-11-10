@@ -205,11 +205,10 @@ const QAPopup = ({ tender, onClose }) => {
         <div className="flex border-b border-gray-200">
           <button
             onClick={() => setActiveTab("browse")}
-            className={`px-6 py-3 font-medium text-sm transition-colors ${
-              activeTab === "browse"
+            className={`px-6 py-3 font-medium text-sm transition-colors ${activeTab === "browse"
                 ? "border-b-2 border-purple-500 text-purple-600"
                 : "text-gray-500 hover:text-gray-700"
-            }`}
+              }`}
           >
             <div className="flex items-center gap-2">
               <Search className="w-4 h-4" />
@@ -218,11 +217,10 @@ const QAPopup = ({ tender, onClose }) => {
           </button>
           <button
             onClick={() => setActiveTab("ask")}
-            className={`px-6 py-3 font-medium text-sm transition-colors ${
-              activeTab === "ask"
+            className={`px-6 py-3 font-medium text-sm transition-colors ${activeTab === "ask"
                 ? "border-b-2 border-purple-500 text-purple-600"
                 : "text-gray-500 hover:text-gray-700"
-            }`}
+              }`}
           >
             <div className="flex items-center gap-2">
               <MessageCircle className="w-4 h-4" />
@@ -409,7 +407,7 @@ const QAPopup = ({ tender, onClose }) => {
           )}
 
           {activeTab === "ask" && (
-            <div className="max-w-2xl mx-auto">
+            <div className="max-w-4xl mx-auto">
               <div className="mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Ask a Question

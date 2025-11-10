@@ -69,7 +69,7 @@ const CancelTenderModal = ({ show, onClose, tender, onCancelSuccess }) => {
       style={{ marginTop: "0px" }}
       className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4"
     >
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-red-100 rounded-lg">

@@ -112,21 +112,21 @@ const UploadDocumentModal = ({ isOpen, onClose, onUpload }) => {
             formData.category === "certificates"
               ? "Legal Documents"
               : formData.category === "financial"
-              ? "Financial Documents"
-              : formData.category === "technical"
-              ? "Technical Documents"
-              : formData.category === "proposals"
-              ? "Marketing Materials"
-              : formData.category === "contracts"
-              ? "Experience Documents"
-              : formData.category,
+                ? "Financial Documents"
+                : formData.category === "technical"
+                  ? "Technical Documents"
+                  : formData.category === "proposals"
+                    ? "Marketing Materials"
+                    : formData.category === "contracts"
+                      ? "Experience Documents"
+                      : formData.category,
           file: uploadedFile._id,
           description: formData.description,
           tags: formData.tags
             ? formData.tags
-                .split(",")
-                .map((tag) => tag.trim())
-                .filter((tag) => tag)
+              .split(",")
+              .map((tag) => tag.trim())
+              .filter((tag) => tag)
             : [],
           expiryDate: formData.expiryDate || null,
           // Include client-side metadata so UI can render immediately without depending on API fill-in
@@ -175,7 +175,7 @@ const UploadDocumentModal = ({ isOpen, onClose, onUpload }) => {
       style={{ marginTop: 0 }}
       className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 md:items-center mt-0"
     >
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] flex flex-col">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl mx-4 max-h-[90vh] flex flex-col">
         <div className="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0">
           <h2 className="text-xl font-semibold text-gray-900">
             Upload Document
@@ -195,11 +195,10 @@ const UploadDocumentModal = ({ isOpen, onClose, onUpload }) => {
           <div className="p-6 space-y-0 md:space-y-6 overflow-y-auto flex-1">
             {/* File Upload Area */}
             <div
-              className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-                dragActive
+              className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${dragActive
                   ? "border-green-500 bg-green-50"
                   : "border-gray-300 hover:border-gray-400"
-              }`}
+                }`}
               onDragEnter={handleDrag}
               onDragLeave={handleDrag}
               onDragOver={handleDrag}
@@ -348,11 +347,10 @@ const UploadDocumentModal = ({ isOpen, onClose, onUpload }) => {
             <button
               type="submit"
               disabled={isUploading}
-              className={`flex items-center gap-2 px-6 py-2 rounded-lg font-medium transition-colors ${
-                isUploading
+              className={`flex items-center gap-2 px-6 py-2 rounded-lg font-medium transition-colors ${isUploading
                   ? "bg-green-400 text-white cursor-wait"
                   : "bg-green-600 hover:bg-green-700 text-white"
-              }`}
+                }`}
             >
               <Upload className="w-4 h-4" />
               {isUploading ? "Uploading..." : "Upload Document"}

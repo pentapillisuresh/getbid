@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 function ServicesSection() {
   const navigate = useNavigate();
-  
+
   const services = [
     {
       title: "Tender Search & Discovery",
@@ -58,11 +58,11 @@ function ServicesSection() {
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <p className="text-white/90 text-sm uppercase tracking-wide mb-2" style={{fontWeight:"bold"}}>
+          <p className="text-white/90 text-sm uppercase tracking-wide mb-2" style={{ fontWeight: "bold" }}>
             Why Choose Us
           </p>
           <h2 className="text-4xl font-bold text-white mb-3">Our Services</h2>
-          <p className="text-white/80 max-w-2xl mx-auto text-base">
+          <p className="text-white/80 max-w-4xl mx-auto text-base">
             GetBid provides comprehensive tender, bid, and document management
             solutions for modern businesses and contractors.
           </p>
@@ -99,7 +99,7 @@ function ServicesSection() {
 
               {/* Button */}
               <div className="mt-auto flex justify-center">
-                <button 
+                <button
                   onClick={() => handleReadMore(service.path)}
                   className="bg-purple-700 text-white w-36 py-2 rounded-md font-semibold hover:bg-purple-800 transition-colors"
                 >

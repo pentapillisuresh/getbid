@@ -108,8 +108,8 @@ const SupportPopup = ({ onClose }) => {
           <button
             onClick={() => setActiveTab('help')}
             className={`px-6 py-3 font-medium text-sm transition-colors ${activeTab === 'help'
-                ? 'border-b-2 border-orange-500 text-orange-600'
-                : 'text-gray-500 hover:text-gray-700'
+              ? 'border-b-2 border-orange-500 text-orange-600'
+              : 'text-gray-500 hover:text-gray-700'
               }`}
           >
             <div className="flex items-center gap-2">
@@ -120,8 +120,8 @@ const SupportPopup = ({ onClose }) => {
           <button
             onClick={() => setActiveTab('tickets')}
             className={`px-6 py-3 font-medium text-sm transition-colors ${activeTab === 'tickets'
-                ? 'border-b-2 border-orange-500 text-orange-600'
-                : 'text-gray-500 hover:text-gray-700'
+              ? 'border-b-2 border-orange-500 text-orange-600'
+              : 'text-gray-500 hover:text-gray-700'
               }`}
           >
             <div className="flex items-center gap-2">
@@ -132,8 +132,8 @@ const SupportPopup = ({ onClose }) => {
           <button
             onClick={() => setActiveTab('contact')}
             className={`px-6 py-3 font-medium text-sm transition-colors ${activeTab === 'contact'
-                ? 'border-b-2 border-orange-500 text-orange-600'
-                : 'text-gray-500 hover:text-gray-700'
+              ? 'border-b-2 border-orange-500 text-orange-600'
+              : 'text-gray-500 hover:text-gray-700'
               }`}
           >
             <div className="flex items-center gap-2">
@@ -152,7 +152,7 @@ const SupportPopup = ({ onClose }) => {
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">How can we help you?</h3>
                   <p className="text-gray-600">Search our knowledge base or browse by category</p>
                 </div>
-                <div className="max-w-2xl mx-auto flex gap-4">
+                <div className="max-w-4xl mx-auto flex gap-4">
                   <div className="flex-1 relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <input
@@ -251,7 +251,7 @@ const SupportPopup = ({ onClose }) => {
           )}
 
           {activeTab === 'contact' && (
-            <div className="max-w-2xl mx-auto">
+            <div className="max-w-4xl mx-auto">
               <h3 className="text-lg font-semibold text-gray-900 mb-6">Contact Information</h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">

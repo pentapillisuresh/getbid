@@ -288,11 +288,10 @@ const SupportHelpdesk = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === tab.id
+              className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm ${activeTab === tab.id
                   ? "border-primary-500 text-primary-600"
                   : "border-transparent text-gray-500 hover:text-gray-700"
-              }`}
+                }`}
             >
               {tab.icon}
               {tab.label}
@@ -304,7 +303,7 @@ const SupportHelpdesk = () => {
       {/* New Ticket Modal */}
       {showNewTicket && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+          <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] flex flex-col">
             <div className="p-6 border-b border-gray-200 flex-shrink-0">
               <h3 className="text-xl font-semibold text-gray-900">
                 Create Support Ticket
@@ -553,8 +552,8 @@ const SupportHelpdesk = () => {
                   {contact.type.includes("Phone")
                     ? "Call Now"
                     : contact.type.includes("Email")
-                    ? "Send Email"
-                    : "Start Chat"}
+                      ? "Send Email"
+                      : "Start Chat"}
                 </button>
               </div>
             ))}
