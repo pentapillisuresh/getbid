@@ -80,11 +80,11 @@ const VendorDashboard = () => {
       path: "/clarifications",
       // badge: "2",
     },
-    {
-      icon: <HeadphonesIcon className="w-5 h-5" />,
-      label: "Support & Helpdesk",
-      path: "/support",
-    },
+    // {
+    //   icon: <HeadphonesIcon className="w-5 h-5" />,
+    //   label: "Support & Helpdesk",
+    //   path: "/support",
+    // },
   ];
 
   return (

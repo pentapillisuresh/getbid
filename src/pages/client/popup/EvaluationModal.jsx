@@ -858,6 +858,7 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
 
         <div className="text-sm text-gray-600">
           <p>Vendor: {selectedBid?.user?.name || "N/A"}</p>
+          <p>Email: {selectedBid?.user?.email || "N/A"}</p>
           <p>Company: {selectedBid?.user?.company?.name || "N/A"}</p>
           <p>
             Amount:{" "}
