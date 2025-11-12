@@ -680,77 +680,6 @@ const BidManagement = () => {
                       </div>
                     )}
 
-                    {/* Contract Terms */}
-                    {bid.status === "awarded" && bid.contractTerms && (
-                      <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                        <span className="text-sm text-green-600 font-medium block mb-2">
-                          Contract Details:
-                        </span>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                          <div>
-                            <span className="text-green-600 font-medium">
-                              Duration:
-                            </span>
-                            <div className="text-green-700">
-                              {bid.contractTerms.duration}
-                            </div>
-                          </div>
-                          <div>
-                            <span className="text-green-600 font-medium">
-                              Bonus:
-                            </span>
-                            <div className="text-green-700">
-                              {bid.contractTerms.bonus}
-                            </div>
-                          </div>
-                          <div>
-                            <span className="text-green-600 font-medium">
-                              Start Date:
-                            </span>
-                            <div className="text-green-700">
-                              {bid.contractTerms.commencementDate
-                                ? new Date(
-                                    bid.contractTerms.commencementDate
-                                  ).toLocaleDateString()
-                                : "-"}
-                            </div>
-                          </div>
-                          <div>
-                            <span className="text-green-600 font-medium">
-                              End Date:
-                            </span>
-                            <div className="text-green-700">
-                              {bid.contractTerms.completionDate
-                                ? new Date(
-                                    bid.contractTerms.completionDate
-                                  ).toLocaleDateString()
-                                : "-"}
-                            </div>
-                          </div>
-                        </div>
-                        {bid.contractTerms.conditions && (
-                          <div className="mt-2">
-                            <span className="text-green-600 font-medium">
-                              Conditions:
-                            </span>
-                            <div className="text-green-700">
-                              {bid.contractTerms.conditions}
-                            </div>
-                          </div>
-                        )}
-                        {bid.contractTerms.remarks && (
-                          <div className="mt-2">
-                            <span className="text-green-600 font-medium">
-                              Remarks:
-                            </span>
-                            <div className="text-green-700">
-                              {bid.contractTerms.remarks}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
                     {/* Documents */}
                     {bid.documents && bid.documents.length > 0 && (
                       <div className="mb-4">
@@ -828,6 +757,16 @@ const BidManagement = () => {
                       </button>
                     )}
 
+                    {bid.status === "awarded" && bid.contractTerms && (
+                      <button
+                        onClick={() => handleShowContract(bid)}
+                        className="flex items-center gap-2 text-green-600 hover:text-green-700 font-medium text-sm"
+                      >
+                        <FileText className="w-4 h-4" />
+                        View Contract Details
+                      </button>
+                    )}
+
                     <button className="flex items-center gap-2 text-gray-600 hover:text-gray-700 font-medium text-sm">
                       <Download className="w-4 h-4" />
                       Download
@@ -847,14 +786,6 @@ const BidManagement = () => {
                             className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors"
                           >
                             Re-Bid
-                          </button>
-                        )}
-                        {bid.status === "awarded" && (
-                          <button
-                            onClick={() => handleShowContract(bid)}
-                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors"
-                          >
-                            View Contract
                           </button>
                         )}
                         {bid.status === "pending" && (
