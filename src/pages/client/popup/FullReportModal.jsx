@@ -6,6 +6,7 @@ import {
   Award,
   TrendingUp,
   TrendingDown,
+  Eye,
 } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -13,6 +14,8 @@ import * as XLSX from "xlsx";
 
 const FullReportModal = ({ tender, onClose }) => {
   const currentDate = new Date().toLocaleDateString("en-GB");
+  const [selectedContract, setSelectedContract] = React.useState(null);
+  const [showContractModal, setShowContractModal] = React.useState(false);
 
   // Helper function to format date as "Nov 28th, 2025"
   const formatDate = (dateString) => {
@@ -65,6 +68,7 @@ const FullReportModal = ({ tender, onClose }) => {
           bid.contactPerson ||
           bid.user?.contactPerson ||
           "N/A",
+        company: bid.company || bid.user?.company || null,
         technicalScore:
           bid.technicalEvaluation?.totalRating || bid.technicalScore || 0,
         financialScore:
@@ -383,6 +387,272 @@ const FullReportModal = ({ tender, onClose }) => {
     );
   };
 
+  const handleViewContract = (bid) => {
+    setSelectedContract(bid);
+    setShowContractModal(true);
+  };
+
+  const handleCloseContractModal = () => {
+    setShowContractModal(false);
+    setSelectedContract(null);
+  };
+
+  const handleDownloadContract = () => {
+    if (!selectedContract) return;
+
+    const doc = new jsPDF();
+
+    // Helper to replace rupee symbol with Rs.
+    const formatCurrencyForPDF = (amount) => {
+      if (!amount) return "N/A";
+      return String(amount).replace(/₹/g, "Rs. ");
+    };
+
+    // Add header with logo/icon placeholder
+    doc.setFillColor(34, 197, 94); // Green color
+    doc.rect(0, 0, 210, 40, "F");
+
+    // Add title
+    doc.setFontSize(24);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(255, 255, 255);
+    doc.text("CONTRACT AGREEMENT", 105, 20, { align: "center" });
+
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.text("Awarded Contract Details", 105, 30, { align: "center" });
+
+    // Reset text color
+    doc.setTextColor(0, 0, 0);
+
+    // Add contract ID and date
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Contract Date: ${currentDate}`, 14, 50);
+    doc.text(`Tender ID: ${tender.tenderId || tender.id || "N/A"}`, 14, 56);
+
+    // Add awarded badge
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(34, 197, 94);
+    doc.text("✓ AWARDED CONTRACT", 150, 50);
+    doc.setTextColor(0, 0, 0);
+
+    // Section: Tender Information
+    let yPos = 70;
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.setFillColor(59, 130, 246);
+    doc.rect(14, yPos - 5, 182, 8, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.text("TENDER INFORMATION", 16, yPos);
+    doc.setTextColor(0, 0, 0);
+
+    yPos += 10;
+    const tenderInfo = [
+      ["Tender Title", tender.title || "N/A"],
+      ["Category", tender.category || "N/A"],
+      ["Estimated Value", formatCurrencyForPDF(estimatedValue)],
+    ];
+
+    autoTable(doc, {
+      startY: yPos,
+      body: tenderInfo,
+      theme: "plain",
+      styles: { fontSize: 10, cellPadding: 2 },
+      columnStyles: {
+        0: { fontStyle: "bold", cellWidth: 60 },
+        1: { cellWidth: 122 },
+      },
+      margin: { left: 14, right: 14 },
+    });
+
+    // Section: Vendor Information
+    yPos = (doc.lastAutoTable?.finalY || yPos + 20) + 10;
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.setFillColor(59, 130, 246);
+    doc.rect(14, yPos - 5, 182, 8, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.text("VENDOR INFORMATION", 16, yPos);
+    doc.setTextColor(0, 0, 0);
+
+    yPos += 10;
+    const vendorInfo = [
+      ["Vendor Name", selectedContract.vendorName],
+      [
+        "Company Name",
+        selectedContract.company?.name ||
+          selectedContract.user?.company?.name ||
+          "-",
+      ],
+      [
+        "Company Type",
+        selectedContract.company?.companyType ||
+          selectedContract.user?.company?.companyType ||
+          "-",
+      ],
+      [
+        "Email",
+        selectedContract.vendor?.email || selectedContract.user?.email || "N/A",
+      ],
+      ["Contact Person", selectedContract.contactPerson],
+    ];
+
+    autoTable(doc, {
+      startY: yPos,
+      body: vendorInfo,
+      theme: "plain",
+      styles: { fontSize: 10, cellPadding: 2 },
+      columnStyles: {
+        0: { fontStyle: "bold", cellWidth: 60 },
+        1: { cellWidth: 122 },
+      },
+      margin: { left: 14, right: 14 },
+    });
+
+    // Section: Contract Details
+    yPos = (doc.lastAutoTable?.finalY || yPos + 35) + 10;
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.setFillColor(34, 197, 94);
+    doc.rect(14, yPos - 5, 182, 8, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.text("CONTRACT DETAILS", 16, yPos);
+    doc.setTextColor(0, 0, 0);
+
+    yPos += 10;
+    const contractDetails = [
+      [
+        "Duration",
+        selectedContract.contract?.duration ||
+          selectedContract.duration ||
+          "10 days",
+      ],
+      [
+        "Start Date",
+        selectedContract.contract?.startDate
+          ? formatDate(selectedContract.contract.startDate)
+          : selectedContract.startDate
+          ? formatDate(selectedContract.startDate)
+          : "13/11/2025",
+      ],
+      [
+        "End Date",
+        selectedContract.contract?.endDate
+          ? formatDate(selectedContract.contract.endDate)
+          : selectedContract.endDate
+          ? formatDate(selectedContract.endDate)
+          : "26/11/2025",
+      ],
+      [
+        "Bonus",
+        selectedContract.contract?.bonus || selectedContract.bonus || "5%",
+      ],
+    ];
+
+    autoTable(doc, {
+      startY: yPos,
+      body: contractDetails,
+      theme: "plain",
+      styles: { fontSize: 10, cellPadding: 2 },
+      columnStyles: {
+        0: { fontStyle: "bold", cellWidth: 60 },
+        1: { cellWidth: 122 },
+      },
+      margin: { left: 14, right: 14 },
+    });
+
+    // Section: Financial Details
+    yPos = (doc.lastAutoTable?.finalY || yPos + 30) + 10;
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.setFillColor(59, 130, 246);
+    doc.rect(14, yPos - 5, 182, 8, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.text("FINANCIAL DETAILS", 16, yPos);
+    doc.setTextColor(0, 0, 0);
+
+    yPos += 10;
+    const financialDetails = [
+      ["Contract Value", formatCurrencyForPDF(selectedContract.bidAmount)],
+      ["Variance from Estimate", selectedContract.variance],
+      ["Rank", `L${selectedContract.rank} (Lowest Bid)`],
+    ];
+
+    autoTable(doc, {
+      startY: yPos,
+      body: financialDetails,
+      theme: "plain",
+      styles: { fontSize: 10, cellPadding: 2 },
+      columnStyles: {
+        0: { fontStyle: "bold", cellWidth: 60 },
+        1: { cellWidth: 122 },
+      },
+      margin: { left: 14, right: 14 },
+    });
+
+    // Section: Evaluation Scores
+    yPos = (doc.lastAutoTable?.finalY || yPos + 20) + 10;
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.setFillColor(59, 130, 246);
+    doc.rect(14, yPos - 5, 182, 8, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.text("EVALUATION SCORES", 16, yPos);
+    doc.setTextColor(0, 0, 0);
+
+    yPos += 10;
+    const evaluationScores = [
+      ["Technical Score", `${selectedContract.technicalScore}/100`],
+      ["Bid Submitted Date", selectedContract.submittedDate],
+    ];
+
+    autoTable(doc, {
+      startY: yPos,
+      body: evaluationScores,
+      theme: "plain",
+      styles: { fontSize: 10, cellPadding: 2 },
+      columnStyles: {
+        0: { fontStyle: "bold", cellWidth: 60 },
+        1: { cellWidth: 122 },
+      },
+      margin: { left: 14, right: 14 },
+    });
+
+    // Add footer
+    yPos = (doc.lastAutoTable?.finalY || yPos + 30) + 15;
+    doc.setFillColor(240, 240, 240);
+    doc.rect(14, yPos, 182, 20, "F");
+
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(34, 197, 94);
+    doc.text("CONTRACT AWARDED", 105, yPos + 6, { align: "center" });
+
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100, 100, 100);
+    doc.text(
+      `This contract has been awarded to ${selectedContract.vendorName}`,
+      105,
+      yPos + 12,
+      { align: "center" }
+    );
+    doc.text(
+      `Based on competitive bid and strong evaluation scores`,
+      105,
+      yPos + 17,
+      { align: "center" }
+    );
+
+    // Save the PDF
+    const fileName = `Contract_${selectedContract.vendorName.replace(
+      /[^a-z0-9]/gi,
+      "_"
+    )}_${tender.tenderId || "Tender"}_${new Date().getTime()}.pdf`;
+    doc.save(fileName);
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-7xl max-h-[95vh] flex flex-col">
@@ -575,6 +845,9 @@ const FullReportModal = ({ tender, onClose }) => {
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Submitted
                       </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -666,12 +939,23 @@ const FullReportModal = ({ tender, onClose }) => {
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                             {bid.submittedDate}
                           </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm">
+                            {bid.isAwarded && (
+                              <button
+                                onClick={() => handleViewContract(bid)}
+                                className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                              >
+                                <Eye className="w-4 h-4" />
+                                View Contract
+                              </button>
+                            )}
+                          </td>
                         </tr>
                       ))
                     ) : (
                       <tr>
                         <td
-                          colSpan="7"
+                          colSpan="8"
                           className="px-4 py-8 text-center text-gray-500"
                         >
                           <div className="space-y-2">
@@ -716,6 +1000,318 @@ const FullReportModal = ({ tender, onClose }) => {
           </div>
         </div>
       </div>
+
+      {/* Contract Details Modal */}
+      {showContractModal && selectedContract && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[60] p-4">
+          <div className="bg-white rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-green-50 to-blue-50">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                  <Award className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    Contract Details
+                  </h2>
+                  <p className="text-sm text-gray-600 mt-0.5">
+                    Awarded Contract Information
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={handleCloseContractModal}
+                className="p-2 hover:bg-white rounded-full transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="space-y-6">
+                {/* Contract Header */}
+                <div className="bg-green-50 border-l-4 border-green-500 rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Award className="w-5 h-5 text-green-600" />
+                    <h3 className="text-lg font-semibold text-green-900">
+                      Awarded Bid
+                    </h3>
+                  </div>
+                  <p className="text-sm text-green-700">
+                    This contract has been awarded to{" "}
+                    {selectedContract.vendorName}
+                  </p>
+                </div>
+
+                {/* Vendor Information */}
+                <div className="bg-white border border-gray-200 rounded-lg p-5">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-blue-600" />
+                    Vendor Information
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Vendor Name</p>
+                      <p className="text-base font-semibold text-gray-900">
+                        {selectedContract.vendorName}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Company Name</p>
+                      <p className="text-base font-semibold text-gray-900">
+                        {selectedContract.company?.name ||
+                          selectedContract.user?.company?.name ||
+                          "-"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Email</p>
+                      <p className="text-base font-semibold text-gray-900">
+                        {selectedContract.vendor?.email ||
+                          selectedContract.user?.email ||
+                          "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Company Type</p>
+                      <p className="text-base font-semibold text-gray-900">
+                        {selectedContract.company?.companyType ||
+                          selectedContract.user?.company?.companyType ||
+                          "-"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Contract Details */}
+                <div className="bg-gradient-to-r from-green-50 to-teal-50 border border-green-200 rounded-lg p-5">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-green-600" />
+                    Contract Details
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="bg-white rounded-lg p-4 border border-green-200">
+                      <p className="text-sm text-green-700 font-medium mb-1">
+                        Duration
+                      </p>
+                      <p className="text-2xl font-bold text-green-600">
+                        {selectedContract.contract?.duration ||
+                          selectedContract.duration ||
+                          "10 days"}
+                      </p>
+                    </div>
+                    <div className="bg-white rounded-lg p-4 border border-green-200">
+                      <p className="text-sm text-green-700 font-medium mb-1">
+                        Bonus
+                      </p>
+                      <p className="text-2xl font-bold text-green-600">
+                        {selectedContract.contract?.bonus ||
+                          selectedContract.bonus ||
+                          "5%"}
+                      </p>
+                    </div>
+                    <div className="bg-white rounded-lg p-4 border border-green-200">
+                      <p className="text-sm text-green-700 font-medium mb-1">
+                        Start Date
+                      </p>
+                      <p className="text-lg font-bold text-green-600">
+                        {selectedContract.contract?.startDate
+                          ? formatDate(selectedContract.contract.startDate)
+                          : selectedContract.startDate
+                          ? formatDate(selectedContract.startDate)
+                          : "13/11/2025"}
+                      </p>
+                    </div>
+                    <div className="bg-white rounded-lg p-4 border border-green-200">
+                      <p className="text-sm text-green-700 font-medium mb-1">
+                        End Date
+                      </p>
+                      <p className="text-lg font-bold text-green-600">
+                        {selectedContract.contract?.endDate
+                          ? formatDate(selectedContract.contract.endDate)
+                          : selectedContract.endDate
+                          ? formatDate(selectedContract.endDate)
+                          : "26/11/2025"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Financial Details */}
+                <div className="bg-white border border-gray-200 rounded-lg p-5">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-green-600" />
+                    Financial Details
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-blue-50 rounded-lg p-4">
+                      <p className="text-sm text-blue-700 mb-1">
+                        Contract Value
+                      </p>
+                      <p className="text-2xl font-bold text-blue-600">
+                        {selectedContract.bidAmount}
+                      </p>
+                    </div>
+                    <div className="bg-purple-50 rounded-lg p-4">
+                      <p className="text-sm text-purple-700 mb-1">
+                        Variance from Estimate
+                      </p>
+                      <p
+                        className={`text-2xl font-bold ${
+                          selectedContract.variance.startsWith("-")
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }`}
+                      >
+                        {selectedContract.variance}
+                      </p>
+                    </div>
+                    <div className="bg-orange-50 rounded-lg p-4">
+                      <p className="text-sm text-orange-700 mb-1">Rank</p>
+                      <p className="text-2xl font-bold text-orange-600">
+                        L{selectedContract.rank}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Evaluation Scores */}
+                <div className="bg-white border border-gray-200 rounded-lg p-5">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <Award className="w-5 h-5 text-purple-600" />
+                    Evaluation Scores
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4">
+                      <p className="text-sm text-blue-700 mb-2">
+                        Technical Score
+                      </p>
+                      <div className="flex items-end gap-2">
+                        <p className="text-3xl font-bold text-blue-600">
+                          {selectedContract.technicalScore}
+                        </p>
+                        <p className="text-lg text-blue-500 mb-1">/100</p>
+                      </div>
+                      <div className="mt-2 bg-blue-200 rounded-full h-2 overflow-hidden">
+                        <div
+                          className="bg-blue-600 h-full transition-all duration-500"
+                          style={{
+                            width: `${selectedContract.technicalScore}%`,
+                          }}
+                        ></div>
+                      </div>
+                    </div>
+                    <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-4">
+                      <p className="text-sm text-green-700 mb-2">
+                        Financial Score
+                      </p>
+                      <div className="flex items-end gap-2">
+                        <p className="text-3xl font-bold text-green-600">
+                          {selectedContract.financialScore}
+                        </p>
+                        <p className="text-lg text-green-500 mb-1">/100</p>
+                      </div>
+                      <div className="mt-2 bg-green-200 rounded-full h-2 overflow-hidden">
+                        <div
+                          className="bg-green-600 h-full transition-all duration-500"
+                          style={{
+                            width: `${selectedContract.financialScore}%`,
+                          }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-4">
+                    <p className="text-sm text-purple-700 mb-2">
+                      Overall Score
+                    </p>
+                    <div className="flex items-end gap-2">
+                      <p className="text-4xl font-bold text-purple-600">
+                        {selectedContract.overallScore}
+                      </p>
+                      <p className="text-xl text-purple-500 mb-1.5">/100</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tender Information */}
+                <div className="bg-white border border-gray-200 rounded-lg p-5">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    Tender Information
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Tender Title</p>
+                      <p className="text-base font-semibold text-gray-900">
+                        {tender.title}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Tender ID</p>
+                      <p className="text-base font-semibold text-gray-900">
+                        {tender.tenderId || tender.id || "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Category</p>
+                      <p className="text-base font-semibold text-gray-900">
+                        {tender.category || "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">
+                        Bid Submitted Date
+                      </p>
+                      <p className="text-base font-semibold text-gray-900">
+                        {selectedContract.submittedDate}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Award Status */}
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-5">
+                  <div className="flex items-start gap-3">
+                    <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                      <Award className="w-7 h-7 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-green-900 mb-1">
+                        Contract Awarded
+                      </h3>
+                      <p className="text-sm text-green-700">
+                        This bid has been successfully awarded the contract. The
+                        vendor{" "}
+                        <span className="font-semibold">
+                          {selectedContract.vendorName}
+                        </span>{" "}
+                        has been selected for this tender based on their
+                        competitive bid and strong evaluation scores.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
+              <button
+                onClick={handleCloseContractModal}
+                className="px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition-colors"
+              >
+                Close
+              </button>
+              <button
+                onClick={handleDownloadContract}
+                className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+              >
+                <Download className="w-4 h-4" />
+                Download Contract
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

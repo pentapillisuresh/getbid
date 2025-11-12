@@ -173,9 +173,14 @@ const BidEvaluation = () => {
 
   // Filter tenders based on selected filter
   const getFilteredTenders = () => {
-    if (filter === "all") return tenders;
+    // First filter out cancelled tenders
+    const nonCancelledTenders = tenders.filter(
+      (tender) => tender.status !== "cancelled"
+    );
 
-    return tenders.filter((tender) => {
+    if (filter === "all") return nonCancelledTenders;
+
+    return nonCancelledTenders.filter((tender) => {
       const { status } = tender;
 
       switch (filter) {

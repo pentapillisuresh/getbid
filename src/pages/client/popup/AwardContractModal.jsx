@@ -232,7 +232,8 @@ const AwardContractModal = ({ bid, tender, onClose, onConfirm }) => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Performance Bond (%)
+                      Performance Bond (%){" "}
+                      <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -249,7 +250,8 @@ const AwardContractModal = ({ bid, tender, onClose, onConfirm }) => {
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Work Commencement Date
+                      Work Commencement Date{" "}
+                      <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="date"
@@ -265,7 +267,8 @@ const AwardContractModal = ({ bid, tender, onClose, onConfirm }) => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Expected Completion Date
+                      Expected Completion Date{" "}
+                      <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="date"
@@ -354,7 +357,12 @@ const AwardContractModal = ({ bid, tender, onClose, onConfirm }) => {
             {currentStep === 2 && (
               <button
                 onClick={handleSubmit}
-                disabled={!formData.confirmed}
+                disabled={
+                  !formData.confirmed ||
+                  !formData.workCommencementDate ||
+                  !formData.expectedCompletionDate ||
+                  !formData.performanceBond
+                }
                 className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium disabled:bg-gray-300 disabled:cursor-not-allowed"
               >
                 Confirm Award

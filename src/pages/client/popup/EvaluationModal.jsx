@@ -574,6 +574,46 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
     setFullReportModalOpen(true);
   };
 
+  const handleViewDocument = (doc) => {
+    if (doc.url) {
+      // Open document in a new tab
+      window.open(doc.url, "_blank", "noopener,noreferrer");
+    } else if (doc.fileUrl) {
+      window.open(doc.fileUrl, "_blank", "noopener,noreferrer");
+    } else {
+      toast.showError("Document URL not available");
+    }
+  };
+
+  const handleDownloadDocument = async (doc) => {
+    try {
+      const fileUrl = doc.url || doc.fileUrl;
+
+      if (!fileUrl) {
+        toast.showError("Document URL not available");
+        return;
+      }
+
+      // Create a temporary anchor element to trigger download
+      const link = document.createElement("a");
+      link.href = fileUrl;
+      link.download = doc.fileName || doc.name || "document";
+      link.target = "_blank";
+
+      // Append to body, click, and remove
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.showSuccess(
+        `Downloading ${doc.fileName || doc.name || "document"}...`
+      );
+    } catch (error) {
+      console.error("Error downloading document:", error);
+      toast.showError("Failed to download document");
+    }
+  };
+
   // Check tender status to determine tab accessibility
   const canAccessTechnical = tender.status === "in-progress";
   // tender.status !== "technical-evaluation" && !technicalEvaluationCompleted;
@@ -660,12 +700,12 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                 {eligibleBids.map((bid, index) => {
                   const totalScore = bid.technicalEvaluation
                     ? Object.values({
-                      experience: bid.technicalEvaluation.experience || 0,
-                      expertise: bid.technicalEvaluation.expertise || 0,
-                      resources: bid.technicalEvaluation.resources || 0,
-                      timeline: bid.technicalEvaluation.timeline || 0,
-                      quality: bid.technicalEvaluation.quality || 0,
-                    }).reduce((sum, score) => sum + score, 0)
+                        experience: bid.technicalEvaluation.experience || 0,
+                        expertise: bid.technicalEvaluation.expertise || 0,
+                        resources: bid.technicalEvaluation.resources || 0,
+                        timeline: bid.technicalEvaluation.timeline || 0,
+                        quality: bid.technicalEvaluation.quality || 0,
+                      }).reduce((sum, score) => sum + score, 0)
                     : 0;
 
                   return (
@@ -690,18 +730,20 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                       <td className="px-4 py-4 whitespace-nowrap">
                         <div className="flex flex-col gap-1">
                           <span
-                            className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${index === 0
+                            className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                              index === 0
                                 ? "bg-green-100 text-green-800"
                                 : "bg-blue-100 text-blue-800"
-                              }`}
+                            }`}
                           >
                             {index === 0 ? "L1 (Lowest)" : `L${index + 1}`}
                           </span>
                           <span
-                            className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${bid.status === "awarded"
+                            className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                              bid.status === "awarded"
                                 ? "bg-purple-100 text-purple-800"
                                 : "bg-green-100 text-green-800"
-                              }`}
+                            }`}
                           >
                             {bid.status === "awarded" ? "Awarded" : "Approved"}
                           </span>
@@ -787,28 +829,29 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
 
           <div className="flex items-center gap-2">
             <span
-              className={`px-3 py-1 rounded-full text-sm font-medium ${selectedBid?.status === "pending"
+              className={`px-3 py-1 rounded-full text-sm font-medium ${
+                selectedBid?.status === "pending"
                   ? "bg-yellow-100 text-yellow-800"
                   : selectedBid?.status === "approved"
-                    ? "bg-green-100 text-green-800"
-                    : selectedBid?.status === "rejected" ||
-                      selectedBid?.status === "disqualified"
-                      ? "bg-red-100 text-red-800"
-                      : selectedBid?.status === "deleted"
-                        ? "bg-gray-100 text-gray-800"
-                        : "bg-gray-100 text-gray-800"
-                }`}
+                  ? "bg-green-100 text-green-800"
+                  : selectedBid?.status === "rejected" ||
+                    selectedBid?.status === "disqualified"
+                  ? "bg-red-100 text-red-800"
+                  : selectedBid?.status === "deleted"
+                  ? "bg-gray-100 text-gray-800"
+                  : "bg-gray-100 text-gray-800"
+              }`}
             >
               {selectedBid?.status === "pending"
                 ? "Pending"
                 : selectedBid?.status === "approved"
-                  ? "Approved"
-                  : selectedBid?.status === "rejected" ||
-                    selectedBid?.status === "disqualified"
-                    ? "Disqualified"
-                    : selectedBid?.status === "deleted"
-                      ? "Deleted"
-                      : "Unknown"}
+                ? "Approved"
+                : selectedBid?.status === "rejected" ||
+                  selectedBid?.status === "disqualified"
+                ? "Disqualified"
+                : selectedBid?.status === "deleted"
+                ? "Deleted"
+                : "Unknown"}
             </span>
           </div>
         </div>
@@ -953,10 +996,18 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                  <button className="text-blue-600 hover:text-blue-700 p-1 rounded hover:bg-blue-50">
+                  <button
+                    onClick={() => handleViewDocument(doc.file)}
+                    title="View document"
+                    className="text-blue-600 hover:text-blue-700 p-1 rounded hover:bg-blue-50 transition-colors"
+                  >
                     <Eye className="w-4 h-4" />
                   </button>
-                  <button className="text-blue-600 hover:text-blue-700 p-1 rounded hover:bg-blue-50">
+                  <button
+                    onClick={() => handleDownloadDocument(doc.file)}
+                    title="Download document"
+                    className="text-blue-600 hover:text-blue-700 p-1 rounded hover:bg-blue-50 transition-colors"
+                  >
                     <Download className="w-4 h-4" />
                   </button>
                 </div>
@@ -969,6 +1020,54 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
             </div>
           )}
         </div>
+      </div>
+
+      <div className="mb-6">
+        <h4 className="font-medium text-gray-900 mb-3">Quotation</h4>
+        {selectedBid?.quotation ? (
+          <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-white">
+            <div className="flex items-center gap-3 flex-1">
+              <div className="flex items-center">
+                <FileText className="w-5 h-5 text-blue-500" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="font-medium text-gray-900 text-sm">
+                  {selectedBid.quotation.fileName || "Quotation"}
+                </div>
+                <div className="text-xs text-gray-500">
+                  {selectedBid.quotation.mimeType || "PDF Document"}
+                </div>
+                <div className="text-xs text-gray-400">
+                  {selectedBid.quotation.createdAt &&
+                    `Uploaded: ${new Date(
+                      selectedBid.quotation.createdAt
+                    ).toLocaleDateString()}`}
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+              <button
+                onClick={() => handleViewDocument(selectedBid.quotation)}
+                title="View quotation"
+                className="text-blue-600 hover:text-blue-700 p-1 rounded hover:bg-blue-50 transition-colors"
+              >
+                <Eye className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => handleDownloadDocument(selectedBid.quotation)}
+                title="Download quotation"
+                className="text-blue-600 hover:text-blue-700 p-1 rounded hover:bg-blue-50 transition-colors"
+              >
+                <Download className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-6 text-gray-500 border border-gray-200 rounded-lg bg-white">
+            <FileText className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+            <p className="text-sm">No quotation submitted</p>
+          </div>
+        )}
       </div>
 
       <div className="mb-6">
@@ -988,10 +1087,11 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
           <button
             onClick={handleApprove}
             disabled={!selectedBid || submitting || loading || isDeleted}
-            className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${isApproved
+            className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
+              isApproved
                 ? "bg-green-600 hover:bg-green-700 text-white"
                 : "bg-green-50 border border-green-200 text-green-700 hover:bg-green-100"
-              }`}
+            }`}
           >
             {submitting ? (
               <>
@@ -1008,10 +1108,11 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
           <button
             onClick={handleDisqualify}
             disabled={submitting || loading || isDeleted}
-            className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${isDisqualified
+            className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
+              isDisqualified
                 ? "bg-red-600 hover:bg-red-700 text-white"
                 : "bg-red-50 border border-red-200 text-red-700 hover:bg-red-100"
-              }`}
+            }`}
           >
             <X className="w-4 h-4" />
             Disqualify Bid
@@ -1044,29 +1145,33 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                     <div className="flex mt-2">
                       <button
                         onClick={() =>
-                          canAccessTechnical && setCurrentEvaluationType("technical")
+                          canAccessTechnical &&
+                          setCurrentEvaluationType("technical")
                         }
                         disabled={!canAccessTechnical}
-                        className={`mr-4 font-medium ${currentEvaluationType === "technical"
+                        className={`mr-4 font-medium ${
+                          currentEvaluationType === "technical"
                             ? "text-blue-600"
                             : canAccessTechnical
-                              ? "text-gray-400 hover:text-gray-600"
-                              : "text-gray-300 cursor-not-allowed"
-                          }`}
+                            ? "text-gray-400 hover:text-gray-600"
+                            : "text-gray-300 cursor-not-allowed"
+                        }`}
                       >
                         Technical Evaluation
                       </button>
                       <button
                         onClick={() =>
-                          canAccessFinancial && setCurrentEvaluationType("financial")
+                          canAccessFinancial &&
+                          setCurrentEvaluationType("financial")
                         }
                         disabled={!canAccessFinancial}
-                        className={`font-medium ${currentEvaluationType === "financial"
+                        className={`font-medium ${
+                          currentEvaluationType === "financial"
                             ? "text-blue-600"
                             : canAccessFinancial
-                              ? "text-gray-400 hover:text-gray-600"
-                              : "text-gray-300 cursor-not-allowed"
-                          }`}
+                            ? "text-gray-400 hover:text-gray-600"
+                            : "text-gray-300 cursor-not-allowed"
+                        }`}
                       >
                         Financial Evaluation
                       </button>
@@ -1076,30 +1181,33 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                     <button
                       onClick={handleGenerateTechnicalReport}
                       disabled={!canAccessTechnical}
-                      className={`px-3 py-1.5 rounded text-sm font-medium ${!canAccessTechnical
+                      className={`px-3 py-1.5 rounded text-sm font-medium ${
+                        !canAccessTechnical
                           ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                           : "bg-orange-50 text-orange-700 hover:bg-orange-100"
-                        }`}
+                      }`}
                     >
                       Technical Report
                     </button>
                     <button
                       onClick={handleGenerateFinancialReport}
                       disabled={!canAccessFinancial}
-                      className={`px-3 py-1.5 rounded text-sm font-medium ${!canAccessFinancial
+                      className={`px-3 py-1.5 rounded text-sm font-medium ${
+                        !canAccessFinancial
                           ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                           : "bg-blue-50 text-blue-700 hover:bg-blue-100"
-                        }`}
+                      }`}
                     >
                       Financial Report
                     </button>
                     <button
                       onClick={handleGenerateFullReport}
                       disabled={!canAccessFinancial}
-                      className={`px-3 py-1.5 rounded text-sm font-medium ${!canAccessFinancial
+                      className={`px-3 py-1.5 rounded text-sm font-medium ${
+                        !canAccessFinancial
                           ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                           : "bg-green-50 text-green-700 hover:bg-green-100"
-                        }`}
+                      }`}
                     >
                       Full Report
                     </button>
@@ -1192,11 +1300,11 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                 {submitting
                   ? "Submitting..."
                   : currentEvaluationType === "technical"
-                    ? "Complete Technical Evaluation"
-                    : tender.status === "financial-evaluation" ||
-                      tender.status === "completed"
-                      ? "Evaluation Complete"
-                      : "Complete Financial Evaluation"}
+                  ? "Complete Technical Evaluation"
+                  : tender.status === "financial-evaluation" ||
+                    tender.status === "completed"
+                  ? "Evaluation Complete"
+                  : "Complete Financial Evaluation"}
               </button>
             </div>
           </div>
@@ -1268,7 +1376,9 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                 <div className="p-6 space-y-6">
                   {/* Bid Overview */}
                   <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                    <h4 className="font-medium text-gray-900 mb-3">Bid Overview</h4>
+                    <h4 className="font-medium text-gray-900 mb-3">
+                      Bid Overview
+                    </h4>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <p className="text-sm font-medium text-gray-500">
@@ -1279,7 +1389,9 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                         </p>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-500">Company</p>
+                        <p className="text-sm font-medium text-gray-500">
+                          Company
+                        </p>
                         <p className="text-sm text-gray-900">
                           {selectedBidForDetails.user?.company?.name || "N/A"}
                         </p>
@@ -1295,26 +1407,29 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                         </p>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-500">Status</p>
+                        <p className="text-sm font-medium text-gray-500">
+                          Status
+                        </p>
                         <span
-                          className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${selectedBidForDetails.status === "pending"
+                          className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                            selectedBidForDetails.status === "pending"
                               ? "bg-yellow-100 text-yellow-800"
                               : selectedBidForDetails.status === "approved"
-                                ? "bg-green-100 text-green-800"
-                                : selectedBidForDetails.status === "rejected" ||
-                                  selectedBidForDetails.status === "disqualified"
-                                  ? "bg-red-100 text-red-800"
-                                  : "bg-gray-100 text-gray-800"
-                            }`}
+                              ? "bg-green-100 text-green-800"
+                              : selectedBidForDetails.status === "rejected" ||
+                                selectedBidForDetails.status === "disqualified"
+                              ? "bg-red-100 text-red-800"
+                              : "bg-gray-100 text-gray-800"
+                          }`}
                         >
                           {selectedBidForDetails.status === "pending"
                             ? "Pending"
                             : selectedBidForDetails.status === "approved"
-                              ? "Approved"
-                              : selectedBidForDetails.status === "rejected" ||
-                                selectedBidForDetails.status === "disqualified"
-                                ? "Disqualified"
-                                : "Unknown"}
+                            ? "Approved"
+                            : selectedBidForDetails.status === "rejected" ||
+                              selectedBidForDetails.status === "disqualified"
+                            ? "Disqualified"
+                            : "Unknown"}
                         </span>
                       </div>
                       <div>
@@ -1332,8 +1447,8 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                         <p className="text-sm text-gray-900">
                           {selectedBidForDetails.createdAt
                             ? new Date(
-                              selectedBidForDetails.createdAt
-                            ).toLocaleDateString()
+                                selectedBidForDetails.createdAt
+                              ).toLocaleDateString()
                             : "N/A"}
                         </p>
                       </div>
@@ -1364,8 +1479,8 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                             Experience
                           </p>
                           <p className="text-sm text-gray-900">
-                            {selectedBidForDetails.technicalEvaluation.experience ||
-                              0}
+                            {selectedBidForDetails.technicalEvaluation
+                              .experience || 0}
                             /25
                           </p>
                         </div>
@@ -1374,8 +1489,8 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                             Expertise
                           </p>
                           <p className="text-sm text-gray-900">
-                            {selectedBidForDetails.technicalEvaluation.expertise ||
-                              0}
+                            {selectedBidForDetails.technicalEvaluation
+                              .expertise || 0}
                             /25
                           </p>
                         </div>
@@ -1384,8 +1499,8 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                             Resources
                           </p>
                           <p className="text-sm text-gray-900">
-                            {selectedBidForDetails.technicalEvaluation.resources ||
-                              0}
+                            {selectedBidForDetails.technicalEvaluation
+                              .resources || 0}
                             /20
                           </p>
                         </div>
@@ -1394,8 +1509,8 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                             Timeline
                           </p>
                           <p className="text-sm text-gray-900">
-                            {selectedBidForDetails.technicalEvaluation.timeline ||
-                              0}
+                            {selectedBidForDetails.technicalEvaluation
+                              .timeline || 0}
                             /15
                           </p>
                         </div>
@@ -1404,7 +1519,8 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                             Quality
                           </p>
                           <p className="text-sm text-gray-900">
-                            {selectedBidForDetails.technicalEvaluation.quality || 0}
+                            {selectedBidForDetails.technicalEvaluation
+                              .quality || 0}
                             /15
                           </p>
                         </div>
@@ -1427,8 +1543,8 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                                 selectedBidForDetails.technicalEvaluation
                                   .timeline || 0,
                               quality:
-                                selectedBidForDetails.technicalEvaluation.quality ||
-                                0,
+                                selectedBidForDetails.technicalEvaluation
+                                  .quality || 0,
                             }).reduce((sum, score) => sum + score, 0)}
                             /100
                           </p>
@@ -1455,13 +1571,17 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                       </h4>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <p className="text-sm font-medium text-gray-500">Email</p>
+                          <p className="text-sm font-medium text-gray-500">
+                            Email
+                          </p>
                           <p className="text-sm text-gray-900">
                             {selectedBidForDetails.user.email || "N/A"}
                           </p>
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-gray-500">Phone</p>
+                          <p className="text-sm font-medium text-gray-500">
+                            Phone
+                          </p>
                           <p className="text-sm text-gray-900">
                             {selectedBidForDetails.user.phone || "N/A"}
                           </p>
@@ -1517,10 +1637,18 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                                 </div>
                               </div>
                               <div className="flex items-center gap-2">
-                                <button className="p-1 text-gray-400 hover:text-gray-600">
+                                <button
+                                  onClick={() => handleViewDocument(doc)}
+                                  title="View document"
+                                  className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                                >
                                   <Eye className="w-4 h-4" />
                                 </button>
-                                <button className="p-1 text-gray-400 hover:text-gray-600">
+                                <button
+                                  onClick={() => handleDownloadDocument(doc)}
+                                  title="Download document"
+                                  className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                                >
                                   <Download className="w-4 h-4" />
                                 </button>
                               </div>
@@ -1529,6 +1657,60 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                         </div>
                       </div>
                     )}
+
+                  {/* Quotation */}
+                  {selectedBidForDetails.quotation && (
+                    <div className="bg-white border border-gray-200 rounded-lg p-4">
+                      <h4 className="font-medium text-gray-900 mb-3">
+                        Quotation
+                      </h4>
+                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded border">
+                        <div className="flex items-center gap-3">
+                          <FileText className="w-5 h-5 text-blue-500" />
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">
+                              {selectedBidForDetails.quotation.fileName ||
+                                "Quotation"}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {selectedBidForDetails.quotation.mimeType ||
+                                "PDF Document"}
+                            </p>
+                            <p className="text-xs text-gray-400">
+                              {selectedBidForDetails.quotation.createdAt &&
+                                `Uploaded: ${new Date(
+                                  selectedBidForDetails.quotation.createdAt
+                                ).toLocaleDateString()}`}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() =>
+                              handleViewDocument(
+                                selectedBidForDetails.quotation
+                              )
+                            }
+                            title="View quotation"
+                            className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleDownloadDocument(
+                                selectedBidForDetails.quotation
+                              )
+                            }
+                            title="Download quotation"
+                            className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                          >
+                            <Download className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -1585,7 +1767,9 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
 
                     <div className="grid grid-cols-2 gap-4 mt-4">
                       <div>
-                        <p className="text-sm font-medium text-blue-900">Tender:</p>
+                        <p className="text-sm font-medium text-blue-900">
+                          Tender:
+                        </p>
                         <p className="text-sm text-blue-700">{tender.title}</p>
                       </div>
                       <div>
@@ -1599,7 +1783,10 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                           Approved Bids:
                         </p>
                         <p className="text-sm text-blue-700">
-                          {bids.filter((bid) => bid.status === "approved").length}
+                          {
+                            bids.filter((bid) => bid.status === "approved")
+                              .length
+                          }
                         </p>
                       </div>
                       <div>
@@ -1630,14 +1817,19 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                         .map((bid, index) => {
                           const totalScore = bid.technicalEvaluation
                             ? Object.values({
-                              experience: bid.technicalEvaluation.experience || 0,
-                              expertise: bid.technicalEvaluation.expertise || 0,
-                              resources: bid.technicalEvaluation.resources || 0,
-                              timeline: bid.technicalEvaluation.timeline || 0,
-                              quality: bid.technicalEvaluation.quality || 0,
-                            }).reduce((sum, score) => sum + score, 0)
+                                experience:
+                                  bid.technicalEvaluation.experience || 0,
+                                expertise:
+                                  bid.technicalEvaluation.expertise || 0,
+                                resources:
+                                  bid.technicalEvaluation.resources || 0,
+                                timeline: bid.technicalEvaluation.timeline || 0,
+                                quality: bid.technicalEvaluation.quality || 0,
+                              }).reduce((sum, score) => sum + score, 0)
                             : 0;
-                          const percentage = ((totalScore / 100) * 100).toFixed(1);
+                          const percentage = ((totalScore / 100) * 100).toFixed(
+                            1
+                          );
 
                           return (
                             <div
@@ -1681,12 +1873,12 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                             • Technical evaluation will be marked as completed
                           </li>
                           <li>
-                            • System will automatically move to financial evaluation
-                            phase
+                            • System will automatically move to financial
+                            evaluation phase
                           </li>
                           <li>
-                            • Only approved bidders will be considered for financial
-                            evaluation
+                            • Only approved bidders will be considered for
+                            financial evaluation
                           </li>
                           <li>
                             • Technical scores will be finalized and cannot be
@@ -1703,7 +1895,9 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                       <input
                         type="checkbox"
                         checked={confirmationChecked}
-                        onChange={(e) => setConfirmationChecked(e.target.checked)}
+                        onChange={(e) =>
+                          setConfirmationChecked(e.target.checked)
+                        }
                         className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                       />
                       <div>
@@ -1712,9 +1906,9 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                         </p>
                         <p className="text-sm text-yellow-800 mt-1">
                           I confirm that all technical evaluations have been
-                          completed accurately and I have the authority to finalize
-                          this evaluation phase. This action cannot be reversed once
-                          submitted.
+                          completed accurately and I have the authority to
+                          finalize this evaluation phase. This action cannot be
+                          reversed once submitted.
                         </p>
                       </div>
                     </label>
@@ -1802,7 +1996,10 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                           Awards Made:
                         </p>
                         <p className="text-sm text-green-700">
-                          {bids.filter((bid) => bid.status === "awarded").length}
+                          {
+                            bids.filter((bid) => bid.status === "awarded")
+                              .length
+                          }
                         </p>
                       </div>
                     </div>
@@ -1814,7 +2011,9 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                       <input
                         type="checkbox"
                         checked={confirmationChecked}
-                        onChange={(e) => setConfirmationChecked(e.target.checked)}
+                        onChange={(e) =>
+                          setConfirmationChecked(e.target.checked)
+                        }
                         className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                       />
                       <div>
@@ -1822,9 +2021,9 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                           Final Confirmation:
                         </p>
                         <p className="text-sm text-yellow-800 mt-1">
-                          I confirm that the financial evaluation is complete and
-                          all contract awards have been finalized. This will close
-                          the evaluation process.
+                          I confirm that the financial evaluation is complete
+                          and all contract awards have been finalized. This will
+                          close the evaluation process.
                         </p>
                       </div>
                     </label>
