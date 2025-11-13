@@ -13,14 +13,20 @@ import {
   Filter,
   RefreshCw,
 } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import api from "../../../services/apiService";
 import toastService from "../../../services/toastService";
+import clientStatsService from "../../../services/clientStatsService";
 
 const ReportsAnalytics = () => {
   const [selectedPeriod, setSelectedPeriod] = useState("last-30-days");
-  const [selectedReport, setSelectedReport] = useState("overview");
   const [tenderPerformanceData, setTenderPerformanceData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [statsData, setStatsData] = useState(null);
+  const [customStartDate, setCustomStartDate] = useState("");
+  const [customEndDate, setCustomEndDate] = useState("");
+  const [showCustomDatePicker, setShowCustomDatePicker] = useState(false);
 
   const periods = [
     { value: "last-7-days", label: "Last 7 Days" },
@@ -30,76 +36,48 @@ const ReportsAnalytics = () => {
     { value: "custom", label: "Custom Range" },
   ];
 
-  const reportTypes = [
-    { value: "overview", label: "Overview Dashboard" },
-    { value: "tender-performance", label: "Tender Performance" },
-    { value: "vendor-analysis", label: "Vendor Analysis" },
-    { value: "financial-summary", label: "Financial Summary" },
-    { value: "compliance-report", label: "Compliance Report" },
-  ];
+  // Helper function to calculate date range based on selected period
+  const getDateRange = () => {
+    const endDate = new Date();
+    let startDate = new Date();
 
-  const kpiCards = [
-    {
-      title: "Total Tender Value",
-      value: "₹72.5 Cr",
-      change: "+15.2%",
-      changeType: "positive",
-      icon: <IndianRupee className="w-8 h-8 text-green-600" />,
-      description: "Total value of all published tenders",
-    },
-    {
-      title: "Active Tenders",
-      value: "12",
-      change: "+3",
-      changeType: "positive",
-      icon: <FileText className="w-8 h-8 text-blue-600" />,
-      description: "Currently open for bidding",
-    },
-    {
-      title: "Vendor Participation",
-      value: "78%",
-      change: "+5.8%",
-      changeType: "positive",
-      icon: <Users className="w-8 h-8 text-purple-600" />,
-      description: "Average response rate",
-    },
-    {
-      title: "Avg Processing Time",
-      value: "12 days",
-      change: "-2 days",
-      changeType: "positive",
-      icon: <Clock className="w-8 h-8 text-orange-600" />,
-      description: "From publication to award",
-    },
-  ];
-
-  // Fetch tender performance data from API
-  useEffect(() => {
-    fetchTenderPerformanceData();
-  }, []);
-
-  const fetchTenderPerformanceData = async () => {
-    setIsLoading(true);
-    try {
-      const response = await api.get("/v1/reports/admin/tenders-category");
-
-      if (response.data) {
-        // Transform API data to match component format
-        const formattedData = response.data.map((item) => ({
-          category: item.category,
-          published: item.totalTenders,
-          awarded: item.completedTenders,
-          value: formatCurrency(item.totalValue),
-          avgBids: item.averageBids,
-        }));
-        setTenderPerformanceData(formattedData);
-      }
-    } catch (error) {
-      console.error("Error fetching tender performance data:", error);
-      toastService.showError("Failed to load tender performance data");
-    } finally {
-      setIsLoading(false);
+    switch (selectedPeriod) {
+      case "last-7-days":
+        startDate.setDate(endDate.getDate() - 7);
+        break;
+      case "last-30-days":
+        startDate.setDate(endDate.getDate() - 30);
+        break;
+      case "last-90-days":
+        startDate.setDate(endDate.getDate() - 90);
+        break;
+      case "this-year":
+        startDate = new Date(endDate.getFullYear(), 0, 1);
+        break;
+      case "custom":
+        if (customStartDate && customEndDate) {
+          return {
+            startDate: customStartDate,
+            endDate: customEndDate,
+          };
+        }
+        return null;
+      default:
+        startDate.setDate(endDate.getDate() - 30);
     }
+
+    // Format dates as YYYY-MM-DD
+    const formatDate = (date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    };
+
+    return {
+      startDate: formatDate(startDate),
+      endDate: formatDate(endDate),
+    };
   };
 
   // Helper function to format currency in Indian format
@@ -110,6 +88,347 @@ const ReportsAnalytics = () => {
       return `₹${(value / 100000).toFixed(1)} L`;
     } else {
       return `₹${value.toLocaleString("en-IN")}`;
+    }
+  };
+
+  // Helper function to format currency for PDF (without rupee symbol)
+  const formatCurrencyForPDF = (value) => {
+    if (value >= 10000000) {
+      return `Rs. ${(value / 10000000).toFixed(1)} Cr`;
+    } else if (value >= 100000) {
+      return `Rs. ${(value / 100000).toFixed(1)} L`;
+    } else {
+      return `Rs. ${value.toLocaleString("en-IN")}`;
+    }
+  };
+
+  const kpiCards = [
+    {
+      title: "Total Tender Value",
+      value: statsData?.totalTenderValue
+        ? formatCurrency(statsData.totalTenderValue)
+        : "₹0",
+      icon: <IndianRupee className="w-8 h-8 text-green-600" />,
+      description: "Total value of all published tenders",
+    },
+    {
+      title: "Active Tenders",
+      value: statsData?.activeTenders?.toString() || "0",
+      icon: <FileText className="w-8 h-8 text-blue-600" />,
+      description: "Currently open for bidding",
+    },
+    {
+      title: "Vendor Participation",
+      value: statsData?.vendorParticipation
+        ? `${statsData.vendorParticipation.toFixed(1)}%`
+        : "0%",
+      icon: <Users className="w-8 h-8 text-purple-600" />,
+      description: "Average response rate",
+    },
+    {
+      title: "Avg Processing Time",
+      value: statsData?.avgProcessingTime
+        ? `${statsData.avgProcessingTime} days`
+        : "0 days",
+      icon: <Clock className="w-8 h-8 text-orange-600" />,
+      description: "From publication to award",
+    },
+  ];
+
+  // Fetch data from API
+  useEffect(() => {
+    const dateRange = getDateRange();
+    if (dateRange) {
+      fetchClientStats(dateRange);
+      fetchTenderPerformanceData(dateRange);
+    }
+  }, [selectedPeriod, customStartDate, customEndDate]);
+
+  // Handle period change
+  const handlePeriodChange = (value) => {
+    setSelectedPeriod(value);
+    setShowCustomDatePicker(value === "custom");
+  };
+
+  // Export report function
+  const handleExportReport = () => {
+    try {
+      // Prepare stats data
+      const statsRows = [
+        ["Metric", "Value"],
+        [
+          "Total Tender Value",
+          statsData?.totalTenderValue
+            ? formatCurrencyForPDF(statsData.totalTenderValue)
+            : "Rs. 0",
+        ],
+        ["Active Tenders", statsData?.activeTenders?.toString() || "0"],
+        [
+          "Vendor Participation",
+          statsData?.vendorParticipation
+            ? `${statsData.vendorParticipation.toFixed(1)}%`
+            : "0%",
+        ],
+        [
+          "Avg Processing Time",
+          statsData?.avgProcessingTime
+            ? `${statsData.avgProcessingTime} days`
+            : "0 days",
+        ],
+      ];
+
+      // Prepare tender performance data
+      const performanceRows = [
+        [],
+        ["Tender Performance by Category"],
+        ["Category", "Published", "Awarded", "Total Value", "Avg Bids"],
+        ...tenderPerformanceData.map((item) => [
+          item.category,
+          item.published,
+          item.awarded,
+          formatCurrencyForPDF(item.rawValue || 0),
+          item.avgBids,
+        ]),
+      ];
+
+      // Combine all data
+      const dateRange = getDateRange();
+      const reportHeader = [
+        ["Reports & Analytics"],
+        [
+          `Period: ${
+            periods.find((p) => p.value === selectedPeriod)?.label ||
+            selectedPeriod
+          }`,
+        ],
+        dateRange
+          ? [`Date Range: ${dateRange.startDate} to ${dateRange.endDate}`]
+          : [],
+        [`Generated: ${new Date().toLocaleString()}`],
+        [],
+        ["Key Performance Indicators"],
+      ];
+
+      const allRows = [...reportHeader, ...statsRows, ...performanceRows];
+
+      // Convert to CSV
+      const csvContent = allRows
+        .map((row) => row.map((cell) => `"${cell}"`).join(","))
+        .join("\n");
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+
+      link.setAttribute("href", url);
+      link.setAttribute(
+        "download",
+        `reports-analytics-${new Date().toISOString().split("T")[0]}.csv`
+      );
+      link.style.visibility = "hidden";
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toastService.showSuccess("Report exported successfully");
+    } catch (error) {
+      console.error("Error exporting report:", error);
+      toastService.showError("Failed to export report");
+    }
+  };
+
+  // Export PDF report function
+  const handleExportPDF = () => {
+    try {
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const dateRange = getDateRange();
+
+      // Add title
+      doc.setFontSize(20);
+      doc.setFont("helvetica", "bold");
+      doc.text("Reports & Analytics", pageWidth / 2, 20, { align: "center" });
+
+      // Add period info
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      const periodLabel =
+        periods.find((p) => p.value === selectedPeriod)?.label ||
+        selectedPeriod;
+      doc.text(`Period: ${periodLabel}`, pageWidth / 2, 28, {
+        align: "center",
+      });
+
+      if (dateRange) {
+        doc.text(
+          `Date Range: ${dateRange.startDate} to ${dateRange.endDate}`,
+          pageWidth / 2,
+          34,
+          { align: "center" }
+        );
+      }
+
+      doc.setFontSize(8);
+      doc.text(`Generated: ${new Date().toLocaleString()}`, pageWidth / 2, 40, {
+        align: "center",
+      });
+
+      // Add KPI section
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("Key Performance Indicators", 14, 52);
+
+      autoTable(doc, {
+        startY: 56,
+        head: [["Metric", "Value"]],
+        body: [
+          [
+            "Total Tender Value",
+            statsData?.totalTenderValue
+              ? formatCurrencyForPDF(statsData.totalTenderValue)
+              : "Rs. 0",
+          ],
+          ["Active Tenders", statsData?.activeTenders?.toString() || "0"],
+          [
+            "Vendor Participation",
+            statsData?.vendorParticipation
+              ? `${statsData.vendorParticipation.toFixed(1)}%`
+              : "0%",
+          ],
+          [
+            "Avg Processing Time",
+            statsData?.avgProcessingTime
+              ? `${statsData.avgProcessingTime} days`
+              : "0 days",
+          ],
+        ],
+        theme: "grid",
+        headStyles: {
+          fillColor: [79, 70, 229],
+          fontSize: 10,
+          fontStyle: "bold",
+        },
+        bodyStyles: { fontSize: 9 },
+        alternateRowStyles: { fillColor: [245, 247, 250] },
+        margin: { left: 14, right: 14 },
+      });
+
+      // Add Tender Performance section
+      const finalY = doc.lastAutoTable.finalY || 56;
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("Tender Performance by Category", 14, finalY + 15);
+
+      if (tenderPerformanceData.length > 0) {
+        autoTable(doc, {
+          startY: finalY + 20,
+          head: [
+            ["Category", "Published", "Awarded", "Total Value", "Avg Bids"],
+          ],
+          body: tenderPerformanceData.map((item) => [
+            item.category,
+            item.published.toString(),
+            item.awarded.toString(),
+            formatCurrencyForPDF(item.rawValue || 0),
+            item.avgBids.toString(),
+          ]),
+          theme: "grid",
+          headStyles: {
+            fillColor: [79, 70, 229],
+            fontSize: 9,
+            fontStyle: "bold",
+          },
+          bodyStyles: { fontSize: 8 },
+          alternateRowStyles: { fillColor: [245, 247, 250] },
+          margin: { left: 14, right: 14 },
+          columnStyles: {
+            0: { cellWidth: 50 },
+            1: { cellWidth: 25, halign: "center" },
+            2: { cellWidth: 25, halign: "center" },
+            3: { cellWidth: 40, halign: "right" },
+            4: { cellWidth: 25, halign: "center" },
+          },
+        });
+      } else {
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "italic");
+        doc.text("No tender performance data available", 14, finalY + 25);
+      }
+
+      // Add footer
+      const pageCount = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setFont("helvetica", "normal");
+        doc.text(
+          `Page ${i} of ${pageCount}`,
+          pageWidth / 2,
+          doc.internal.pageSize.getHeight() - 10,
+          { align: "center" }
+        );
+      }
+
+      // Save the PDF
+      doc.save(
+        `reports-analytics-${new Date().toISOString().split("T")[0]}.pdf`
+      );
+      toastService.showSuccess("PDF report generated successfully");
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      toastService.showError("Failed to generate PDF report");
+    }
+  };
+
+  const fetchClientStats = async (dateRange) => {
+    try {
+      let url = "/v1/reports/client/stats?startDate=" + dateRange.startDate;
+      if (selectedPeriod === "custom" && dateRange.endDate) {
+        url += "&endDate=" + dateRange.endDate;
+      }
+
+      const response = await api.get(url);
+      if (response && response.data) {
+        setStatsData(response.data);
+      } else {
+        toastService.showError("Failed to load statistics");
+      }
+    } catch (error) {
+      console.error("Error fetching client stats:", error);
+      toastService.showError("Failed to load statistics");
+    }
+  };
+
+  const fetchTenderPerformanceData = async (dateRange) => {
+    setIsLoading(true);
+    try {
+      let url =
+        "/v1/reports/client/tenders-category?startDate=" + dateRange.startDate;
+      if (selectedPeriod === "custom" && dateRange.endDate) {
+        url += "&endDate=" + dateRange.endDate;
+      }
+
+      const response = await api.get(url);
+
+      if (response.data) {
+        // Transform API data to match component format
+        const formattedData = response.data.map((item) => ({
+          category: item.category,
+          published: item.totalTenders,
+          awarded: item.completedTenders,
+          value: formatCurrency(item.totalValue),
+          rawValue: item.totalValue, // Store raw value for PDF export
+          avgBids: item.averageBids,
+        }));
+        setTenderPerformanceData(formattedData);
+      }
+    } catch (error) {
+      console.error("Error fetching tender performance data:", error);
+      toastService.showError("Failed to load tender performance data");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -207,7 +526,13 @@ const ReportsAnalytics = () => {
         </div>
         <div className="flex items-center gap-3">
           <button
-            onClick={fetchTenderPerformanceData}
+            onClick={() => {
+              const dateRange = getDateRange();
+              if (dateRange) {
+                fetchClientStats(dateRange);
+                fetchTenderPerformanceData(dateRange);
+              }
+            }}
             disabled={isLoading}
             className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -216,9 +541,19 @@ const ReportsAnalytics = () => {
             />
             Refresh
           </button>
-          <button className="flex items-center gap-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700">
+          <button
+            onClick={handleExportReport}
+            className="flex items-center gap-2 px-4 py-2 border border-primary-600 text-primary-600 rounded-lg hover:bg-primary-50"
+          >
             <Download className="w-4 h-4" />
-            Export Report
+            Export CSV
+          </button>
+          <button
+            onClick={handleExportPDF}
+            className="flex items-center gap-2 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700"
+          >
+            <FileText className="w-4 h-4" />
+            Export PDF
           </button>
         </div>
       </div>
@@ -228,11 +563,12 @@ const ReportsAnalytics = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
+              <Calendar className="w-4 h-4 inline-block mr-1" />
               Time Period
             </label>
             <select
               value={selectedPeriod}
-              onChange={(e) => setSelectedPeriod(e.target.value)}
+              onChange={(e) => handlePeriodChange(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             >
               {periods.map((period) => (
@@ -242,31 +578,36 @@ const ReportsAnalytics = () => {
               ))}
             </select>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Report Type
-            </label>
-            <select
-              value={selectedReport}
-              onChange={(e) => setSelectedReport(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            >
-              {reportTypes.map((report) => (
-                <option key={report.value} value={report.value}>
-                  {report.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Actions
-            </label>
-            <button className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-              <Filter className="w-4 h-4" />
-              Advanced Filters
-            </button>
-          </div>
+
+          {showCustomDatePicker && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Start Date
+                </label>
+                <input
+                  type="date"
+                  value={customStartDate}
+                  onChange={(e) => setCustomStartDate(e.target.value)}
+                  max={customEndDate || new Date().toISOString().split("T")[0]}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  End Date
+                </label>
+                <input
+                  type="date"
+                  value={customEndDate}
+                  onChange={(e) => setCustomEndDate(e.target.value)}
+                  min={customStartDate}
+                  max={new Date().toISOString().split("T")[0]}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                />
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -287,15 +628,6 @@ const ReportsAnalytics = () => {
                   <div className="text-sm text-gray-600">{kpi.title}</div>
                 </div>
               </div>
-              <div
-                className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                  kpi.changeType === "positive"
-                    ? "bg-green-100 text-green-600"
-                    : "bg-red-100 text-red-600"
-                }`}
-              >
-                <span>{kpi.change}</span>
-              </div>
             </div>
             <p className="text-sm text-gray-500">{kpi.description}</p>
           </div>
@@ -305,15 +637,15 @@ const ReportsAnalytics = () => {
       {/* Main Analytics Content */}
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Tender Performance */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-3">
           <div className="card">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-900">
                 Tender Performance by Category
               </h2>
-              <button className="text-primary-600 hover:text-primary-700 text-sm font-medium">
+              {/* <button className="text-primary-600 hover:text-primary-700 text-sm font-medium">
                 View Details →
-              </button>
+              </button> */}
             </div>
 
             <div className="overflow-x-auto">
@@ -389,7 +721,7 @@ const ReportsAnalytics = () => {
         </div>
 
         {/* Recent Trends */}
-        <div>
+        {/* <div>
           <div className="card">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Recent Trends
@@ -413,7 +745,7 @@ const ReportsAnalytics = () => {
               ))}
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Vendor Analytics & Compliance */}
@@ -474,7 +806,7 @@ const ReportsAnalytics = () => {
       </div>
 
       {/* Chart Placeholder */}
-      <div className="card">
+      {/* <div className="card">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-gray-900">
             Tender Activity Timeline
@@ -503,10 +835,10 @@ const ReportsAnalytics = () => {
             </p>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Export Options */}
-      <div className="card bg-blue-50 border border-blue-200">
+      {/* <div className="card bg-blue-50 border border-blue-200">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="font-semibold text-blue-900 mb-1">Export Reports</h3>
@@ -526,7 +858,7 @@ const ReportsAnalytics = () => {
             </button>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

@@ -290,16 +290,18 @@ const VendorDetails = ({ vendor, onClose }) => {
                     Company Information
                   </h3>
                   <div className="space-y-3">
-                    {vendor.company.name && (
-                      <div>
-                        <div className="text-sm text-gray-500">
-                          Company Name
-                        </div>
-                        <div className="font-medium text-gray-900">
-                          {vendor.company.name}
-                        </div>
+                    <div>
+                      <div className="text-sm text-gray-500">Company Name</div>
+                      <div className="font-medium text-gray-900">
+                        {vendor.company?.name || "—"}
                       </div>
-                    )}
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-500">Company Type</div>
+                      <div className="font-medium text-gray-900">
+                        {vendor.company?.companyType || "—"}
+                      </div>
+                    </div>
                     {vendor.company.registrationNumber && (
                       <div>
                         <div className="text-sm text-gray-500">

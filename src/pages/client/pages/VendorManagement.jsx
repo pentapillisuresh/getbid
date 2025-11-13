@@ -559,20 +559,22 @@ const VendorManagement = () => {
                   </div>
                 </div>
                 <div>
-                  <div className="text-sm text-gray-600 mb-1">Category</div>
+                  <div className="text-sm text-gray-600 mb-1">Email</div>
                   <div className="font-medium text-gray-900">
-                    {vendor.category}
+                    {vendor.email}
                   </div>
                 </div>
                 <div>
-                  <div className="text-sm text-gray-600 mb-1">Experience</div>
+                  <div className="text-sm text-gray-600 mb-1">Company</div>
                   <div className="font-medium text-gray-900">
-                    {vendor.experience}
+                    {vendor.company?.name || "—"}
                   </div>
                 </div>
                 <div>
-                  <div className="text-sm text-gray-600 mb-1">ID</div>
-                  <div className="font-medium text-gray-900">{vendor.id}</div>
+                  <div className="text-sm text-gray-600 mb-1">Company Type</div>
+                  <div className="font-medium text-gray-900">
+                    {vendor.company?.companyType || "—"}
+                  </div>
                 </div>
               </div>
 

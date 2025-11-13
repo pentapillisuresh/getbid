@@ -74,10 +74,11 @@ const RateVendorModal = ({ vendor, onClose, onSubmit }) => {
             className="focus:outline-none transition-transform hover:scale-110"
           >
             <Star
-              className={`w-8 h-8 ${star <= (hovered || currentRating)
+              className={`w-8 h-8 ${
+                star <= (hovered || currentRating)
                   ? "text-yellow-400 fill-current"
                   : "text-gray-300"
-                }`}
+              }`}
             />
           </button>
         ))}
@@ -124,21 +125,21 @@ const RateVendorModal = ({ vendor, onClose, onSubmit }) => {
                 </span>
               </div>
               <div>
-                <span className="text-gray-600">Category:</span>
+                <span className="text-gray-600">Company:</span>
                 <span className="ml-2 font-medium text-gray-900">
-                  {vendor?.category}
+                  {vendor?.company?.name || "—"}
                 </span>
               </div>
               <div>
-                <span className="text-gray-600">Experience:</span>
+                <span className="text-gray-600">Email:</span>
                 <span className="ml-2 font-medium text-gray-900">
-                  {vendor?.experience}
+                  {vendor?.email}
                 </span>
               </div>
               <div>
-                <span className="text-gray-600">ID:</span>
+                <span className="text-gray-600">Company Type:</span>
                 <span className="ml-2 font-medium text-gray-900">
-                  {vendor?.id}
+                  {vendor?.company?.companyType || "—"}
                 </span>
               </div>
             </div>
@@ -232,8 +233,8 @@ const RateVendorModal = ({ vendor, onClose, onSubmit }) => {
                   ? "Updating..."
                   : "Submitting..."
                 : vendor?.hasRating
-                  ? "Update Rating"
-                  : "Submit Rating"}
+                ? "Update Rating"
+                : "Submit Rating"}
             </button>
           </div>
         </form>
