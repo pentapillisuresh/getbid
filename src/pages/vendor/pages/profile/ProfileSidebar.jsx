@@ -20,9 +20,9 @@ const ProfileSidebar = ({ activeTab, onTabChange, user }) => {
 
   return (
     <div className="w-80 bg-white border-r border-gray-200 p-6 flex flex-col">
-      {/* ✅ Back Button */}
+      {/* Back Button */}
       <button
-        onClick={() => navigate("/client/dashboard")}
+        onClick={() => navigate("/vendor/dashboard")}
         className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
       >
         <ArrowLeft className="w-5 h-5" />
@@ -31,23 +31,15 @@ const ProfileSidebar = ({ activeTab, onTabChange, user }) => {
 
       {/* Company Info */}
       <div className="flex flex-col items-center mb-8">
-        {/* <div className="w-32 h-32 rounded-full overflow-hidden shadow-lg mb-4">
-          <img
-            src="https://img.freepik.com/free-photo/modern-business-center_1127-2923.jpg?t=st=1759776011~exp=1759779611~hmac=b58c89e66d477f29b7e1efa24c161c6020a5df605cb2777aad2edbd07037b2bb&w=1060"
-            alt="Company Logo"
-            className="w-full h-full object-cover"
-          />
-        </div> */}
-
         <h2 className="text-xl font-bold text-gray-900 text-center pt-5">
           {user?.company?.name || user?.companyName || "Company Name"}
         </h2>
         <p className="text-sm text-gray-600 mt-1">
           {user?.name || "User Name"}
         </p>
-        <span className="mt-2 px-3 py-1 bg-blue-50 text-blue-600 text-xs font-medium rounded-full flex items-center gap-1">
-          <span className="w-1.5 h-1.5 bg-blue-600 rounded-full"></span>
-          Client
+        <span className="mt-2 px-3 py-1 bg-green-50 text-green-600 text-xs font-medium rounded-full flex items-center gap-1">
+          <span className="w-1.5 h-1.5 bg-green-600 rounded-full"></span>
+          Vendor
         </span>
       </div>
 
@@ -63,7 +55,7 @@ const ProfileSidebar = ({ activeTab, onTabChange, user }) => {
               onClick={() => onTabChange(item.id)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all ${
                 isActive
-                  ? "bg-blue-50 text-blue-600 border-l-4 border-blue-600"
+                  ? "bg-green-50 text-green-600 border-l-4 border-green-600"
                   : "text-gray-700 hover:bg-gray-50"
               }`}
             >

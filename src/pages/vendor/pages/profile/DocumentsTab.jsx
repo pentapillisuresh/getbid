@@ -14,7 +14,7 @@ const DocumentsTab = () => {
           {!isEditing && (
             <button
               onClick={() => setIsEditing(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
             >
               <Edit className="w-4 h-4" />
               Edit
@@ -45,7 +45,7 @@ const DocumentsTab = () => {
                 Verified
               </span>
             </div>
-            <p className="text-sm text-gray-700 mb-1">rajesh@techbuild.com</p>
+            <p className="text-sm text-gray-700 mb-1">vendor@company.com</p>
             <p className="text-xs text-blue-600">Verified on March 15, 2024</p>
           </div>
 
@@ -96,9 +96,7 @@ const DocumentsTab = () => {
                 <FileText className="w-5 h-5 text-green-600" />
               </div>
               <div>
-                <p className="font-medium text-gray-900">
-                  Audited Financial Statements
-                </p>
+                <p className="font-medium text-gray-900">PAN Card</p>
                 <p className="text-sm text-gray-600">
                   Uploaded on March 12, 2024
                 </p>
@@ -115,16 +113,14 @@ const DocumentsTab = () => {
                 <FileText className="w-5 h-5 text-yellow-600" />
               </div>
               <div>
-                <p className="font-medium text-gray-900">
-                  Experience Certificates
-                </p>
+                <p className="font-medium text-gray-900">ISO Certification</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <span className="px-3 py-1 bg-yellow-100 text-yellow-700 text-sm font-medium rounded-full">
                 Pending
               </span>
-              <button className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
+              <button className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2">
                 <Upload className="w-4 h-4" />
                 Upload
               </button>
@@ -138,6 +134,25 @@ const DocumentsTab = () => {
               </div>
               <div>
                 <p className="font-medium text-gray-900">Bank Statement</p>
+                <p className="text-sm text-gray-600">
+                  Uploaded on March 14, 2024
+                </p>
+              </div>
+            </div>
+            <span className="px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full">
+              Uploaded
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                <FileText className="w-5 h-5 text-green-600" />
+              </div>
+              <div>
+                <p className="font-medium text-gray-900">
+                  Experience Certificate
+                </p>
                 <p className="text-sm text-gray-600">
                   Uploaded on March 14, 2024
                 </p>

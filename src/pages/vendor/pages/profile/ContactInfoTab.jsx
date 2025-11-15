@@ -35,7 +35,7 @@ const ContactInfoTab = ({ user, setUser, loadingUser }) => {
   });
 
   useEffect(() => {
-    // whenever parent passes user (from ProfilePage), use it
+    // whenever parent passes user, use it
     if (user) {
       setRemoteUser(user);
       setForm({
@@ -98,13 +98,12 @@ const ContactInfoTab = ({ user, setUser, loadingUser }) => {
       };
       fetchStates();
     } else {
-      // Clear states and districts when exiting edit mode
       setStates([]);
       setDistricts([]);
     }
   }, [isEditing]);
 
-  // Fetch districts when state changes (only in edit mode)
+  // Fetch districts when state changes
   useEffect(() => {
     if (isEditing && form.state) {
       const fetchDistricts = async () => {
@@ -125,7 +124,6 @@ const ContactInfoTab = ({ user, setUser, loadingUser }) => {
 
   const handleChange = (key) => (e) => {
     if (key === "state") {
-      // Clear district when state changes
       setForm((s) => ({ ...s, [key]: e.target.value, district: "" }));
     } else {
       setForm((s) => ({ ...s, [key]: e.target.value }));
@@ -141,7 +139,6 @@ const ContactInfoTab = ({ user, setUser, loadingUser }) => {
       return;
     }
 
-    // Prepare payload with only the fields being updated
     const payload = {
       name: form.name,
       email: form.email,
@@ -157,7 +154,6 @@ const ContactInfoTab = ({ user, setUser, loadingUser }) => {
       const resp = await api.put(`/v1/users/${userId}`, { body: payload });
       const updatedUser = resp?.data || resp;
 
-      // Update local state and localStorage
       setRemoteUser(updatedUser);
       if (typeof setUser === "function") setUser(updatedUser);
 
@@ -176,7 +172,6 @@ const ContactInfoTab = ({ user, setUser, loadingUser }) => {
   };
 
   const handleCancel = () => {
-    // reset to remoteUser values
     const base = remoteUser || safeParseUser();
     setForm({
       name: base.name || base.company?.contact?.name || "",
@@ -200,8 +195,7 @@ const ContactInfoTab = ({ user, setUser, loadingUser }) => {
     remoteUser?.emailVerification && remoteUser.emailVerification.isVerified
   );
   const phoneVerified = !!(
-    remoteUser?.phoneNumberVerification &&
-    remoteUser.phoneNumberVerification.isVerified
+    remoteUser?.phoneVerification && remoteUser.phoneVerification.isVerified
   );
 
   if (loading) {
@@ -227,7 +221,7 @@ const ContactInfoTab = ({ user, setUser, loadingUser }) => {
           {!isEditing && (
             <button
               onClick={() => setEditing(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
             >
               <Edit className="w-4 h-4" />
               Edit
@@ -235,7 +229,7 @@ const ContactInfoTab = ({ user, setUser, loadingUser }) => {
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Contact Person Name
@@ -256,35 +250,48 @@ const ContactInfoTab = ({ user, setUser, loadingUser }) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Email Address
+              {emailVerified && (
+                <span className="ml-2 inline-flex items-center gap-1 text-green-600 text-xs">
+                  <CheckCircle className="w-3 h-3" />
+                  Verified
+                </span>
+              )}
             </label>
-            <div className="bg-gray-50 rounded-lg px-4 py-3 flex items-center justify-between">
-              <span className="text-gray-900">{form.email || "-"}</span>
-              <span
-                className={`flex items-center gap-1 text-xs ${
-                  emailVerified ? "text-green-600" : "text-gray-500"
-                } font-medium`}
-              >
-                {/* {emailVerified && <CheckCircle className="w-4 h-4" />}
-                {emailVerified ? "Verified" : "Unverified"} */}
-              </span>
-            </div>
+            {isEditing ? (
+              <input
+                type="email"
+                value={form.email}
+                onChange={handleChange("email")}
+                className="w-full rounded-lg border-gray-200 bg-gray-50 px-4 py-3"
+              />
+            ) : (
+              <div className="bg-gray-50 rounded-lg px-4 py-3 text-gray-900">
+                {form.email || "-"}
+              </div>
+            )}
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Phone Number
+              {phoneVerified && (
+                <span className="ml-2 inline-flex items-center gap-1 text-green-600 text-xs">
+                  <CheckCircle className="w-3 h-3" />
+                  Verified
+                </span>
+              )}
             </label>
-            <div className="bg-gray-50 rounded-lg px-4 py-3 flex items-center justify-between">
-              <span className="text-gray-900">{form.phoneNumber || "-"}</span>
-              <span
-                className={`flex items-center gap-1 text-xs ${
-                  phoneVerified ? "text-green-600" : "text-gray-500"
-                } font-medium`}
-              >
-                {/* {phoneVerified && <CheckCircle className="w-4 h-4" />}
-                {phoneVerified ? "Verified" : "Unverified"} */}
-              </span>
-            </div>
+            {isEditing ? (
+              <input
+                value={form.phoneNumber}
+                onChange={handleChange("phoneNumber")}
+                className="w-full rounded-lg border-gray-200 bg-gray-50 px-4 py-3"
+              />
+            ) : (
+              <div className="bg-gray-50 rounded-lg px-4 py-3 text-gray-900">
+                {form.phoneNumber || "-"}
+              </div>
+            )}
           </div>
 
           <div>
@@ -298,50 +305,30 @@ const ContactInfoTab = ({ user, setUser, loadingUser }) => {
                 className="w-full rounded-lg border-gray-200 bg-gray-50 px-4 py-3"
               />
             ) : (
-              <div className="bg-gray-50 rounded-lg px-4 py-3">
-                {form.website ? (
-                  <a
-                    href={
-                      form.website.startsWith("http")
-                        ? form.website
-                        : `https://${form.website}`
-                    }
-                    className="text-blue-600 hover:underline"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {form.website}
-                  </a>
-                ) : (
-                  "-"
-                )}
+              <div className="bg-gray-50 rounded-lg px-4 py-3 text-gray-900">
+                {form.website || "-"}
               </div>
             )}
           </div>
-        </div>
 
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Address Details
-        </h3>
+          <div className="col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Address
+            </label>
+            {isEditing ? (
+              <textarea
+                value={form.address}
+                onChange={handleChange("address")}
+                rows={3}
+                className="w-full rounded-lg border-gray-200 bg-gray-50 px-4 py-3"
+              />
+            ) : (
+              <div className="bg-gray-50 rounded-lg px-4 py-3 text-gray-900">
+                {form.address || "-"}
+              </div>
+            )}
+          </div>
 
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Complete Address
-          </label>
-          {isEditing ? (
-            <input
-              value={form.address}
-              onChange={handleChange("address")}
-              className="w-full rounded-lg border-gray-200 bg-gray-50 px-4 py-3"
-            />
-          ) : (
-            <div className="bg-gray-50 rounded-lg px-4 py-3 text-gray-900">
-              {form.address || "-"}
-            </div>
-          )}
-        </div>
-
-        <div className="grid grid-cols-3 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               State
@@ -354,8 +341,11 @@ const ContactInfoTab = ({ user, setUser, loadingUser }) => {
               >
                 <option value="">Select State</option>
                 {states.map((state) => (
-                  <option key={state} value={state}>
-                    {state}
+                  <option
+                    key={state.value || state}
+                    value={state.value || state}
+                  >
+                    {state.label || state}
                   </option>
                 ))}
               </select>
@@ -379,8 +369,11 @@ const ContactInfoTab = ({ user, setUser, loadingUser }) => {
               >
                 <option value="">Select District</option>
                 {districts.map((district) => (
-                  <option key={district} value={district}>
-                    {district}
+                  <option
+                    key={district.value || district}
+                    value={district.value || district}
+                  >
+                    {district.label || district}
                   </option>
                 ))}
               </select>
@@ -413,13 +406,13 @@ const ContactInfoTab = ({ user, setUser, loadingUser }) => {
           <div className="mt-6 flex items-center gap-3">
             <button
               onClick={handleSave}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg"
+              className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
             >
-              Save
+              Save Changes
             </button>
             <button
               onClick={handleCancel}
-              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg"
+              className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
             >
               Cancel
             </button>

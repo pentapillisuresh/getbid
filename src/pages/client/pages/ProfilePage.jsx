@@ -1,17 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Building2, CreditCard as Edit } from "lucide-react";
+import { Building2 } from "lucide-react";
 import api from "../../../services/apiService";
 import ProfileSidebar from "./profile/ProfileSidebar";
-import OverviewTab from "./profile/OverviewTab";
 import ContactInfoTab from "./profile/ContactInfoTab";
 import BusinessDetailsTab from "./profile/BusinessDetailsTab";
-import ParticipatedTendersTab from "./profile/ParticipatedTendersTab";
 import DocumentsTab from "./profile/DocumentsTab";
-import SecurityTab from "./profile/SecurityTab";
 
 const ProfilePage = () => {
-  const [activeTab, setActiveTab] = useState("overview");
-  const [isEditing, setIsEditing] = useState(false);
+  const [activeTab, setActiveTab] = useState("contact");
   const [user, setUser] = useState(null);
   const [loadingUser, setLoadingUser] = useState(true);
 
@@ -64,13 +60,9 @@ const ProfilePage = () => {
 
   const renderContent = () => {
     switch (activeTab) {
-      case "overview":
-        return <OverviewTab />;
       case "contact":
         return (
           <ContactInfoTab
-            isEditing={isEditing}
-            setIsEditing={setIsEditing}
             user={user}
             setUser={setUser}
             loadingUser={loadingUser}
@@ -80,19 +72,20 @@ const ProfilePage = () => {
         return (
           <BusinessDetailsTab
             user={user}
-            isEditing={isEditing}
             setUser={setUser}
             loadingUser={loadingUser}
           />
         );
-      case "tenders":
-        return <ParticipatedTendersTab />;
       case "documents":
         return <DocumentsTab />;
-      case "security":
-        return <SecurityTab />;
       default:
-        return <OverviewTab />;
+        return (
+          <ContactInfoTab
+            user={user}
+            setUser={setUser}
+            loadingUser={loadingUser}
+          />
+        );
     }
   };
 
@@ -113,18 +106,15 @@ const ProfilePage = () => {
               </p>
             </div>
           </div>
-          <button
-            onClick={() => setIsEditing((s) => !s)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <Edit className="w-4 h-4" />
-            {isEditing ? "Close Edit" : "Edit Profile"}
-          </button>
         </div>
       </div>
 
       <div className="flex max-w-screen-2xl mx-auto">
-        <ProfileSidebar activeTab={activeTab} onTabChange={setActiveTab} />
+        <ProfileSidebar
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          user={user}
+        />
 
         <div className="flex-1 p-8">{renderContent()}</div>
       </div>

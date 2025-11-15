@@ -107,6 +107,7 @@ const VendorDashboard = () => {
           <Route path="/bid-management" element={<BidManagement />} />
           <Route path="/activities" element={<VendorActivitiesPage />} />
           <Route path="/profile-management" element={<ProfileManagement />} />
+          <Route path="/profile" element={<ProfileManagement />} />
           <Route path="/document-repository" element={<DocumentRepository />} />
           <Route path="/clarifications" element={<ClarificationQA />} />
           <Route path="/support" element={<SupportHelpdesk />} />

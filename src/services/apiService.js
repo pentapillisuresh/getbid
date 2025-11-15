@@ -312,6 +312,21 @@ api.setAuthToken = (token) => {
   api.setDefaults({ headers: mergedHeaders });
 };
 
+// Password change API methods
+api.sendPasswordChangeOtp = (type = "email") => {
+  return api.post("/v1/users/send-password-change-otp", {
+    body: { type },
+    showToasts: true,
+  });
+};
+
+api.changePassword = (otp, newPassword) => {
+  return api.post("/v1/users/change-password", {
+    body: { otp, newPassword },
+    showToasts: true,
+  });
+};
+
 /**
  * Usage examples:
  *

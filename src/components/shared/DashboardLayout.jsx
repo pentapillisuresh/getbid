@@ -7,10 +7,12 @@ import {
   Menu,
   UserCircle,
   ChevronRight,
+  Key,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import notificationsService from "../../services/notificationsService";
+import ChangePasswordModal from "./ChangePasswordModal";
 
 const DashboardLayout = ({
   children,
@@ -27,8 +29,12 @@ const DashboardLayout = ({
   const [unreadCount, setUnreadCount] = useState(0);
   const [isNotificationDropdownOpen, setIsNotificationDropdownOpen] =
     useState(false);
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] =
+    useState(false);
   const [notificationLoading, setNotificationLoading] = useState(false);
   const notificationDropdownRef = useRef(null);
+  const userDropdownRef = useRef(null);
 
   // Fetch notifications on component mount
   useEffect(() => {
@@ -67,6 +73,12 @@ const DashboardLayout = ({
         !notificationDropdownRef.current.contains(event.target)
       ) {
         setIsNotificationDropdownOpen(false);
+      }
+      if (
+        userDropdownRef.current &&
+        !userDropdownRef.current.contains(event.target)
+      ) {
+        setIsUserDropdownOpen(false);
       }
     };
 
@@ -186,9 +198,18 @@ const DashboardLayout = ({
     setSidebarOpen(!sidebarOpen);
   };
 
+  const toggleUserDropdown = () => {
+    setIsUserDropdownOpen(!isUserDropdownOpen);
+  };
+
   const handleProfile = () => {
-    // Navigate to the profile page
+    setIsUserDropdownOpen(false);
     navigate(`/${userType}/profile`);
+  };
+
+  const handleChangePasswordClick = () => {
+    setIsUserDropdownOpen(false);
+    setIsChangePasswordModalOpen(true);
   };
 
   return (
@@ -211,11 +232,19 @@ const DashboardLayout = ({
               {/* Logo and Title */}
               <div className="flex items-center gap-3">
                 <div className="">
-                               <img src="/images/logo2.png" alt="Logo" className="w-20 h-10" />
-
+                  <img
+                    src="/images/logo2.png"
+                    alt="Logo"
+                    className="w-20 h-10"
+                  />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900" style={{fontFamily:"Pacifico"}}>{title}</h1>
+                  <h1
+                    className="text-xl font-bold text-gray-900"
+                    style={{ fontFamily: "Pacifico" }}
+                  >
+                    {title}
+                  </h1>
                   <p className="text-sm text-gray-600 hidden sm:block">
                     {subtitle}
                   </p>
@@ -336,27 +365,47 @@ const DashboardLayout = ({
                   </p>
                   <p className="text-xs text-gray-600">{userInfo.email}</p>
                 </div>
-                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                  <User className="w-5 h-5 text-gray-600" />
+
+                {/* User Profile Dropdown */}
+                <div className="relative" ref={userDropdownRef}>
+                  <button
+                    onClick={toggleUserDropdown}
+                    className="p-2 text-gray-500 hover:text-primary-600 rounded-lg hover:bg-primary-50 transition-colors"
+                    title="Profile Menu"
+                  >
+                    <UserCircle className="w-5 h-5" />
+                  </button>
+
+                  {/* User Dropdown Menu */}
+                  {isUserDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-50 overflow-hidden">
+                      <div className="py-1">
+                        <button
+                          onClick={handleProfile}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        >
+                          <User className="w-4 h-4 text-gray-500" />
+                          <span>Profile</span>
+                        </button>
+                        <button
+                          onClick={handleChangePasswordClick}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        >
+                          <Key className="w-4 h-4 text-gray-500" />
+                          <span>Change Password</span>
+                        </button>
+                        <div className="border-t border-gray-200"></div>
+                        <button
+                          onClick={handleLogout}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          <span>Logout</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-
-                {/* Profile Icon */}
-                <button
-                  onClick={handleProfile}
-                  className="p-2 text-gray-500 hover:text-primary-600 rounded-lg hover:bg-primary-50 transition-colors"
-                  title="Profile"
-                >
-                  <UserCircle className="w-5 h-5" />
-                </button>
-
-                {/* Logout */}
-                <button
-                  onClick={handleLogout}
-                  className="p-2 text-gray-500 hover:text-primary-600 rounded-lg hover:bg-primary-50 transition-colors"
-                  title="Logout"
-                >
-                  <LogOut className="w-5 h-5" />
-                </button>
               </div>
             </div>
           </div>
@@ -383,6 +432,12 @@ const DashboardLayout = ({
         )}
         {children}
       </div>
+
+      {/* Change Password Modal */}
+      <ChangePasswordModal
+        isOpen={isChangePasswordModalOpen}
+        onClose={() => setIsChangePasswordModalOpen(false)}
+      />
     </div>
   );
 };

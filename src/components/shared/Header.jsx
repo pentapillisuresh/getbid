@@ -1,15 +1,29 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Building2, Globe, HelpCircle, Bell, ChevronRight } from "lucide-react";
+import {
+  Building2,
+  Globe,
+  HelpCircle,
+  Bell,
+  ChevronRight,
+  User,
+  LogOut,
+  Key,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import notificationsService from "../../services/notificationsService";
+import ChangePasswordModal from "./ChangePasswordModal";
 
 const Header = () => {
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] =
+    useState(false);
   const [loading, setLoading] = useState(false);
   const dropdownRef = useRef(null);
+  const userDropdownRef = useRef(null);
 
   // Fetch notifications on component mount
   useEffect(() => {
@@ -45,6 +59,12 @@ const Header = () => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsDropdownOpen(false);
+      }
+      if (
+        userDropdownRef.current &&
+        !userDropdownRef.current.contains(event.target)
+      ) {
+        setIsUserDropdownOpen(false);
       }
     };
 
@@ -161,6 +181,32 @@ const Header = () => {
       fetchRecentNotifications(); // Refresh when opening
     }
   };
+
+  const toggleUserDropdown = () => {
+    setIsUserDropdownOpen(!isUserDropdownOpen);
+  };
+
+  const handleProfileClick = () => {
+    setIsUserDropdownOpen(false);
+    const userType = getUserType();
+    navigate(`/${userType}/profile`);
+  };
+
+  const handleChangePasswordClick = () => {
+    setIsUserDropdownOpen(false);
+    setIsChangePasswordModalOpen(true);
+  };
+
+  const handleLogout = () => {
+    // Clear all authentication data
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    // Redirect to login page
+    navigate("/login");
+  };
+
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4">
@@ -288,9 +334,55 @@ const Header = () => {
               <HelpCircle className="w-4 h-4" />
               Help & Support
             </button>
+
+            {/* User Profile Dropdown */}
+            <div className="relative" ref={userDropdownRef}>
+              <button
+                onClick={toggleUserDropdown}
+                className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <User className="w-5 h-5" />
+              </button>
+
+              {/* User Dropdown Menu */}
+              {isUserDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-50 overflow-hidden">
+                  <div className="py-1">
+                    <button
+                      onClick={handleProfileClick}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      <User className="w-4 h-4 text-gray-500" />
+                      <span>Profile</span>
+                    </button>
+                    <button
+                      onClick={handleChangePasswordClick}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                      <Key className="w-4 h-4 text-gray-500" />
+                      <span>Change Password</span>
+                    </button>
+                    <div className="border-t border-gray-200"></div>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>Logout</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Change Password Modal */}
+      <ChangePasswordModal
+        isOpen={isChangePasswordModalOpen}
+        onClose={() => setIsChangePasswordModalOpen(false)}
+      />
     </header>
   );
 };
