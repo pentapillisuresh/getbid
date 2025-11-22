@@ -172,11 +172,19 @@ function CTASection() {
                   procurement process today!
                 </p>
                 <div className="flex gap-4 flex-wrap">
-                  <button className="bg-white text-purple-600 px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition">
+                  <button
+                    onClick={() => {
+                      const pricingSection = document.getElementById("pricing");
+                      if (pricingSection) {
+                        pricingSection.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                    className="bg-white text-purple-600 px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition"
+                  >
                     View Plans
                   </button>
                   <button
-                    onClick={() => navigate("/choose-login-type")}
+                    onClick={() => navigate("/login")}
                     className="bg-purple-900 text-white px-6 py-2 rounded-lg font-semibold hover:bg-purple-800 transition"
                   >
                     Login

@@ -1,10 +1,19 @@
-import { Search, Filter, Bell, Database, Bookmark, TrendingUp, File, Phone, Mail } from 'lucide-react'
+import {
+  Search,
+  Filter,
+  Bell,
+  Database,
+  Bookmark,
+  TrendingUp,
+  File,
+  Phone,
+  Mail,
+} from "lucide-react";
 import Header from "../../pages/Home/Header";
 import Footer from "../../pages/Home/Footer";
 
 function TenderSearch() {
   return (
-
     <section>
       <Header />
       <div className="min-h-screen bg-white">
@@ -13,21 +22,26 @@ function TenderSearch() {
           <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
             {/* Left Content */}
             <div className="space-y-6">
-              <p className="text-blue-600 font-medium text-sm">Advanced Search Technology</p>
+              <p className="text-blue-600 font-medium text-sm">
+                Advanced Search Technology
+              </p>
               <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
-                Tender Search &<br />Discovery Solutions
+                Tender Search &<br />
+                Discovery Solutions
               </h1>
               <p className="text-gray-600 text-lg leading-relaxed">
-                Discover government tenders with our powerful search engine. Find the right opportunities faster with advanced filters, real-time alerts, and comprehensive tender database.
+                Discover government tenders with our powerful search engine.
+                Find the right opportunities faster with advanced filters,
+                real-time alerts, and comprehensive tender database.
               </p>
-              <div className="flex flex-wrap gap-4">
+              {/* <div className="flex flex-wrap gap-4">
                 <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
                   Start Free Trial
                 </button>
                 <button className="border-2 border-blue-600 text-blue-600 hover:bg-blue-50 px-6 py-3 rounded-lg font-medium transition-colors">
                   Learn More
                 </button>
-              </div>
+              </div> */}
             </div>
 
             {/* Right Mockup */}
@@ -41,7 +55,6 @@ function TenderSearch() {
                 />
               </div>
             </div>
-
           </div>
         </section>
 
@@ -53,7 +66,8 @@ function TenderSearch() {
                 Powerful Search Features
               </h2>
               <p className="text-gray-600 max-w-4xl mx-auto">
-                Our advanced tender search system helps you find the most relevant opportunities with precision and speed.
+                Our advanced tender search system helps you find the most
+                relevant opportunities with precision and speed.
               </p>
             </div>
 
@@ -63,9 +77,13 @@ function TenderSearch() {
                 <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mb-6">
                   <Search className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Smart Search Algorithm</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">
+                  Smart Search Algorithm
+                </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Our AI-powered search engine understands your business needs and delivers highly relevant tender matches based on your industry, location, and capabilities.
+                  Our AI-powered search engine understands your business needs
+                  and delivers highly relevant tender matches based on your
+                  industry, location, and capabilities.
                 </p>
               </div>
 
@@ -74,9 +92,13 @@ function TenderSearch() {
                 <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center mb-6">
                   <Filter className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Advanced Filters</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">
+                  Advanced Filters
+                </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Narrow down results by industry, location, department, category, deadline, and more. Save your filter preferences for quick access to relevant opportunities.
+                  Narrow down results by industry, location, department,
+                  category, deadline, and more. Save your filter preferences for
+                  quick access to relevant opportunities.
                 </p>
               </div>
 
@@ -85,9 +107,13 @@ function TenderSearch() {
                 <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center mb-6">
                   <Bell className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Real-time Alerts</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">
+                  Real-time Alerts
+                </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Get instant notifications when new tenders matching your criteria are published. Never miss an opportunity with our customizable alert system.
+                  Get instant notifications when new tenders matching your
+                  criteria are published. Never miss an opportunity with our
+                  customizable alert system.
                 </p>
               </div>
 
@@ -96,9 +122,13 @@ function TenderSearch() {
                 <div className="w-12 h-12 bg-orange-600 rounded-full flex items-center justify-center mb-6">
                   <Database className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Comprehensive Database</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">
+                  Comprehensive Database
+                </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Access tenders from central government, state governments, PSUs, and local bodies. Our platform covers major tendering authorities across India.
+                  Access tenders from central government, state governments,
+                  PSUs, and local bodies. Our platform covers major tendering
+                  authorities across India.
                 </p>
               </div>
 
@@ -107,9 +137,13 @@ function TenderSearch() {
                 <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center mb-6">
                   <Bookmark className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Save & Organize</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">
+                  Save & Organize
+                </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Bookmark interesting tenders, create custom lists, and organize opportunities by priority. Streamline your personalized tender pipeline efficiently.
+                  Bookmark interesting tenders, create custom lists, and
+                  organize opportunities by priority. Streamline your
+                  personalized tender pipeline efficiently.
                 </p>
               </div>
 
@@ -118,9 +152,13 @@ function TenderSearch() {
                 <div className="w-12 h-12 bg-cyan-600 rounded-full flex items-center justify-center mb-6">
                   <TrendingUp className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Market Intelligence</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">
+                  Market Intelligence
+                </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Get insights into tender trends, competition analysis, and market opportunities. Make informed decisions with our comprehensive market data.
+                  Get insights into tender trends, competition analysis, and
+                  market opportunities. Make informed decisions with our
+                  comprehensive market data.
                 </p>
               </div>
             </div>
@@ -135,7 +173,8 @@ function TenderSearch() {
                 How Our Search Works
               </h2>
               <p className="text-gray-600 max-w-4xl mx-auto">
-                Simple, powerful, and efficient - discover tenders in just a few clicks.
+                Simple, powerful, and efficient - discover tenders in just a few
+                clicks.
               </p>
             </div>
 
@@ -145,9 +184,13 @@ function TenderSearch() {
                 <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-6">
                   1
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Set Your Criteria</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">
+                  Set Your Criteria
+                </h3>
                 <p className="text-gray-600">
-                  Define your search parameters including industry, location, tender value, and keywords to match your business capabilities.
+                  Define your search parameters including industry, location,
+                  tender value, and keywords to match your business
+                  capabilities.
                 </p>
               </div>
 
@@ -156,9 +199,13 @@ function TenderSearch() {
                 <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-6">
                   2
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">AI-Powered Matching</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">
+                  AI-Powered Matching
+                </h3>
                 <p className="text-gray-600">
-                  Our intelligent algorithm scans millions of tenders and presents the most relevant opportunities based on your profile.
+                  Our intelligent algorithm scans millions of tenders and
+                  presents the most relevant opportunities based on your
+                  profile.
                 </p>
               </div>
 
@@ -167,9 +214,12 @@ function TenderSearch() {
                 <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-6">
                   3
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Review & Analyze</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">
+                  Review & Analyze
+                </h3>
                 <p className="text-gray-600">
-                  Access detailed tender information, documents, eligibility criteria, and competition analysis to make informed decisions.
+                  Access detailed tender information, documents, eligibility
+                  criteria, and competition analysis to make informed decisions.
                 </p>
               </div>
 
@@ -178,9 +228,12 @@ function TenderSearch() {
                 <div className="w-16 h-16 bg-orange-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-6">
                   4
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Take Action</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">
+                  Take Action
+                </h3>
                 <p className="text-gray-600">
-                  Save interesting tenders, set reminders for deadlines, and proceed with bid preparation using our integrated tools.
+                  Save interesting tenders, set reminders for deadlines, and
+                  proceed with bid preparation using our integrated tools.
                 </p>
               </div>
             </div>
@@ -204,9 +257,13 @@ function TenderSearch() {
                       <Search className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-gray-900 mb-2">Save 80% Search Time</h4>
+                      <h4 className="font-bold text-gray-900 mb-2">
+                        Save 80% Search Time
+                      </h4>
                       <p className="text-gray-600">
-                        Our automated search and filtering system reduces manual effort, letting you focus on bid preparation instead of finding tenders.
+                        Our automated search and filtering system reduces manual
+                        effort, letting you focus on bid preparation instead of
+                        finding tenders.
                       </p>
                     </div>
                   </div>
@@ -217,9 +274,13 @@ function TenderSearch() {
                       <TrendingUp className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-gray-900 mb-2">Higher Success Rate</h4>
+                      <h4 className="font-bold text-gray-900 mb-2">
+                        Higher Success Rate
+                      </h4>
                       <p className="text-gray-600">
-                        Find tenders that perfectly match your capabilities and experience, increasing your chances of winning contracts.
+                        Find tenders that perfectly match your capabilities and
+                        experience, increasing your chances of winning
+                        contracts.
                       </p>
                     </div>
                   </div>
@@ -230,9 +291,13 @@ function TenderSearch() {
                       <File className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-gray-900 mb-2">Verified Information</h4>
+                      <h4 className="font-bold text-gray-900 mb-2">
+                        Verified Information
+                      </h4>
                       <p className="text-gray-600">
-                        All tender information is verified and updated in real-time from official government sources for accuracy and reliability.
+                        All tender information is verified and updated in
+                        real-time from official government sources for accuracy
+                        and reliability.
                       </p>
                     </div>
                   </div>
@@ -243,9 +308,12 @@ function TenderSearch() {
                       <Database className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-gray-900 mb-2">Pan-India Coverage</h4>
+                      <h4 className="font-bold text-gray-900 mb-2">
+                        Pan-India Coverage
+                      </h4>
                       <p className="text-gray-600">
-                        Access tenders from all states, union territories, and central government departments in one unified platform.
+                        Access tenders from all states, union territories, and
+                        central government departments in one unified platform.
                       </p>
                     </div>
                   </div>
@@ -273,7 +341,8 @@ function TenderSearch() {
               Ready to Discover Your Next Opportunity?
             </h2>
             <p className="text-blue-100 text-lg mb-8 max-w-4xl mx-auto">
-              Join thousands of successful businesses who trust our platform to find the right government tenders.
+              Join thousands of successful businesses who trust our platform to
+              find the right government tenders.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
               <button className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 rounded-lg font-semibold transition-colors">
@@ -287,11 +356,10 @@ function TenderSearch() {
         </section>
 
         {/* Footer */}
-
       </div>
       <Footer />
     </section>
-  )
+  );
 }
 
-export default TenderSearch
+export default TenderSearch;

@@ -56,11 +56,12 @@ const Header = () => {
     if (element) {
       const headerOffset = 80; // Adjust based on your header height
       const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+      const offsetPosition =
+        elementPosition + window.pageYOffset - headerOffset;
 
       window.scrollTo({
         top: offsetPosition,
-        behavior: "smooth"
+        behavior: "smooth",
       });
     }
     setMenuOpen(false);
@@ -151,11 +152,11 @@ const Header = () => {
             onClick={() => scrollToSection("pricing")}
             className={`font-medium transition ${
               // isActive("/pricing")
-               location.hash === "#pricing" || location.state?.scrollTo === "pricing"
+              location.hash === "#pricing" ||
+              location.state?.scrollTo === "pricing"
                 ? "text-[#6B21A8]"
                 : "text-gray-800 hover:text-[#6B21A8]"
             }`}
-         
           >
             Pricing
           </button>
@@ -164,7 +165,8 @@ const Header = () => {
           <button
             onClick={() => scrollToSection("contact")}
             className={`font-medium transition ${
-              location.hash === "#contact" || location.state?.scrollTo === "contact"
+              location.hash === "#contact" ||
+              location.state?.scrollTo === "contact"
                 ? "text-[#6B21A8]"
                 : "text-gray-800 hover:text-[#6B21A8]"
             }`}
@@ -271,7 +273,7 @@ const Header = () => {
 
             <button
               onClick={() => {
-                navigate("/choose-login-type");
+                navigate("/login");
                 setMenuOpen(false);
               }}
               className="text-[#6B21A8] font-semibold border-t pt-2 text-left"
