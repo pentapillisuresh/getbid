@@ -445,7 +445,7 @@ const TendersSection = ({ isStandalone = false }) => {
                             tender.status || "Open"
                           )}`}
                         >
-                          {tender.status || "Open"}
+                          {tender.status || "in-progress"}
                         </span>
                       </div>
                       {/* <Heart className="w-5 h-5 text-gray-400 hover:text-red-500 cursor-pointer" /> */}
@@ -464,31 +464,29 @@ const TendersSection = ({ isStandalone = false }) => {
                       <div>
                         <p className="text-sm text-gray-500">Organization</p>
                         <p className="font-medium text-gray-900">
-                          {tender.organization || "Department of Public Works"}
+                          {tender.postedBy &&
+                          tender.postedBy.company &&
+                          tender.postedBy.company.name
+                            ? tender.postedBy.company.name
+                            : "-"}
                         </p>
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">Category</p>
                         <p className="font-medium text-gray-900">
-                          {tender.category || "Construction"}
+                          {tender.category || "-"}
                         </p>
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">Estimated Value</p>
                         <p className="font-medium text-green-600">
-                          {formatCurrency(
-                            tender.value || tender.estimatedValue || 8550000
-                          )}
+                          {formatCurrency(tender.value)}
                         </p>
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">Deadline</p>
                         <p className="font-medium text-red-600">
-                          {formatDate(
-                            tender.bidDeadline ||
-                              tender.deadline ||
-                              "2024-02-15"
-                          )}
+                          {formatDate(tender.bidDeadline)}
                         </p>
                       </div>
                     </div>
@@ -500,15 +498,10 @@ const TendersSection = ({ isStandalone = false }) => {
                           {tender.location ||
                             (tender.district && tender.state
                               ? `${tender.district}, ${tender.state}`
-                              : "Mumbai, Maharashtra")}
+                              : "-")}
                         </span>
                         <span>
-                          📅 Published:{" "}
-                          {formatDate(
-                            tender.createdAt ||
-                              tender.publishedDate ||
-                              "2024-01-05"
-                          )}
+                          📅 Published: {formatDate(tender.createdAt)}
                         </span>
                       </div>
 

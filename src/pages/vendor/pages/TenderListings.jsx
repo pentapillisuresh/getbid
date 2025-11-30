@@ -215,6 +215,9 @@ const TenderListings = () => {
           bidsCount: it.bidsCount || 0,
           isBidSubmitted: !!it.isBidSubmitted,
           department: it.postedBy ? it.postedBy.name : "—",
+          companyName:
+            (it.postedBy && it.postedBy.company && it.postedBy.company.name) ||
+            "—",
           location: `${it.district || ""}${
             it.district && it.state ? ", " : ""
           }${it.state || ""}`,
@@ -576,7 +579,7 @@ const TenderListings = () => {
                       <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-2">
                         <span className="flex items-center gap-1">
                           <Building2 className="w-4 h-4" />
-                          {t.department}
+                          {t.companyName}
                         </span>
                         <span className="flex items-center gap-1">
                           <MapPin className="w-4 h-4" />

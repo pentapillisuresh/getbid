@@ -151,21 +151,21 @@ const ViewDetailsPopup = ({ tender, isOpen, onClose }) => {
                   </span>
                 </div>
               )}
-              {(tender.value || tender.estimatedValue) && (
+              {tender.value && (
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Estimated Value</p>
                   <p className="font-semibold text-green-600">
-                    {formatCurrency(tender.value || tender.estimatedValue)}
+                    {formatCurrency(tender.value)}
                   </p>
                 </div>
               )}
-              {(tender.bidDeadline || tender.deadline) && (
+              {tender.bidDeadline && (
                 <div>
                   <p className="text-sm text-gray-500 mb-1">
                     Submission Deadline
                   </p>
                   <p className="font-semibold text-red-600">
-                    {formatDate(tender.bidDeadline || tender.deadline)}
+                    {formatDate(tender.bidDeadline)}
                   </p>
                 </div>
               )}
@@ -202,11 +202,11 @@ const ViewDetailsPopup = ({ tender, isOpen, onClose }) => {
                   Organization Details
                 </h3>
                 <div className="space-y-4">
-                  {tender.organization && (
+                  {tender.postedBy?.company?.name && (
                     <div>
-                      <p className="text-sm text-gray-500">Organization:</p>
+                      <p className="text-sm text-gray-500">Company Name:</p>
                       <p className="font-medium text-gray-900">
-                        {tender.organization}
+                        {tender.postedBy?.company?.name}
                       </p>
                     </div>
                   )}
