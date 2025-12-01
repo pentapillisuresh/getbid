@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Phone, Mail, MapPin, Send, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import toast from "../../services/toastService";
+import api from "../../services/apiService";
 
 function CTASection() {
   const navigate = useNavigate();
@@ -67,35 +68,25 @@ function CTASection() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("http://localhost:3003/v1/enquiries", {
-        method: "POST",
-        headers: {
-          accept: "*/*",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
+      const response = await api.request("POST", "/v1/enquiries", {
+        body: formData,
       });
 
-      if (response.ok) {
-        toast.showSuccess(
-          "Message sent successfully! We'll get back to you soon."
-        );
-        setFormData({
-          name: "",
-          email: "",
-          phone: "",
-          company: "",
-          message: "",
-        });
-      } else {
-        const errorData = await response.json();
-        toast.showError(
-          errorData.message || "Failed to send message. Please try again."
-        );
-      }
+      toast.showSuccess(
+        "Message sent successfully! We'll get back to you soon."
+      );
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        company: "",
+        message: "",
+      });
     } catch (error) {
       console.error("Error submitting enquiry:", error);
-      toast.showError("An error occurred. Please try again later.");
+      toast.showError(
+        error.message || "An error occurred. Please try again later."
+      );
     } finally {
       setIsSubmitting(false);
     }

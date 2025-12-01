@@ -302,8 +302,8 @@ const TendersSection = ({ isStandalone = false }) => {
             Browse Available Tenders
           </h1>
           <p className="text-lg md:text-xl max-w-3xl mx-auto">
-            Discover opportunities from government and private organizations.
-            Find the perfect tender for your business.
+            Discover opportunities from private organizations. Find the perfect
+            tender for your business.
           </p>
         </div>
       </div>
