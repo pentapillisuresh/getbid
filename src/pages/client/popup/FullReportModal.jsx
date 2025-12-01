@@ -885,7 +885,10 @@ const FullReportModal = ({ tender, onClose }) => {
                               {bid.vendorName}
                             </div>
                             <div className="text-sm text-gray-500">
-                              {bid.contactPerson}
+                              {bid?.user?.company?.name}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {bid?.user?.email}
                             </div>
                           </td>
                           <td className="px-4 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">

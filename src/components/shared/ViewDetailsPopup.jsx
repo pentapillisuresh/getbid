@@ -113,6 +113,8 @@ const ViewDetailsPopup = ({ tender, isOpen, onClose }) => {
     return currentDate <= deadlineDate;
   };
 
+  console.log(tender);
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col">
@@ -179,6 +181,38 @@ const ViewDetailsPopup = ({ tender, isOpen, onClose }) => {
                 </div>
               )}
             </div>
+
+            {/* Additional Info */}
+            {(tender.locationScope ||
+              tender.meetingDate ||
+              tender.meetingVenue) && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 p-4 bg-blue-50 rounded-lg">
+                {tender.locationScope && (
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Location Scope</p>
+                    <p className="font-semibold text-gray-900">
+                      {tender.locationScope}
+                    </p>
+                  </div>
+                )}
+                {tender.meetingDate && (
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Meeting Date</p>
+                    <p className="font-semibold text-gray-900">
+                      {formatDate(tender.meetingDate)}
+                    </p>
+                  </div>
+                )}
+                {tender.meetingVenue && (
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Meeting Venue</p>
+                    <p className="font-semibold text-gray-900">
+                      {tender.meetingVenue}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Project Description */}
             {tender.description && (

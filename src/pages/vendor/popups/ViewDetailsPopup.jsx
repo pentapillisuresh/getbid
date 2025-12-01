@@ -177,6 +177,27 @@ const ViewDetailsPopup = ({ tender, onClose }) => {
                 </div>
               </div>
 
+              {/* Location Scope */}
+              {(tender.locationScope ||
+                tender?.raw?.locationScope ||
+                tender.raw?.tender?.locationScope) && (
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    Location Scope
+                  </h3>
+                  <div className="bg-purple-50 border border-purple-200 p-4 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-purple-600" />
+                      <span className="font-medium text-purple-700">
+                        {tender.locationScope ||
+                          tender?.raw?.locationScope ||
+                          tender.raw?.tender?.locationScope}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Pre-bid Meeting */}
               {tender.meetingDate && (
                 <div>

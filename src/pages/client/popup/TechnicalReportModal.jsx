@@ -386,6 +386,9 @@ const TechnicalReportModal = ({ tender, onClose }) => {
                             `Vendor ${index + 1}`}
                         </div>
                         <div className="text-sm text-gray-500">
+                          {bid.user?.company?.name}
+                        </div>
+                        <div className="text-sm text-gray-500">
                           {bid.vendor?.email ||
                             bid.email ||
                             bid.user?.email ||

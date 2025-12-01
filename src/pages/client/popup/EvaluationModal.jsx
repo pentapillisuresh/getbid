@@ -720,6 +720,9 @@ const EvaluationModal = ({ tender, evaluationType = "technical", onClose }) => {
                         <div className="text-sm text-gray-500">
                           {bid.user?.name || "N/A"}
                         </div>
+                        <div className="text-sm text-gray-500">
+                          {bid.user?.email}
+                        </div>
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                         {totalScore}/100
