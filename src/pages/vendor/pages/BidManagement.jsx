@@ -103,7 +103,8 @@ const BidManagement = () => {
       ? new Date(item.tender.bidDeadline)
       : null;
     const isBeforeDeadline = deadline ? new Date() < deadline : false;
-    canRebid = isBeforeDeadline && displayStatus === "deleted";
+    // canRebid = isBeforeDeadline && displayStatus === "deleted";
+    canRebid = isBeforeDeadline;
 
     // Format bid amount with currency
     const formattedAmount =

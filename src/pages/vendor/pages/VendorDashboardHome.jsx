@@ -1031,14 +1031,14 @@ const VendorDashboardHome = () => {
                       <Eye className="w-4 h-4" />
                       View Details
                     </button>
-                    <button className="flex items-center gap-2 text-green-600 hover:text-green-700 text-sm font-medium">
+                    {/* <button className="flex items-center gap-2 text-green-600 hover:text-green-700 text-sm font-medium">
                       <ExternalLink className="w-4 h-4" />
                       View Tender
-                    </button>
-                    <button className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium">
+                    </button> */}
+                    {/* <button className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium">
                       <Download className="w-4 h-4" />
                       Download
-                    </button>
+                    </button> */}
                   </div>
                 </div>
               ))}
