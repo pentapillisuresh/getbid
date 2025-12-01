@@ -206,10 +206,15 @@ const TenderFormModal = ({
         ...prev,
         title: tenderData.title || "",
         category: tenderData.category || "",
-        estimatedValue:
-          parseEstimatedValue(tenderData.estimatedValue) ||
-          parseEstimatedValue(tenderData.value) ||
-          "",
+        // estimatedValue:
+        //   parseEstimatedValue(tenderData.estimatedValue) ||
+        //   parseEstimatedValue(tenderData.value) ||
+        //   "",
+        estimatedValue: tenderData.rawData
+          ? tenderData.rawData.value
+          : parseEstimatedValue(tenderData.estimatedValue) ||
+            parseEstimatedValue(tenderData.value) ||
+            "",
         deadline: parseDeadlineDate(),
         description: tenderData.description || "",
         eligibility:
