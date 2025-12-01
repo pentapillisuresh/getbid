@@ -190,7 +190,7 @@ const TendersSection = ({ isStandalone = false }) => {
 
   // Format currency
   const formatCurrency = (amount) => {
-    if (!amount) return "Not specified";
+    // if (!amount) return "Not specified";
     return new Intl.NumberFormat("en-IN", {
       style: "currency",
       currency: "INR",

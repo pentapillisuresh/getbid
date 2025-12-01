@@ -131,7 +131,7 @@ function CTASection() {
                   </div>
                   <div>
                     <p className="font-semibold text-gray-900">Phone</p>
-                    <p className="text-gray-600">+91-8287117152</p>
+                    <p className="text-gray-600">+91-9422799442</p>
                   </div>
                 </div>
 
@@ -141,7 +141,7 @@ function CTASection() {
                   </div>
                   <div>
                     <p className="font-semibold text-gray-900">Email</p>
-                    <p className="text-gray-600">contact@Getbid.in</p>
+                    <p className="text-gray-600">support@getbid.in</p>
                   </div>
                 </div>
 
@@ -152,7 +152,7 @@ function CTASection() {
                   <div>
                     <p className="font-semibold text-gray-900">Address</p>
                     <p className="text-gray-600">
-                      D No. 48-8/1, Srinagar V-hotel Road Raid,
+                      D No. 48-8/1, Srinagar V-hotel Road,
                       <br />
                       Dwaraka Nagar,
                       <br />

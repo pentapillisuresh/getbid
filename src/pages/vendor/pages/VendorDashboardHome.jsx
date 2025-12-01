@@ -533,7 +533,7 @@ const VendorDashboardHome = () => {
             statusColor,
             bidsCount: t.bidsCount || 0,
             isBidSubmitted: !!t.isBidSubmitted,
-
+            postedBy: t.postedBy || {},
             // Additional fields for ViewDetailsPopup
             description: t.description || "No description available",
             eligibilityCriteria: t.eligibilityCriteria || [],
@@ -982,6 +982,9 @@ const VendorDashboardHome = () => {
                       <h3 className="font-semibold text-gray-900 mb-2">
                         {tender.title}
                       </h3>
+                      <p className="text-sm text-gray-500 mb-2">
+                        {tender?.postedBy?.company?.name}
+                      </p>
                       <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
                         <span className="flex items-center gap-1">
                           <FileText className="w-4 h-4" />

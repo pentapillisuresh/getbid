@@ -21,7 +21,7 @@ const ViewDetailsPopup = ({ tender, isOpen, onClose }) => {
 
   // Format currency
   const formatCurrency = (amount) => {
-    if (!amount) return "Not specified";
+    // if (!amount) return "Not specified";
     return new Intl.NumberFormat("en-IN", {
       style: "currency",
       currency: "INR",
@@ -151,14 +151,12 @@ const ViewDetailsPopup = ({ tender, isOpen, onClose }) => {
                   </span>
                 </div>
               )}
-              {tender.value && (
-                <div>
-                  <p className="text-sm text-gray-500 mb-1">Estimated Value</p>
-                  <p className="font-semibold text-green-600">
-                    {formatCurrency(tender.value)}
-                  </p>
-                </div>
-              )}
+              <div>
+                <p className="text-sm text-gray-500 mb-1">Estimated Value</p>
+                <p className="font-semibold text-green-600">
+                  {formatCurrency(tender.value)}
+                </p>
+              </div>
               {tender.bidDeadline && (
                 <div>
                   <p className="text-sm text-gray-500 mb-1">

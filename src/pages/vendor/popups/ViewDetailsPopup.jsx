@@ -67,7 +67,10 @@ const ViewDetailsPopup = ({ tender, onClose }) => {
                   <div>
                     <span className="text-gray-500 text-sm">Organization:</span>
                     <div className="font-medium text-gray-900">
-                      {tender.raw?.tender?.postedBy?.company?.name || "-"}
+                      {tender?.postedBy?.company?.name ||
+                        tender.raw?.postedBy?.company?.name ||
+                        tender.raw?.tender?.postedBy?.company?.name ||
+                        "-"}
                     </div>
                   </div>
                   <div>
