@@ -87,9 +87,25 @@ export default function HeroCarousel() {
                 <p className="bg-gradient-to-r from-purple-700 to-green-600 bg-clip-text text-transparent font-bold text-xs sm:text-sm lg:text-base">
                   {slide.subtitle}
                 </p>
-                <h3 className="text-5xl font-bold text-gray-900 leading-none mb-6">
-                  {slide.title}
-                </h3>
+               <h3
+  className="
+    text-xl
+    sm:text-1xl
+    md:text-2xl
+    lg:text-3xl
+    xl:text-4xl
+    font-bold
+    text-gray-900
+    leading-tight
+    mb-6
+    px-2
+    sm:px-0
+    font-[Poppins,Inter,sans-serif]
+  "
+>
+  {slide.title}
+</h3>
+
                 <p className="text-gray-700 text-lg mb-8 leading-relaxed">
                   {slide.description}
                 </p>
