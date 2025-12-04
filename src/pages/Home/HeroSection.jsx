@@ -18,8 +18,8 @@ const slides = [
     subtitle: "Intelligent Bid Management",
     description:
       "Maximize your success rate with our intelligent bid tracking system, real-time notifications, and expert guidance that helps you win more private sector contracts and tenders.",
-    button1: "Explore Features",
-    button2: "Get Started",
+    // button1: "Explore Features",
+    // button2: "Get Started",
     video: "/gifs/banner2.mp4", // Replaced image with video
   },
   {
@@ -27,8 +27,8 @@ const slides = [
     subtitle: "Complete Compliance Support",
     description:
       "Navigate complex tender requirements effortlessly with our compliance verification tools, document management system, and dedicated support team for private companies and contractors.",
-    button1: "Try for Free",
-    button2: "Contact Sales",
+    // button1: "Try for Free",
+    // button2: "Contact Sales",
     video: "/gifs/banner3.mp4", // Replaced image with video
   },
 ];
@@ -87,8 +87,8 @@ export default function HeroCarousel() {
                 <p className="bg-gradient-to-r from-purple-700 to-green-600 bg-clip-text text-transparent font-bold text-xs sm:text-sm lg:text-base">
                   {slide.subtitle}
                 </p>
-               <h3
-  className="
+                <h3
+                  className="
     text-xl
     sm:text-1xl
     md:text-2xl
@@ -102,31 +102,35 @@ export default function HeroCarousel() {
     sm:px-0
     font-[Poppins,Inter,sans-serif]
   "
->
-  {slide.title}
-</h3>
+                >
+                  {slide.title}
+                </h3>
 
                 <p className="text-gray-700 text-lg mb-8 leading-relaxed">
                   {slide.description}
                 </p>
 
                 <div className="flex gap-4">
-                  <button
-                    className="bg-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl"
-                    onClick={() => (window.location.href = slide.button1Link)}
-                  >
-                    {slide.button1}
-                  </button>
+                  {slide.button1 && (
+                    <button
+                      className="bg-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+                      onClick={() => (window.location.href = slide.button1Link)}
+                    >
+                      {slide.button1}
+                    </button>
+                  )}
 
-                  <button
-                    className="bg-white text-green-600 px-8 py-3 rounded-lg font-semibold border-2 border-green-600 hover:bg-green-50 transition-all duration-300 shadow-md hover:shadow-lg"
-                    onClick={() =>
-                      slide.button2Link &&
-                      (window.location.href = slide.button2Link)
-                    }
-                  >
-                    {slide.button2}
-                  </button>
+                  {slide.button2 && (
+                    <button
+                      className="bg-white text-green-600 px-8 py-3 rounded-lg font-semibold border-2 border-green-600 hover:bg-green-50 transition-all duration-300 shadow-md hover:shadow-lg"
+                      onClick={() =>
+                        slide.button2Link &&
+                        (window.location.href = slide.button2Link)
+                      }
+                    >
+                      {slide.button2}
+                    </button>
+                  )}
                 </div>
               </div>
 
