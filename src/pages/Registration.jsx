@@ -844,7 +844,7 @@ const Registration = () => {
           <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-4">
             {/* Centered Logo */}
             <div className="flex justify-center mb-3">
-              <img src="/images/logo2.png" alt="Logo" className="w-20 h-10" />
+              <img src="/images/tender2.png" alt="Logo" className="w-20 h-10" />
             </div>
             <h1 className="text-xl font-bold text-white text-center mb-3">
               Registration Portal
@@ -855,10 +855,10 @@ const Registration = () => {
                 <div key={step} className="flex items-center">
                   <div
                     className={`flex items-center justify-center w-8 h-8 rounded-full font-semibold text-sm ${step === currentStep
-                        ? "bg-white text-blue-600 shadow-md"
-                        : step < currentStep
-                          ? "bg-blue-200 text-blue-700"
-                          : "bg-blue-400 text-blue-100"
+                      ? "bg-white text-blue-600 shadow-md"
+                      : step < currentStep
+                        ? "bg-blue-200 text-blue-700"
+                        : "bg-blue-400 text-blue-100"
                       }`}
                   >
                     {step < currentStep ? (
@@ -893,8 +893,8 @@ const Registration = () => {
                     <button
                       onClick={() => setRegistrationType("vendor")}
                       className={`p-4 rounded-lg border transition-all ${registrationType === "vendor"
-                          ? "border-blue-500 bg-blue-50 text-blue-700"
-                          : "border-gray-200 hover:border-gray-300"
+                        ? "border-blue-500 bg-blue-50 text-blue-700"
+                        : "border-gray-200 hover:border-gray-300"
                         }`}
                     >
                       <Building2 className="w-6 h-6 mx-auto mb-2 text-blue-600" />
@@ -907,8 +907,8 @@ const Registration = () => {
                     <button
                       onClick={() => setRegistrationType("client")}
                       className={`p-4 rounded-lg border transition-all ${registrationType === "client"
-                          ? "border-blue-500 bg-blue-50 text-blue-700"
-                          : "border-gray-200 hover:border-gray-300"
+                        ? "border-blue-500 bg-blue-50 text-blue-700"
+                        : "border-gray-200 hover:border-gray-300"
                         }`}
                     >
                       <Building2 className="w-6 h-6 mx-auto mb-2 text-blue-600" />
@@ -948,8 +948,8 @@ const Registration = () => {
                         }));
                       }}
                       className={`p-4 rounded-lg border transition-all ${entityType === "individual"
-                          ? "border-gray-500 bg-gray-50"
-                          : "border-gray-200 hover:border-gray-300"
+                        ? "border-gray-500 bg-gray-50"
+                        : "border-gray-200 hover:border-gray-300"
                         }`}
                     >
                       <User className="w-6 h-6 mx-auto mb-2 text-gray-600" />
@@ -984,8 +984,8 @@ const Registration = () => {
                         }));
                       }}
                       className={`p-4 rounded-lg border transition-all ${entityType === "company"
-                          ? "border-gray-500 bg-gray-50"
-                          : "border-gray-200 hover:border-gray-300"
+                        ? "border-gray-500 bg-gray-50"
+                        : "border-gray-200 hover:border-gray-300"
                         }`}
                     >
                       <Building2 className="w-6 h-6 mx-auto mb-2 text-gray-600" />
@@ -1409,8 +1409,8 @@ const Registration = () => {
                   <div className="space-y-3">
                     <div
                       className={`p-3 rounded-lg border-2 ${emailVerified
-                          ? "border-blue-200 bg-blue-50"
-                          : "border-gray-200 bg-gray-50"
+                        ? "border-blue-200 bg-blue-50"
+                        : "border-gray-200 bg-gray-50"
                         }`}
                     >
                       <label className="block text-xs font-semibold text-gray-700 mb-1">
@@ -1498,8 +1498,8 @@ const Registration = () => {
 
                     <div
                       className={`p-3 rounded-lg border-2 ${mobileVerified
-                          ? "border-blue-200 bg-blue-50"
-                          : "border-gray-200 bg-gray-50"
+                        ? "border-blue-200 bg-blue-50"
+                        : "border-gray-200 bg-gray-50"
                         }`}
                     >
                       <label className="block text-xs font-semibold text-gray-700 mb-1">

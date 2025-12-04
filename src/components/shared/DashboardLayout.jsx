@@ -233,7 +233,7 @@ const DashboardLayout = ({
               <div className="flex items-center gap-3">
                 <div className="">
                   <img
-                    src="/images/logo2.png"
+                    src="/images/tender2.png"
                     alt="Logo"
                     className="w-20 h-10"
                   />
@@ -290,17 +290,15 @@ const DashboardLayout = ({
                             onClick={() =>
                               handleNotificationClick(notification)
                             }
-                            className={`px-4 py-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${
-                              !notification.isRead ? "bg-blue-50" : ""
-                            }`}
+                            className={`px-4 py-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${!notification.isRead ? "bg-blue-50" : ""
+                              }`}
                           >
                             <div className="flex items-start gap-3">
                               <div
-                                className={`flex-shrink-0 w-2 h-2 rounded-full mt-2 ${
-                                  !notification.isRead
-                                    ? "bg-blue-600"
-                                    : "bg-gray-300"
-                                }`}
+                                className={`flex-shrink-0 w-2 h-2 rounded-full mt-2 ${!notification.isRead
+                                  ? "bg-blue-600"
+                                  : "bg-gray-300"
+                                  }`}
                               />
                               <div className="flex-1 min-w-0">
                                 <h4 className="text-sm font-medium text-gray-900 truncate">

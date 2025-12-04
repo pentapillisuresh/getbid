@@ -103,7 +103,7 @@ function CTASection() {
               Ready to Transform Your Tendering Success?
             </h2>
             <p className="text-gray-600 max-w-4xl mx-auto">
-              Contact our expert team today and discover how Getbid can help you
+              Contact our expert team today and discover how Tender box can help you
               win more tenders and grow your business.
             </p>
           </div>
@@ -132,7 +132,7 @@ function CTASection() {
                   </div>
                   <div>
                     <p className="font-semibold text-gray-900">Email</p>
-                    <p className="text-gray-600">support@getbid.in</p>
+                    <p className="text-gray-600">support@Tender box.in</p>
                   </div>
                 </div>
 

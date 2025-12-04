@@ -169,7 +169,7 @@ const ChooseLoginType = () => {
                 <div className="text-center mb-8">
                   <div className="flex justify-center mb-4">
                     <img
-                      src="/images/logo2.png"
+                      src="/images/tender2.png"
                       alt="Logo"
                       className="w-20 h-10"
                     />
@@ -187,19 +187,17 @@ const ChooseLoginType = () => {
                   <button
                     type="button"
                     onClick={() => setLoginType("vendor")}
-                    className={`p-4 sm:p-6 rounded-xl border-2 transition-all duration-300 hover:shadow-md ${
-                      loginType === "vendor"
-                        ? "border-primary-500 bg-primary-50 text-primary-600"
-                        : "border-gray-200 hover:border-gray-300 text-gray-700"
-                    }`}
+                    className={`p-4 sm:p-6 rounded-xl border-2 transition-all duration-300 hover:shadow-md ${loginType === "vendor"
+                      ? "border-primary-500 bg-primary-50 text-primary-600"
+                      : "border-gray-200 hover:border-gray-300 text-gray-700"
+                      }`}
                   >
                     <div className="flex flex-col items-center text-center space-y-3">
                       <Building2
-                        className={`w-8 h-8 ${
-                          loginType === "vendor"
-                            ? "text-gray-600"
-                            : "text-gray-400"
-                        }`}
+                        className={`w-8 h-8 ${loginType === "vendor"
+                          ? "text-gray-600"
+                          : "text-gray-400"
+                          }`}
                       />
                       <div className="space-y-1">
                         <div className="font-semibold">🏢 Vendor</div>
@@ -213,19 +211,17 @@ const ChooseLoginType = () => {
                   <button
                     type="button"
                     onClick={() => setLoginType("client")}
-                    className={`p-4 sm:p-6 rounded-xl border-2 transition-all duration-300 hover:shadow-md ${
-                      loginType === "client"
-                        ? "border-primary-500 bg-primary-50 text-primary-600"
-                        : "border-gray-200 hover:border-gray-300 text-gray-700"
-                    }`}
+                    className={`p-4 sm:p-6 rounded-xl border-2 transition-all duration-300 hover:shadow-md ${loginType === "client"
+                      ? "border-primary-500 bg-primary-50 text-primary-600"
+                      : "border-gray-200 hover:border-gray-300 text-gray-700"
+                      }`}
                   >
                     <div className="flex flex-col items-center text-center space-y-3">
                       <Users
-                        className={`w-8 h-8 ${
-                          loginType === "client"
-                            ? "text-gray-600"
-                            : "text-gray-400"
-                        }`}
+                        className={`w-8 h-8 ${loginType === "client"
+                          ? "text-gray-600"
+                          : "text-gray-400"
+                          }`}
                       />
                       <div className="space-y-1">
                         <div className="font-semibold">🏛️ Client</div>
@@ -368,17 +364,15 @@ const ChooseLoginType = () => {
                   <button
                     type="submit"
                     disabled={loading}
-                    className={`w-full text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-300 ${
-                      loading
-                        ? "opacity-70 cursor-not-allowed bg-gray-400"
-                        : "bg-primary-500 hover:!bg-primary-600 active:!bg-primary-700 focus:!bg-primary-600"
-                    }`}
+                    className={`w-full text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-300 ${loading
+                      ? "opacity-70 cursor-not-allowed bg-gray-400"
+                      : "bg-primary-500 hover:!bg-primary-600 active:!bg-primary-700 focus:!bg-primary-600"
+                      }`}
                   >
                     {loading
                       ? "Signing in…"
-                      : `🏢 Sign in as ${
-                          loginType === "vendor" ? "Vendor" : "Client"
-                        }`}
+                      : `🏢 Sign in as ${loginType === "vendor" ? "Vendor" : "Client"
+                      }`}
                   </button>
                 </form>
 

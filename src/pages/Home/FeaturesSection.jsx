@@ -6,7 +6,7 @@ function FeaturesSection() {
       img: "/images/w1.png", // replace with your image path
       title: "24/7 Customer Care",
       description:
-        "GetBid is an organization dedicated to help private companies and contractors find inspirational opportunities to get better business.",
+        "Tender box is an organization dedicated to help private companies and contractors find inspirational opportunities to get better business.",
     },
     {
       img: "/images/w2.png", // replace with your image path

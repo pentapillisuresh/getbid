@@ -78,7 +78,7 @@ const Header = () => {
           className="flex items-center space-x-2 cursor-pointer"
           onClick={() => navigate("/")}
         >
-          <img src="/images/logo2.png" alt="Logo" className="w-[110px]" />
+          <img src="/images/tender2.png" alt="Logo" className="w-[110px]" />
         </div>
 
         {/* Desktop Navigation */}
@@ -86,11 +86,10 @@ const Header = () => {
           {/* Home */}
           <button
             onClick={() => navigate("/")}
-            className={`font-medium transition ${
-              isActive("/")
-                ? "text-[#6B21A8]"
-                : "text-gray-800 hover:text-[#6B21A8]"
-            }`}
+            className={`font-medium transition ${isActive("/")
+              ? "text-[#6B21A8]"
+              : "text-gray-800 hover:text-[#6B21A8]"
+              }`}
           >
             Home
           </button>
@@ -98,11 +97,10 @@ const Header = () => {
           {/* About - Scrolls to about section */}
           <button
             onClick={() => scrollToSection("about")}
-            className={`font-medium transition ${
-              location.hash === "#about" || location.state?.scrollTo === "about"
-                ? "text-[#6B21A8]"
-                : "text-gray-800 hover:text-[#6B21A8]"
-            }`}
+            className={`font-medium transition ${location.hash === "#about" || location.state?.scrollTo === "about"
+              ? "text-[#6B21A8]"
+              : "text-gray-800 hover:text-[#6B21A8]"
+              }`}
           >
             About Us
           </button>
@@ -116,11 +114,10 @@ const Header = () => {
           >
             <button
               onClick={() => setServicesOpen((prev) => !prev)}
-              className={`flex items-center font-medium transition ${
-                location.pathname.startsWith("/services")
-                  ? "text-[#6B21A8]"
-                  : "text-gray-800 hover:text-[#6B21A8]"
-              }`}
+              className={`flex items-center font-medium transition ${location.pathname.startsWith("/services")
+                ? "text-[#6B21A8]"
+                : "text-gray-800 hover:text-[#6B21A8]"
+                }`}
             >
               Services <ChevronDown className="ml-1 w-4 h-4" />
             </button>
@@ -134,11 +131,10 @@ const Header = () => {
                       navigate(service.path);
                       setServicesOpen(false);
                     }}
-                    className={`block w-full text-left px-4 py-2 text-sm rounded-md transition ${
-                      isActive(service.path)
-                        ? "bg-[#F3E8FF] text-[#6B21A8] font-semibold"
-                        : "text-gray-700 hover:bg-[#F3E8FF] hover:text-[#6B21A8]"
-                    }`}
+                    className={`block w-full text-left px-4 py-2 text-sm rounded-md transition ${isActive(service.path)
+                      ? "bg-[#F3E8FF] text-[#6B21A8] font-semibold"
+                      : "text-gray-700 hover:bg-[#F3E8FF] hover:text-[#6B21A8]"
+                      }`}
                   >
                     {service.name}
                   </button>
@@ -153,10 +149,10 @@ const Header = () => {
             className={`font-medium transition ${
               // isActive("/pricing")
               location.hash === "#pricing" ||
-              location.state?.scrollTo === "pricing"
+                location.state?.scrollTo === "pricing"
                 ? "text-[#6B21A8]"
                 : "text-gray-800 hover:text-[#6B21A8]"
-            }`}
+              }`}
           >
             Pricing
           </button>
@@ -164,12 +160,11 @@ const Header = () => {
           {/* Contact - Scrolls to contact section */}
           <button
             onClick={() => scrollToSection("contact")}
-            className={`font-medium transition ${
-              location.hash === "#contact" ||
+            className={`font-medium transition ${location.hash === "#contact" ||
               location.state?.scrollTo === "contact"
-                ? "text-[#6B21A8]"
-                : "text-gray-800 hover:text-[#6B21A8]"
-            }`}
+              ? "text-[#6B21A8]"
+              : "text-gray-800 hover:text-[#6B21A8]"
+              }`}
           >
             Contact Us
           </button>

@@ -10,13 +10,13 @@ function Footer() {
           {/* Column 1: Logo & Description */}
           <div className="md:col-span-2">
             <div className="flex items-center gap-3 mb-4">
-              <img src="/images/logo2.png" alt="GetBid Logo" className="w-24 h-auto" />
+              <img src="/images/tender2.png" alt="GetBid Logo" className="w-24 h-auto" />
             </div>
             <p className="text-gray-300 text-sm leading-relaxed max-w-md mb-4">
-              GetBid is your trusted partner in tendering success. We provide cutting-edge technology 
+              Tender box is your trusted partner in tendering success. We provide cutting-edge technology
               and expert guidance to help private companies and contractors win more tenders and grow their business.
             </p>
-            
+
             {/* Social Links - Exact same as image */}
             <div className="flex gap-3">
               <a href="#" className="w-8 h-8 bg-gray-800 rounded flex items-center justify-center hover:bg-blue-600 transition-colors">
@@ -101,7 +101,7 @@ function Footer() {
 
         {/* Bottom Footer */}
         <div className="border-t border-gray-700 pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-gray-300 text-sm">© 2025 GetBid. All rights reserved.</p>
+          <p className="text-gray-300 text-sm">© 2025 Tender box. All rights reserved.</p>
           <div className="flex gap-6 flex-wrap justify-center">
             <a href="#" className="text-gray-300 hover:text-white text-sm transition-colors">
               Privacy Policy

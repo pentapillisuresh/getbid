@@ -8,12 +8,12 @@ function AboutSection() {
         <div className="max-w-7xl mx-auto">
           {/* Section Header */}
           <div className="text-center mb-12">
-            <p className="text-purple-600 font-semibold mb-2">About  <span className="bg-gradient-to-r from-purple-700 to-green-600 bg-clip-text text-transparent font-bold text-base sm:text-lg">Getbid</span> </p>
+            <p className="text-purple-600 font-semibold mb-2">About  <span className="bg-gradient-to-r from-purple-700 to-green-600 bg-clip-text text-transparent font-bold text-base sm:text-lg">Tender box</span> </p>
             <h2 className="text-4xl font-bold text-gray-900 mb-4">
               Your Trusted Partner in Tendering Success
             </h2>
             <p className="text-gray-600 max-w-3xl mx-auto">
-              Getbid is dedicated to empowering businesses with cutting-edge tendering solutions. We help companies navigate the complex world of procurement with confidence and efficiency.
+              Tender box is dedicated to empowering businesses with cutting-edge tendering solutions. We help companies navigate the complex world of procurement with confidence and efficiency.
             </p>
           </div>
 

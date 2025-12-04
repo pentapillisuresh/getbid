@@ -15,14 +15,14 @@ function ServicesSection() {
     {
       title: "Bid Management",
       description:
-        "From concept to bid submission, GetBid covers the entire business tender management process for private companies and contractors...",
+        "From concept to bid submission, Tender box covers the entire business tender management process for private companies and contractors...",
       videoUrl: "/images/why2.mp4",
       path: "/services/bid-management"
     },
     {
       title: "Document Management",
       description:
-        "GetBid focuses on your document security by increasing the quality and quantity of our Document Services for private sector clients.",
+        "Tender box focuses on your document security by increasing the quality and quantity of our Document Services for private sector clients.",
       videoUrl: "/images/why3.mp4",
       path: "/services/document-management"
     },
@@ -63,7 +63,7 @@ function ServicesSection() {
           </p>
           <h2 className="text-4xl font-bold text-white mb-3">Our Services</h2>
           <p className="text-white/80 max-w-4xl mx-auto text-base">
-            GetBid provides comprehensive tender, bid, and document management
+            Tender box provides comprehensive tender, bid, and document management
             solutions for modern businesses and contractors.
           </p>
         </div>
