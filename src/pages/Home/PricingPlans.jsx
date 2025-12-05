@@ -80,7 +80,7 @@ function PricingSection() {
               Pricing Plans
             </div>
             <h2 className="text-5xl font-bold text-gray-900 mb-6">
-              Flexible Tender Solutions
+              Flexible Vendors Plans
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
               Choose a plan that grows with your business. Pay only for the
