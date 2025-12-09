@@ -55,6 +55,9 @@ const Registration = () => {
   const [panFileId, setPanFileId] = useState(null);
   const [gstFileId, setGstFileId] = useState(null);
 
+  // Track which fields were prefilled from PAN/GST verification
+  const [prefilledFields, setPrefilledFields] = useState({});
+
   // Generate a random 4-character captcha: uppercase letters + digits
   const generateCaptcha = () => {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -76,8 +79,6 @@ const Registration = () => {
     gstOtp: "",
     firstName: "",
     lastName: "",
-    fatherName: "",
-    dateOfBirth: "",
     companyName: "",
     companyType: "",
     incorporationDate: "",
@@ -473,9 +474,20 @@ const Registration = () => {
   const handleEditPan = () => {
     setPanVerified(false);
     setShowPanOtp(false);
-    setFormData((prev) => ({ ...prev, panOtp: "" }));
+    setFormData((prev) => ({
+      ...prev,
+      panOtp: "",
+      firstName: "",
+      lastName: "",
+    }));
     setPanFile(null);
     setPanFileId(null);
+    // Reset prefilled fields from PAN
+    setPrefilledFields((prev) => ({
+      ...prev,
+      firstName: false,
+      lastName: false,
+    }));
     // Reset the file input
     const fileInput = document.getElementById("pan-file-input");
     if (fileInput) fileInput.value = "";
@@ -487,9 +499,26 @@ const Registration = () => {
   const handleEditGst = () => {
     setGstVerified(false);
     setShowGstOtp(false);
-    setFormData((prev) => ({ ...prev, gstOtp: "" }));
+    setFormData((prev) => ({
+      ...prev,
+      gstOtp: "",
+      companyName: "",
+      companyType: "",
+      address: "",
+      city: "",
+      state: "",
+    }));
     setGstFile(null);
     setGstFileId(null);
+    // Reset prefilled fields from GST
+    setPrefilledFields((prev) => ({
+      ...prev,
+      companyName: false,
+      companyType: false,
+      address: false,
+      city: false,
+      state: false,
+    }));
     // Reset the file input
     const fileInput = document.getElementById("gst-file-input");
     if (fileInput) fileInput.value = "";
@@ -529,18 +558,25 @@ const Registration = () => {
             firstName: firstName,
             lastName: lastName,
           }));
+
+          // Track prefilled fields to make them non-editable
+          setPrefilledFields((prev) => ({
+            ...prev,
+            firstName: !!firstName,
+            lastName: !!lastName,
+          }));
         }
 
         toastService.showSuccess(
           response.data?.message ||
-          response.message ||
-          "PAN verified successfully!"
+            response.message ||
+            "PAN verified successfully!"
         );
       } else {
         toastService.showError(
           response.data?.message ||
-          response.message ||
-          "PAN verification failed"
+            response.message ||
+            "PAN verification failed"
         );
       }
     } catch (error) {
@@ -585,16 +621,26 @@ const Registration = () => {
           state: gstData.state || prev.state,
         }));
 
+        // Track prefilled fields to make them non-editable
+        setPrefilledFields((prev) => ({
+          ...prev,
+          companyName: !!gstData.legalName,
+          companyType: !!gstData.businessType,
+          address: !!gstData.principalPlaceAddress,
+          city: !!gstData.stateJurisdiction,
+          state: !!gstData.state,
+        }));
+
         toastService.showSuccess(
           response.data?.message ||
-          response.message ||
-          "GST verified successfully!"
+            response.message ||
+            "GST verified successfully!"
         );
       } else {
         toastService.showError(
           response.data?.message ||
-          response.message ||
-          "GST verification failed"
+            response.message ||
+            "GST verification failed"
         );
       }
     } catch (error) {
@@ -633,16 +679,6 @@ const Registration = () => {
 
       if (!formData.lastName.trim()) {
         toastService.showError("Last Name is required");
-        return;
-      }
-
-      if (!formData.fatherName.trim()) {
-        toastService.showError("Father's Name is required");
-        return;
-      }
-
-      if (!formData.dateOfBirth) {
-        toastService.showError("Date of Birth is required");
         return;
       }
 
@@ -714,16 +750,6 @@ const Registration = () => {
       return;
     }
 
-    if (!formData.fatherName.trim()) {
-      toastService.showError("Father's Name is required");
-      return;
-    }
-
-    if (!formData.dateOfBirth) {
-      toastService.showError("Date of Birth is required");
-      return;
-    }
-
     try {
       setLoading(true);
 
@@ -771,8 +797,6 @@ const Registration = () => {
 
       const payload = {
         name,
-        fatherName: formData.fatherName || undefined,
-        dateOfBirth: formData.dateOfBirth || undefined,
         email: formData.email || undefined,
         phoneNumber: formData.mobile || undefined,
         role: registrationType === "client" ? "client" : "vendor",
@@ -854,12 +878,13 @@ const Registration = () => {
               {[1, 2, 3].map((step) => (
                 <div key={step} className="flex items-center">
                   <div
-                    className={`flex items-center justify-center w-8 h-8 rounded-full font-semibold text-sm ${step === currentStep
-                      ? "bg-white text-blue-600 shadow-md"
-                      : step < currentStep
+                    className={`flex items-center justify-center w-8 h-8 rounded-full font-semibold text-sm ${
+                      step === currentStep
+                        ? "bg-white text-blue-600 shadow-md"
+                        : step < currentStep
                         ? "bg-blue-200 text-blue-700"
                         : "bg-blue-400 text-blue-100"
-                      }`}
+                    }`}
                   >
                     {step < currentStep ? (
                       <CheckCircle className="w-4 h-4" />
@@ -869,8 +894,9 @@ const Registration = () => {
                   </div>
                   {step < 3 && (
                     <div
-                      className={`w-12 h-1 mx-1 rounded ${step < currentStep ? "bg-blue-200" : "bg-blue-400"
-                        }`}
+                      className={`w-12 h-1 mx-1 rounded ${
+                        step < currentStep ? "bg-blue-200" : "bg-blue-400"
+                      }`}
                     />
                   )}
                 </div>
@@ -892,10 +918,11 @@ const Registration = () => {
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       onClick={() => setRegistrationType("vendor")}
-                      className={`p-4 rounded-lg border transition-all ${registrationType === "vendor"
-                        ? "border-blue-500 bg-blue-50 text-blue-700"
-                        : "border-gray-200 hover:border-gray-300"
-                        }`}
+                      className={`p-4 rounded-lg border transition-all ${
+                        registrationType === "vendor"
+                          ? "border-blue-500 bg-blue-50 text-blue-700"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
                     >
                       <Building2 className="w-6 h-6 mx-auto mb-2 text-blue-600" />
                       <div className="font-semibold text-sm mb-1">Vendor</div>
@@ -906,10 +933,11 @@ const Registration = () => {
 
                     <button
                       onClick={() => setRegistrationType("client")}
-                      className={`p-4 rounded-lg border transition-all ${registrationType === "client"
-                        ? "border-blue-500 bg-blue-50 text-blue-700"
-                        : "border-gray-200 hover:border-gray-300"
-                        }`}
+                      className={`p-4 rounded-lg border transition-all ${
+                        registrationType === "client"
+                          ? "border-blue-500 bg-blue-50 text-blue-700"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
                     >
                       <Building2 className="w-6 h-6 mx-auto mb-2 text-blue-600" />
                       <div className="font-semibold text-sm mb-1">Client</div>
@@ -947,10 +975,11 @@ const Registration = () => {
                           gstOtp: "",
                         }));
                       }}
-                      className={`p-4 rounded-lg border transition-all ${entityType === "individual"
-                        ? "border-gray-500 bg-gray-50"
-                        : "border-gray-200 hover:border-gray-300"
-                        }`}
+                      className={`p-4 rounded-lg border transition-all ${
+                        entityType === "individual"
+                          ? "border-gray-500 bg-gray-50"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
                     >
                       <User className="w-6 h-6 mx-auto mb-2 text-gray-600" />
                       <div className="font-semibold text-sm mb-1">
@@ -983,10 +1012,11 @@ const Registration = () => {
                           incorporationDate: "",
                         }));
                       }}
-                      className={`p-4 rounded-lg border transition-all ${entityType === "company"
-                        ? "border-gray-500 bg-gray-50"
-                        : "border-gray-200 hover:border-gray-300"
-                        }`}
+                      className={`p-4 rounded-lg border transition-all ${
+                        entityType === "company"
+                          ? "border-gray-500 bg-gray-50"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
                     >
                       <Building2 className="w-6 h-6 mx-auto mb-2 text-gray-600" />
                       <div className="font-semibold text-sm mb-1">Company</div>
@@ -1252,8 +1282,13 @@ const Registration = () => {
                         name="firstName"
                         value={formData.firstName}
                         onChange={handleInputChange}
-                        className="w-full px-2 py-1 border border-gray-300 rounded-lg bg-white text-gray-900 text-xs"
+                        className={`w-full px-2 py-1 border border-gray-300 rounded-lg text-gray-900 text-xs ${
+                          prefilledFields.firstName
+                            ? "bg-gray-100 cursor-not-allowed"
+                            : "bg-white"
+                        }`}
                         required
+                        disabled={prefilledFields.firstName}
                       />
                     </div>
                     <div>
@@ -1265,34 +1300,13 @@ const Registration = () => {
                         name="lastName"
                         value={formData.lastName}
                         onChange={handleInputChange}
-                        className="w-full px-2 py-1 border border-gray-300 rounded-lg bg-white text-gray-900 text-xs"
+                        className={`w-full px-2 py-1 border border-gray-300 rounded-lg text-gray-900 text-xs ${
+                          prefilledFields.lastName
+                            ? "bg-gray-100 cursor-not-allowed"
+                            : "bg-white"
+                        }`}
                         required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-700 mb-1">
-                        Father's Name *
-                      </label>
-                      <input
-                        type="text"
-                        name="fatherName"
-                        value={formData.fatherName}
-                        onChange={handleInputChange}
-                        className="w-full px-2 py-1 border border-gray-300 rounded-lg bg-white text-gray-900 text-xs"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-700 mb-1">
-                        Date of Birth *
-                      </label>
-                      <input
-                        type="date"
-                        name="dateOfBirth"
-                        value={formData.dateOfBirth}
-                        onChange={handleInputChange}
-                        className="w-full px-2 py-1 border border-gray-300 rounded-lg bg-white text-gray-900 text-xs"
-                        required
+                        disabled={prefilledFields.lastName}
                       />
                     </div>
 
@@ -1309,8 +1323,13 @@ const Registration = () => {
                           value={formData.companyName}
                           onChange={handleInputChange}
                           placeholder="TechCorp Solutions Private Limited"
-                          className="w-full px-2 py-1 border border-gray-300 rounded-lg bg-white text-gray-900 text-xs"
+                          className={`w-full px-2 py-1 border border-gray-300 rounded-lg text-gray-900 text-xs ${
+                            prefilledFields.companyName
+                              ? "bg-gray-100 cursor-not-allowed"
+                              : "bg-white"
+                          }`}
                           required
+                          disabled={prefilledFields.companyName}
                         />
                       </div>
                       <div>
@@ -1321,8 +1340,13 @@ const Registration = () => {
                           name="companyType"
                           value={formData.companyType}
                           onChange={handleInputChange}
-                          className="w-full px-2 py-1 border border-gray-300 rounded-lg bg-white text-gray-900 text-xs"
+                          className={`w-full px-2 py-1 border border-gray-300 rounded-lg text-gray-900 text-xs ${
+                            prefilledFields.companyType
+                              ? "bg-gray-100 cursor-not-allowed"
+                              : "bg-white"
+                          }`}
                           required
+                          disabled={prefilledFields.companyType}
                         >
                           <option value="">Select Company Type</option>
                           <option value="Private Limited Company">
@@ -1371,7 +1395,12 @@ const Registration = () => {
                         name="address"
                         value={formData.address}
                         onChange={handleInputChange}
-                        className="w-full px-2 py-1 border border-gray-300 rounded-lg bg-white text-gray-900 text-xs"
+                        className={`w-full px-2 py-1 border border-gray-300 rounded-lg text-gray-900 text-xs ${
+                          prefilledFields.address
+                            ? "bg-gray-100 cursor-not-allowed"
+                            : "bg-white"
+                        }`}
+                        disabled={prefilledFields.address}
                       />
                     </div>
                     <div>
@@ -1383,7 +1412,12 @@ const Registration = () => {
                         name="city"
                         value={formData.city}
                         onChange={handleInputChange}
-                        className="w-full px-2 py-1 border border-gray-300 rounded-lg bg-white text-gray-900 text-xs"
+                        className={`w-full px-2 py-1 border border-gray-300 rounded-lg text-gray-900 text-xs ${
+                          prefilledFields.city
+                            ? "bg-gray-100 cursor-not-allowed"
+                            : "bg-white"
+                        }`}
+                        disabled={prefilledFields.city}
                       />
                     </div>
                     <div>
@@ -1395,7 +1429,12 @@ const Registration = () => {
                         name="state"
                         value={formData.state}
                         onChange={handleInputChange}
-                        className="w-full px-2 py-1 border border-gray-300 rounded-lg bg-white text-gray-900 text-xs"
+                        className={`w-full px-2 py-1 border border-gray-300 rounded-lg text-gray-900 text-xs ${
+                          prefilledFields.state
+                            ? "bg-gray-100 cursor-not-allowed"
+                            : "bg-white"
+                        }`}
+                        disabled={prefilledFields.state}
                       />
                     </div>
                   </div>
@@ -1408,10 +1447,11 @@ const Registration = () => {
 
                   <div className="space-y-3">
                     <div
-                      className={`p-3 rounded-lg border-2 ${emailVerified
-                        ? "border-blue-200 bg-blue-50"
-                        : "border-gray-200 bg-gray-50"
-                        }`}
+                      className={`p-3 rounded-lg border-2 ${
+                        emailVerified
+                          ? "border-blue-200 bg-blue-50"
+                          : "border-gray-200 bg-gray-50"
+                      }`}
                     >
                       <label className="block text-xs font-semibold text-gray-700 mb-1">
                         Email Address *
@@ -1497,10 +1537,11 @@ const Registration = () => {
                     </div>
 
                     <div
-                      className={`p-3 rounded-lg border-2 ${mobileVerified
-                        ? "border-blue-200 bg-blue-50"
-                        : "border-gray-200 bg-gray-50"
-                        }`}
+                      className={`p-3 rounded-lg border-2 ${
+                        mobileVerified
+                          ? "border-blue-200 bg-blue-50"
+                          : "border-gray-200 bg-gray-50"
+                      }`}
                     >
                       <label className="block text-xs font-semibold text-gray-700 mb-1">
                         Mobile Number *
@@ -1859,8 +1900,9 @@ const Registration = () => {
                 )}
                 <button
                   onClick={handleNext}
-                  className={`flex items-center gap-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold shadow text-sm ${currentStep === 1 ? "ml-auto" : ""
-                    }`}
+                  className={`flex items-center gap-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold shadow text-sm ${
+                    currentStep === 1 ? "ml-auto" : ""
+                  }`}
                 >
                   Continue
                   <ChevronRight className="w-3 h-3" />
