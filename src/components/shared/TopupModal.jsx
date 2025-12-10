@@ -3,6 +3,9 @@ import { X, CheckCircle, XCircle } from "lucide-react";
 import api from "../../services/apiService";
 import toastService from "../../services/toastService";
 
+// Payment gateway configuration - defaults to "cashfree", can be "razorpay"
+const PAYMENT_GATEWAY = import.meta.env.VITE_PAYMENT_GATEWAY || "cashfree";
+
 const TopupModal = ({
   show,
   onClose,
@@ -11,9 +14,11 @@ const TopupModal = ({
   plansError = null,
   onSuccess, // optional callback after successful subscription
   formatCurrency,
+  userDetails = {}, // { name, email, phone } - for Cashfree
 }) => {
   const [creatingSubscriptionFor, setCreatingSubscriptionFor] = useState(null);
 
+  // ============ RAZORPAY FUNCTIONS ============
   const loadRazorpayScript = () => {
     return new Promise((resolve) => {
       if (typeof window === "undefined") return resolve(false);
@@ -26,7 +31,7 @@ const TopupModal = ({
     });
   };
 
-  const handleChoosePlan = async (plan) => {
+  const handleRazorpayPayment = async (plan) => {
     try {
       setCreatingSubscriptionFor(plan.id);
       const createResp = await api.post("/v1/subscriptions/create", {
@@ -113,12 +118,155 @@ const TopupModal = ({
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch (err) {
-      console.error("Choose plan error", err);
+      console.error("Razorpay payment error", err);
       toastService.showError(
         (err && err.message) || "Failed to start subscription"
       );
     } finally {
       setCreatingSubscriptionFor(null);
+    }
+  };
+
+  // ============ CASHFREE FUNCTIONS ============
+  const loadCashfreeScript = () => {
+    return new Promise((resolve) => {
+      if (typeof window === "undefined") return resolve(false);
+      if (window.Cashfree) return resolve(true);
+      const script = document.createElement("script");
+      script.src = "https://sdk.cashfree.com/js/v3/cashfree.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  const handleCashfreePayment = async (plan) => {
+    try {
+      setCreatingSubscriptionFor(plan.id);
+
+      // Get the current page URL for return
+      const returnUrl = `${window.location.origin}/payment/callback`;
+
+      // Create Cashfree order
+      const createResp = await api.post("/v1/subscriptions/cashfree/create", {
+        body: {
+          planId: plan.id,
+          currency: "INR",
+          customerName: userDetails.name || "Customer",
+          customerEmail: userDetails.email || "",
+          customerPhone: userDetails.phone || "",
+          returnUrl: returnUrl,
+        },
+      });
+
+      // Parse response - paymentSessionId can be in order object or subscription object
+      const paymentSessionId =
+        createResp?.order?.paymentSessionId ||
+        createResp?.subscription?.cashfreePaymentSessionId ||
+        createResp?.paymentSessionId ||
+        createResp?.data?.paymentSessionId ||
+        createResp?.payment_session_id;
+
+      const orderId =
+        createResp?.order?.orderId ||
+        createResp?.subscription?.cashfreeOrderId ||
+        createResp?.orderId ||
+        createResp?.data?.orderId ||
+        createResp?.order_id;
+
+      if (!paymentSessionId) {
+        toastService.showError("Failed to create payment session");
+        return;
+      }
+
+      // Load Cashfree SDK
+      const loaded = await loadCashfreeScript();
+      if (!loaded) {
+        toastService.showError("Failed to load payment gateway");
+        return;
+      }
+
+      // Initialize Cashfree
+      const cashfree = window.Cashfree({
+        mode: import.meta.env.VITE_CASHFREE_MODE || "sandbox", // "sandbox" or "production"
+      });
+
+      // Open Cashfree checkout
+      const checkoutOptions = {
+        paymentSessionId: paymentSessionId,
+        redirectTarget: "_modal", // "_self" for redirect, "_modal" for popup
+      };
+
+      const result = await cashfree.checkout(checkoutOptions);
+
+      if (result.error) {
+        // Payment failed or was cancelled
+        console.error("Cashfree checkout error:", result.error);
+        toastService.showError(
+          result.error.message || "Payment failed or cancelled"
+        );
+        return;
+      }
+
+      if (result.redirect) {
+        // Payment is being redirected - will be handled by returnUrl
+        return;
+      }
+
+      if (result.paymentDetails) {
+        // Payment completed - verify on backend
+        try {
+          const verifyResp = await api.post(
+            "/v1/subscriptions/cashfree/verify",
+            {
+              body: {
+                orderId: orderId,
+              },
+              showToasts: true,
+            }
+          );
+
+          if (verifyResp?.success || verifyResp?.verified) {
+            toastService.showSuccess("Subscription confirmed");
+            // call parent callback to refresh subscriptions or UI
+            if (typeof onSuccess === "function") {
+              try {
+                await onSuccess();
+              } catch (e) {
+                console.error("onSuccess callback failed", e);
+              }
+            }
+            // close modal
+            onClose && onClose();
+          } else {
+            toastService.showError(
+              verifyResp?.message || "Payment verification failed"
+            );
+          }
+        } catch (err) {
+          console.error("Cashfree verify error", err);
+          toastService.showError(
+            (err && err.message) || "Payment verification failed"
+          );
+        }
+      }
+    } catch (err) {
+      console.error("Cashfree payment error", err);
+      toastService.showError(
+        (err && err.message) || "Failed to start subscription"
+      );
+    } finally {
+      setCreatingSubscriptionFor(null);
+    }
+  };
+
+  // ============ MAIN HANDLER ============
+  const handleChoosePlan = async (plan) => {
+    if (PAYMENT_GATEWAY === "razorpay") {
+      await handleRazorpayPayment(plan);
+    } else {
+      // Default to Cashfree
+      await handleCashfreePayment(plan);
     }
   };
 

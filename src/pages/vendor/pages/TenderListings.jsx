@@ -26,6 +26,17 @@ const TenderListings = () => {
   const [activePopup, setActivePopup] = useState(null);
   const [selectedTender, setSelectedTender] = useState(null);
 
+  // Read user details from localStorage for Cashfree payments
+  let storedUser = {};
+  try {
+    if (typeof window !== "undefined" && window.localStorage) {
+      const raw = window.localStorage.getItem("user");
+      if (raw) storedUser = JSON.parse(raw) || {};
+    }
+  } catch (e) {
+    storedUser = {};
+  }
+
   // -------------------- Filter Options --------------------
   const [categories, setCategories] = useState([
     { value: "all", label: "All Categories" },
@@ -795,6 +806,11 @@ const TenderListings = () => {
         plansError={plansError}
         onSuccess={handleTopupSuccess}
         formatCurrency={formatCurrency}
+        userDetails={{
+          name: storedUser.name || storedUser.companyName || "",
+          email: storedUser.email || "",
+          phone: storedUser.phoneNumber || storedUser.phone || "",
+        }}
       />
       {activePopup === "support" && <SupportPopup onClose={closePopup} />}
     </div>

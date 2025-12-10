@@ -1386,6 +1386,11 @@ const VendorDashboardHome = () => {
         plansError={plansError}
         onSuccess={handleTopupSuccess}
         formatCurrency={formatCurrency}
+        userDetails={{
+          name: storedUser.name || storedUser.companyName || "",
+          email: storedUser.email || "",
+          phone: storedUser.phoneNumber || storedUser.phone || "",
+        }}
       />
 
       {showDetailsModal && selectedTender && (
