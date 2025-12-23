@@ -669,8 +669,8 @@ const TenderFormModal = ({
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                className="mt-1 w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500"
-                rows="3"
+                className="mt-1 w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500 text-base"
+                rows="6"
                 placeholder="Enter detailed description"
                 required
               />
@@ -741,7 +741,7 @@ const TenderFormModal = ({
                   onChange={handleChange}
                   className="mt-1 w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500"
                   placeholder="Enter complete project address"
-                  rows="2"
+                  rows="3"
                   required
                 />
               </div>
@@ -786,14 +786,14 @@ const TenderFormModal = ({
               </h3>
               {formData.eligibility.map((crit, index) => (
                 <div key={index} className="flex items-center gap-2 mb-2">
-                  <input
-                    type="text"
+                  <textarea
                     value={crit}
                     onChange={(e) =>
                       handleCriteriaChange(index, e.target.value)
                     }
-                    className="mt-1 flex-1 border rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500"
+                    className="mt-1 flex-1 border rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500 resize-none"
                     placeholder="Enter eligibility criteria"
+                    rows="2"
                   />
                   {formData.eligibility.length > 1 && (
                     <button
@@ -804,7 +804,7 @@ const TenderFormModal = ({
                         );
                         setFormData({ ...formData, eligibility: updated });
                       }}
-                      className="text-red-500 hover:text-red-700"
+                      className="text-red-500 hover:text-red-700 mt-1"
                     >
                       ✕
                     </button>
@@ -829,32 +829,32 @@ const TenderFormModal = ({
                 name="specifications"
                 value={formData.specifications}
                 onChange={handleChange}
-                className="mt-1 w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500"
-                rows="3"
+                className="mt-1 w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500 text-base"
+                rows="6"
                 placeholder="Enter technical specifications"
               />
             </div>
 
-            {/* Supporting Documents Section */}
-            <div className="border-t pt-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="bg-gradient-to-br from-purple-100 to-blue-100 w-10 h-10 rounded-full flex items-center justify-center">
-                  <FolderOpen className="text-purple-600" size={20} />
+            {/* Supporting Documents Section - Made Smaller */}
+            <div className="border-t pt-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="bg-gradient-to-br from-purple-100 to-blue-100 w-8 h-8 rounded-full flex items-center justify-center">
+                  <FolderOpen className="text-purple-600" size={16} />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-gray-900">
+                  <h3 className="text-md font-bold text-gray-900">
                     Supporting Documents
                   </h3>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-xs text-gray-600">
                     Upload tender documents, specifications, and other
                     supporting files
                   </p>
                 </div>
               </div>
 
-              {/* File Upload Area */}
+              {/* File Upload Area - Compact */}
               <div
-                className={`border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 ${
+                className={`border-2 border-dashed rounded-lg p-4 text-center transition-all duration-300 ${
                   dragActive
                     ? "border-purple-500 bg-gradient-to-br from-purple-50 to-purple-100"
                     : "border-gray-300 hover:border-purple-400 hover:bg-gradient-to-br hover:from-purple-50 hover:to-blue-50"
@@ -866,38 +866,38 @@ const TenderFormModal = ({
               >
                 <div className="flex flex-col items-center justify-center">
                   <div
-                    className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${
+                    className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 ${
                       dragActive
                         ? "bg-purple-600"
                         : "bg-gradient-to-br from-purple-100 to-blue-100"
                     }`}
                   >
                     <Upload
-                      className={`w-8 h-8 ${
+                      className={`w-5 h-5 ${
                         dragActive ? "text-white" : "text-purple-600"
                       }`}
                     />
                   </div>
 
-                  <p className="text-gray-600 text-lg mb-4 font-medium">
+                  <p className="text-gray-600 text-sm mb-2">
                     Drag and drop your files here, or
                   </p>
 
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                    className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg"
                   >
                     Browse Files
                   </button>
 
-                  <p className="text-sm text-gray-500 mt-4 leading-relaxed">
+                  <p className="text-xs text-gray-500 mt-2">
                     Supported formats: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG (Max
                     25MB each)
                   </p>
 
                   {formData.supportingDocuments.length > 0 && (
-                    <p className="text-sm text-purple-600 mt-2 font-medium">
+                    <p className="text-xs text-purple-600 mt-1 font-medium">
                       {formData.supportingDocuments.length} of 10 files selected
                     </p>
                   )}
@@ -913,14 +913,14 @@ const TenderFormModal = ({
                 />
               </div>
 
-              {/* Selected Files Preview */}
+              {/* Selected Files Preview - Compact */}
               {formData.supportingDocuments.length > 0 && (
-                <div className="space-y-3 mt-6">
-                  <h4 className="text-lg font-bold text-gray-900">
+                <div className="space-y-3 mt-4">
+                  <h4 className="text-md font-bold text-gray-900">
                     Selected Files
                   </h4>
 
-                  <div className="grid gap-3">
+                  <div className="max-h-40 overflow-y-auto">
                     {formData.supportingDocuments.map((file, index) => {
                       // Handle both File objects (new uploads) and existing documents (from API)
                       const isExistingDocument =
@@ -937,18 +937,18 @@ const TenderFormModal = ({
                               ? file._id
                               : `${file.name}-${index}`
                           }
-                          className="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
+                          className="flex items-center gap-2 p-3 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 mb-2"
                         >
-                          <div className="flex items-center gap-3 flex-1">
-                            <div className="w-10 h-10 bg-gradient-to-br from-purple-100 to-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                              <FileText className="w-5 h-5 text-gray-500" />
+                          <div className="flex items-center gap-2 flex-1">
+                            <div className="w-8 h-8 bg-gradient-to-br from-purple-100 to-blue-100 rounded-md flex items-center justify-center flex-shrink-0">
+                              <FileText className="w-4 h-4 text-gray-500" />
                             </div>
 
                             <div className="flex-1 min-w-0">
-                              <p className="font-semibold text-gray-900 truncate">
+                              <p className="font-medium text-gray-900 text-sm truncate">
                                 {fileName}
                               </p>
-                              <p className="text-sm text-gray-500">
+                              <p className="text-xs text-gray-500">
                                 {isExistingDocument ? (
                                   <span className="text-blue-600">
                                     Existing document
@@ -960,24 +960,24 @@ const TenderFormModal = ({
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-2 flex-shrink-0">
+                          <div className="flex items-center gap-1 flex-shrink-0">
                             {isExistingDocument && (
                               <button
                                 type="button"
                                 onClick={() => window.open(file.url, "_blank")}
-                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors"
                                 title="View document"
                               >
-                                <FolderOpen className="w-4 h-4" />
+                                <FolderOpen className="w-3 h-3" />
                               </button>
                             )}
                             <button
                               type="button"
                               onClick={() => removeFile(index)}
-                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
                               title="Remove file"
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-3 h-3" />
                             </button>
                           </div>
                         </div>
@@ -985,18 +985,18 @@ const TenderFormModal = ({
                     })}
                   </div>
 
-                  {/* Summary */}
-                  <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-xl p-4">
+                  {/* Summary - Compact */}
+                  <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-3">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-semibold text-gray-900">
+                        <p className="font-medium text-gray-900 text-sm">
                           {formData.supportingDocuments.length} file
                           {formData.supportingDocuments.length !== 1
                             ? "s"
                             : ""}{" "}
                           selected
                         </p>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-xs text-gray-600">
                           Total size:{" "}
                           {formatFileSize(
                             formData.supportingDocuments
@@ -1015,20 +1015,20 @@ const TenderFormModal = ({
                               supportingDocuments: [],
                             }))
                           }
-                          className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm font-medium"
+                          className="flex items-center gap-1 px-2 py-1 text-red-600 hover:bg-red-50 rounded text-xs font-medium"
                         >
-                          <X className="w-4 h-4" />
+                          <X className="w-3 h-3" />
                           Clear All
                         </button>
                       )}
                     </div>
                   </div>
 
-                  <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
+                  <div className="text-xs text-gray-600 bg-blue-50 p-2 rounded-lg">
                     <p className="mb-1 font-medium text-blue-800">
                       Recommended documents:
                     </p>
-                    <ul className="list-disc list-inside space-y-1 text-blue-700">
+                    <ul className="list-disc list-inside space-y-0.5 text-blue-700">
                       <li>Tender specification document (PDF)</li>
                       <li>Technical requirements (DOC/PDF)</li>
                       <li>Drawings or diagrams (PDF/JPG)</li>
@@ -1059,9 +1059,12 @@ const TenderFormModal = ({
               </select>
             </div>
 
+            {/* Add spacing before Pre-bid Meeting */}
+            <div className="pt-2"></div>
+
             {/* Pre-bid Meeting */}
             <div>
-              <div className="flex items-center">
+              <div className="flex items-center mb-2">
                 <input
                   type="checkbox"
                   name="preBidMeeting"
@@ -1069,49 +1072,61 @@ const TenderFormModal = ({
                   onChange={handleChange}
                   className="h-4 w-4 text-primary-600 border-gray-300 rounded"
                 />
-                <label className="ml-2 text-sm text-gray-700">
+                <label className="ml-2 text-sm font-medium text-gray-700">
                   Schedule Pre-bid Meeting
                 </label>
               </div>
 
-              {formData.preBidMeeting && (
-                <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Meeting Date
-                    </label>
-                    <input
-                      type="date"
-                      name="meetingDate"
-                      value={formData.meetingDate || ""}
-                      onChange={handleChange}
-                      min={getTodayDate()}
-                      // max={formData.deadline || undefined}
-                      className="mt-1 w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500"
-                      required
-                    />
-                  </div>
+              {/* Add visual indicator that there's content below */}
+              {formData.preBidMeeting ? (
+                <div className="mt-2 p-3 border border-gray-200 rounded-lg bg-gray-50 transition-all duration-300">
+                  <p className="text-xs text-gray-500 mb-2">
+                    Pre-bid meeting details will be shown to bidders
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700">
+                        Meeting Date
+                      </label>
+                      <input
+                        type="date"
+                        name="meetingDate"
+                        value={formData.meetingDate || ""}
+                        onChange={handleChange}
+                        min={getTodayDate()}
+                        className="mt-1 w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500"
+                        required
+                      />
+                    </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Venue
-                    </label>
-                    <input
-                      type="text"
-                      name="venue"
-                      value={formData.venue || ""}
-                      onChange={handleChange}
-                      className="mt-1 w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500"
-                      placeholder="Enter meeting venue"
-                      required
-                    />
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700">
+                        Venue
+                      </label>
+                      <input
+                        type="text"
+                        name="venue"
+                        value={formData.venue || ""}
+                        onChange={handleChange}
+                        className="mt-1 w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500"
+                        placeholder="Enter meeting venue"
+                        required
+                      />
+                    </div>
                   </div>
+                </div>
+              ) : (
+                <div className="mt-2 text-xs text-gray-500 italic">
+                  Check this box to add pre-bid meeting details
                 </div>
               )}
             </div>
 
-            {/* Actions */}
+            {/* Add spacing at the bottom before actions */}
+            <div className="pt-4"></div>
           </div>
+
+          {/* Actions */}
           <div className="flex items-center justify-between px-6 py-4 border-t bg-gray-50 flex-shrink-0">
             <div className="flex items-center text-sm text-gray-600">
               <FileText className="w-4 h-4 mr-2" />
