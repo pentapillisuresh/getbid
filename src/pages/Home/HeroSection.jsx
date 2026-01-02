@@ -6,30 +6,26 @@ const slides = [
     title: "Transform Your Business with Advanced Tender Platform",
     subtitle: "Smart Tendering Solutions",
     description:
-      "Discover private sector opportunities faster with our AI-powered tender search, automated bid management, and comprehensive compliance support designed for modern businesses, companies, and individual contractors.",
+      "Discover private tenders in India, corporate tenders in India, and tender platform in India opportunities faster with our AI-powered tender search, automated bid management, and comprehensive compliance support designed for modern businesses, companies, and individual contractors.",
     button1: "Login Now",
     button1Link: "/login",
     button2: "Register Now",
     button2Link: "/register",
-    video: "/gifs/banner1.mp4", // Replaced image with video
+    video: "/gifs/banner1.mp4",
   },
   {
     title: "Streamline Your Bidding Process with Smart Technology",
     subtitle: "Intelligent Bid Management",
     description:
-      "Maximize your success rate with our intelligent bid tracking system, real-time notifications, and expert guidance that helps you win more private sector contracts and tenders.",
-    // button1: "Explore Features",
-    // button2: "Get Started",
-    video: "/gifs/banner2.mp4", // Replaced image with video
+      "Maximize your success rate with private tenders in India, corporate tenders in India, and tender platform in India contracts using our intelligent bid tracking system, real-time notifications, and expert guidance that helps you win more private sector contracts and tenders.",
+    video: "/gifs/banner2.mp4",
   },
   {
     title: "Ensure Perfect Compliance with Expert Assistance",
     subtitle: "Complete Compliance Support",
     description:
-      "Navigate complex tender requirements effortlessly with our compliance verification tools, document management system, and dedicated support team for private companies and contractors.",
-    // button1: "Try for Free",
-    // button2: "Contact Sales",
-    video: "/gifs/banner3.mp4", // Replaced image with video
+      "Navigate complex tender requirements effortlessly for private tenders in India, corporate tenders in India, and tender platform in India with our compliance verification tools, document management system, and dedicated support team for private companies and contractors.",
+    video: "/gifs/banner3.mp4",
   },
 ];
 
